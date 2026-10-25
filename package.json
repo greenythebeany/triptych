@@ -62,7 +62,7 @@
       ],
       "icon": "logo.png",
       "category": "public.app-category.music",
-      "identity": null,
+      "identity": "-",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "linux": {
