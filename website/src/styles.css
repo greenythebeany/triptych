@@ -215,6 +215,14 @@ html.booting .lens { display: none; }
 .band-word { position: absolute; left: calc(var(--margin) - 0.04em); bottom: 24px; font: 800 clamp(64px, 19.5vw, 400px)/0.8 var(--font-display); letter-spacing: -0.05em; }
 .others { list-style: none; margin: 0; padding: 26px var(--margin) 0; display: flex; flex-wrap: wrap; gap: 12px 36px; font-size: var(--step-lead); font-weight: 500; }
 .fine { margin: 18px var(--margin) 0; max-width: 70ch; color: var(--ink-2); }
+.mac-help { margin: 28px var(--margin) 0; max-width: 70ch; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); scroll-margin-top: 90px; }
+.mac-help summary { display: flex; justify-content: space-between; gap: 16px; padding: 18px 0; font: 500 var(--step-lead)/1.25 var(--font-text); cursor: pointer; list-style: none; }
+.mac-help summary::-webkit-details-marker { display: none; }
+.mac-help summary::after { content: '+'; font-weight: 800; transition: transform 0.3s var(--bounce); }
+.mac-help[open] summary::after { transform: rotate(45deg); }
+.mac-help ol { margin: 0 0 16px; padding-left: 1.4em; display: grid; gap: 8px; }
+.mac-help p { margin: 0 0 16px; }
+.mac-help code { font-size: 0.9em; overflow-wrap: anywhere; }
 
 /* ---------- Footer ---------- */
 .foot { display: grid; grid-template-columns: auto 1fr; gap: 16px var(--margin); margin-top: 24svh; padding: 0 var(--margin) 32px; color: var(--ink-2); font-size: var(--step-small); }
@@ -260,4 +268,4 @@ html.booting .lens { display: none; }
    by the inline script in index.html). The OS reduced-motion setting is
    deliberately not used: the site always animates unless switched off here. */
 html.still .viz .bar { animation: none; }
-html.still .motion-switch::after, html.still .nav, html.still .track, html.still .lens-track, html.still .btn, html.still .tabs button, html.still .band, html.still .sheet, html.still .dim, html.still .faq summary::after { transition: none; }
+html.still .motion-switch::after, html.still .nav, html.still .track, html.still .lens-track, html.still .btn, html.still .tabs button, html.still .band, html.still .sheet, html.still .dim, html.still .faq summary::after, html.still .mac-help summary::after { transition: none; }

@@ -26,7 +26,7 @@ export default function What() {
         <li className="is-app">
           <Mark className="panel-mark" />
           <h3>Triptych</h3>
-          <p>The app you listen with, on Windows, Linux, Android and iPhone.</p>
+          <p>The app you listen with, on Windows, macOS, Linux, Android and iPhone.</p>
         </li>
       </ol>
     </section>

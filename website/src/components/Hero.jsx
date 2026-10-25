@@ -172,7 +172,7 @@ export default function Hero() {
       <div className="hud">
         <h1 className="title">Triptych<span className="stop" aria-hidden="true" /></h1>
         <div className="intro">
-          <p className="lede">A music player for your own Jellyfin server. One library, three looks. Free on Windows, Linux, Android and iPhone.</p>
+          <p className="lede">A music player for your own Jellyfin server. One library, three looks. Free on Windows, macOS, Linux, Android and iPhone.</p>
           <a className="btn" href="#download">Download Triptych</a>
         </div>
         <p className="caption"><strong>{LOOKS[index].label}.</strong> {LOOKS[index].caption}</p>
