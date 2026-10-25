@@ -129,8 +129,11 @@ function createWindow() {
     minWidth: 960,
     minHeight: 600,
     backgroundColor: '#0a0a0a',
-    frame: false,
-    titleBarStyle: 'hidden',
+    // macOS keeps its own traffic-light buttons, set into the app's title bar
+    // (36px tall, see --titlebar-h); elsewhere the app draws its own controls.
+    ...(process.platform === 'darwin'
+      ? { titleBarStyle: 'hidden', trafficLightPosition: { x: 14, y: 11 } }
+      : { frame: false, titleBarStyle: 'hidden' }),
     icon: path.join(__dirname, 'src', 'assets', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
