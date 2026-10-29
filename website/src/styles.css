@@ -76,6 +76,13 @@ html.booting .track { filter: blur(24px) brightness(0.82) saturate(0.9); }
 .nav { position: fixed; inset: 0 0 auto; z-index: 30; display: flex; justify-content: space-between; align-items: center; padding: 20px var(--margin); mix-blend-mode: difference; color: #fff; }
 .nav { transition: opacity 0.35s ease, transform 0.5s var(--bounce); }
 .nav[data-shown="false"]:not(:focus-within) { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+/* Firefox redraws a blended fixed bar over the whole page on every scroll
+   frame, and a moving mask over full-size images on every mouse move: there
+   the bar is a plain solid bar and the lens is left out. */
+@supports (-moz-appearance: none) {
+  .nav { mix-blend-mode: normal; background: var(--ground); color: var(--ink); border-bottom: 1px solid var(--ground-2); }
+  .lens { display: none; }
+}
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 20px/1 var(--font-mark); }
 .brand-mark { width: 16px; height: 18px; }
 .brand-mark .bar-3 { fill: currentColor; }
