@@ -139,6 +139,8 @@ svg { fill: currentColor; width: 100%; height: 100%; }
 .titlebar-btn svg { width: 11px; height: 11px; }
 .titlebar-btn:hover { background: rgba(128,128,128,0.15); color: var(--text-primary); }
 .titlebar-close:hover { background: #e81123; color: #fff; }
+body.platform-mac .titlebar-drag { padding-left: 84px; }
+body.platform-mac .titlebar-controls { display: none; }
 
 /* ---------- Login screen ---------- */
 .login-screen {

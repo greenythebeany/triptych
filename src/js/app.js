@@ -362,6 +362,8 @@ document.getElementById('btn-min').addEventListener('click', () => windowControl
 document.getElementById('btn-max').addEventListener('click', () => windowControls.maximize());
 document.getElementById('btn-close').addEventListener('click', () => windowControls.close());
 if (!isDesktop) document.body.classList.add('platform-' + platform);
+// macOS draws its own window buttons in the title bar (see main.js).
+if (isDesktop && window.api.os === 'darwin') document.body.classList.add('platform-mac');
 
 
 // ---------- Utilities ----------

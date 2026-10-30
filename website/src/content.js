@@ -24,5 +24,5 @@ export const FAQ = [
   ['Can I play Spotify or Apple Music songs with it?', 'No. Triptych plays music files you own that are on your Jellyfin server. The Spotify, Apple Music and Nothing options only change how the app looks.'],
   ['Does it work away from home?', 'Yes, as long as your phone can reach your server, for example through a VPN like Tailscale or a public address. Songs you download play with no connection at all.'],
   ['What happens to my data?', 'Your library and listening history stay on your device and your own server. A few optional lookups (missing cover art, lyrics and update checks) talk to outside services, and the Privacy Policy lists exactly what is sent.'],
-  ['Which devices are supported?', 'Windows, Linux, Android and iPhone. On iPhone the app is installed by sideloading an unsigned .ipa, for example with AltStore or Sideloadly.']
+  ['Which devices are supported?', 'Windows, macOS, Linux, Android and iPhone. The Mac app is not signed by Apple, so it needs one extra step the first time you open it (see Opening Triptych on a Mac, under Download). On iPhone the app is installed by sideloading an unsigned .ipa, for example with AltStore or Sideloadly.']
 ];
