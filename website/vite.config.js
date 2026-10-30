@@ -3,12 +3,12 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { legalPages } from './legal.js';
 
-// The site lives at https://greenybeany.dev/triptych/. An absolute base (not
+// The site lives at https://triptych.greenybeany.dev/. An absolute base (not
 // './') keeps fonts, media and scripts working on 404.html, which GitHub Pages
-// serves at any depth under that path.
+// serves for any missing path.
 export default defineConfig({
   plugins: [react(), legalPages()],
-  base: '/triptych/',
+  base: '/',
   // Appended to media URLs so browsers fetch new screenshots after a deploy.
   // build.js sets BUILD_ID once, so the client and the prerender agree on it.
   define: { __BUILD__: JSON.stringify(process.env.BUILD_ID || Date.now().toString(36)) },
