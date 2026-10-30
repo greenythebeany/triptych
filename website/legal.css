@@ -54,3 +54,8 @@ a:hover { color: var(--accent); }
 @keyframes idle { from { transform: scaleY(0.08); } to { transform: scaleY(0.16); } }
 .doc .ways { list-style: none; padding: 0; margin: 32px 0 0; display: grid; gap: 12px; font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem); font-weight: 500; }
 @media (prefers-reduced-motion: reduce) { .silence .bar { animation: none; transform: scaleY(0.08); } }
+
+/* /watch/: the showcase as the page's main content, wider than the text column */
+.doc.watch { width: min(1100px, calc(100% - 2 * var(--margin))); }
+.doc.watch h1 { margin-bottom: 32px; }
+.watch-video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; margin-bottom: 8px; }

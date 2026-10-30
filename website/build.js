@@ -22,6 +22,6 @@ rmSync(ssr, { recursive: true, force: true });
 
 const SITE = 'https://greenybeany.dev/triptych/';
 const today = new Date().toISOString().slice(0, 10);
-const urls = ['', 'terms/', 'privacy/'].map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`);
+const urls = ['', 'watch/', 'terms/', 'privacy/'].map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`);
 writeFileSync(resolve(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`);
 console.log('prerendered index.html, wrote sitemap.xml');
