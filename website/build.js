@@ -20,7 +20,7 @@ if (!html.includes('<!--app-->')) throw new Error('dist/index.html has no <!--ap
 writeFileSync(page, html.replace('<!--app-->', render()));
 rmSync(ssr, { recursive: true, force: true });
 
-const SITE = 'https://greenybeany.dev/triptych/';
+const SITE = 'https://triptych.greenybeany.dev/';
 const today = new Date().toISOString().slice(0, 10);
 const urls = ['', 'watch/', 'terms/', 'privacy/'].map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`);
 writeFileSync(resolve(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`);

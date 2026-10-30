@@ -26,7 +26,7 @@ This document is also available inside the app itself, under **Settings → Abou
 
 ## This website
 
-The Triptych website (greenybeany.dev/triptych) is a static page hosted on GitHub Pages. It sets no cookies and has no analytics, ads or trackers. GitHub, as the host, receives the usual request data any web server sees (such as your IP address and browser) and handles it under [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). To show the latest version and link straight to the download files, your browser asks GitHub's public API (api.github.com) for the latest release; nothing about you is added to that request. Fonts and images are served from the site itself.
+The Triptych website (triptych.greenybeany.dev) is a static page hosted on GitHub Pages. It sets no cookies and has no analytics, ads or trackers. GitHub, as the host, receives the usual request data any web server sees (such as your IP address and browser) and handles it under [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). To show the latest version and link straight to the download files, your browser asks GitHub's public API (api.github.com) for the latest release; nothing about you is added to that request. Fonts and images are served from the site itself.
 
 ## Children's data
 

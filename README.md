@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <sub>More on the <a href="https://greenybeany.dev/triptych/">Triptych website</a></sub>
+  <sub>More on the <a href="https://triptych.greenybeany.dev/">Triptych website</a></sub>
 </p>
 
 ---
