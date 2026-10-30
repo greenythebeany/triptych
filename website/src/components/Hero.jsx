@@ -50,6 +50,7 @@ export default function Hero() {
   const hero = useRef(null);
   const tabs = useRef([]);
   const drag = useRef(null);
+  const lens = useRef(null);
 
   useBoot(useCallback(() => { if (!motionOff()) setPlaying(true); }, []));
 
@@ -108,13 +109,21 @@ export default function Hero() {
     if (Math.abs(dx) > Math.min(120, innerWidth * 0.15)) go(index + (dx < 0 ? 1 : -1));
   };
 
-  // The lens follows a mouse (not touch) without re-rendering.
+  // The lens follows a mouse (not touch) without re-rendering: the position
+  // goes on the lens itself (not the whole hero), at most once a frame.
+  const lensAt = useRef(null);
   const onLens = (e) => {
     if (e.pointerType !== 'mouse') return;
     const box = hero.current.getBoundingClientRect();
-    hero.current.style.setProperty('--mx', `${e.clientX - box.left}px`);
-    hero.current.style.setProperty('--my', `${e.clientY - box.top}px`);
-    hero.current.classList.add('lensing');
+    const first = !lensAt.current;
+    lensAt.current = [e.clientX - box.left, e.clientY - box.top];
+    if (!first) return;
+    requestAnimationFrame(() => {
+      const [x, y] = lensAt.current; lensAt.current = null;
+      lens.current.style.setProperty('--mx', `${x}px`);
+      lens.current.style.setProperty('--my', `${y}px`);
+      hero.current.classList.add('lensing');
+    });
   };
 
   return (
@@ -148,13 +157,14 @@ export default function Hero() {
             aria-label={`${i + 1} of ${LOOKS.length}: ${look.label}`}
             inert={i !== index}
           >
-            <Shot className="shot" name={`d-${look.key}`} phone={`p-${look.key}`} width="1600" height="900" alt={look.alt} eager={i === 0} />
+            {/* blurred and dimmed ahead of time (*-blur): a live CSS blur is redrawn every frame in Firefox */}
+            <Shot className="shot" name={`d-${look.key}-blur`} phone={`p-${look.key}-blur`} width="1600" height="900" alt={look.alt} eager={i === 0} />
           </div>
         ))}
       </div>
 
       {/* The lens: the same slides, sharp, seen through a circle around the mouse. */}
-      <div className="lens" aria-hidden="true">
+      <div className="lens" aria-hidden="true" ref={lens}>
         <div className="lens-track">
           {LOOKS.map((look) => (
             <div className="slide" key={look.key}>

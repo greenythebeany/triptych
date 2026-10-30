@@ -19,6 +19,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         terms: resolve(__dirname, 'terms/index.html'),
         privacy: resolve(__dirname, 'privacy/index.html'),
+        watch: resolve(__dirname, 'watch/index.html'),
         notFound: resolve(__dirname, '404.html')
       }
     }

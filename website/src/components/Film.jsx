@@ -1,24 +1,24 @@
 import { media } from '../site.js';
 
-// The 2.3.0 walkthrough. It never plays by itself; the native controls pause it.
+// The showcase from the README. It never plays by itself. Its own page, /watch/,
+// is the one Google indexes it from.
 export default function Film() {
   return (
     <section className="film" aria-labelledby="film-title">
       <div className="split">
-        <h2 id="film-title">Twenty seconds of Triptych.</h2>
-        <p className="lead">Signing in, an artist page, synced lyrics and a switch between all three looks, recorded in the app. No sound.</p>
+        <h2 id="film-title">Forty seconds of Triptych.</h2>
+        <p className="lead">All three looks, an artist page with synced lyrics, your stats and every device, recorded in the app. With music. <a href="watch/">Watch it on its own page</a>.</p>
       </div>
       <video
         className="film-video"
-        src={media('v23/triptych-2.3.0.mp4')}
-        poster={media('v23/poster-2.3.0.jpg')}
+        src={media('v23/triptych-showcase.mp4')}
+        poster={media('v23/poster-showcase.jpg')}
         width="1920"
         height="1080"
         controls
-        muted
         playsInline
         preload="none"
-        aria-label="A 20-second walkthrough of Triptych"
+        aria-label="A 40-second showcase of Triptych"
       />
     </section>
   );

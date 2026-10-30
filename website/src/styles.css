@@ -66,8 +66,9 @@ p { margin: 0; }
 .hero.lowered .viz .bar-2 { animation-delay: 0.05s; }
 .hero.lowered .viz .bar-3 { animation-delay: 0s; }
 @keyframes sink { from { height: var(--h); } to { height: calc(var(--h) * 0.02); } }
-.track { filter: blur(6px) brightness(0.55); }
-html.booting .track { filter: blur(30px) brightness(0.45) saturate(0.9); }
+.track { filter: none; }
+/* the slides are already blurred (see Hero.jsx); this extra blur is only for the boot, once */
+html.booting .track { filter: blur(24px) brightness(0.82) saturate(0.9); }
 /* up from nothing, a small overshoot, then rest at full height */
 @keyframes rise { 0% { height: calc(var(--h) * 0.02); } 65% { height: calc(var(--h) * 1.06); } 82% { height: calc(var(--h) * 0.98); } 100% { height: var(--h); } }
 
@@ -75,6 +76,13 @@ html.booting .track { filter: blur(30px) brightness(0.45) saturate(0.9); }
 .nav { position: fixed; inset: 0 0 auto; z-index: 30; display: flex; justify-content: space-between; align-items: center; padding: 20px var(--margin); mix-blend-mode: difference; color: #fff; }
 .nav { transition: opacity 0.35s ease, transform 0.5s var(--bounce); }
 .nav[data-shown="false"]:not(:focus-within) { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+/* Firefox redraws a blended fixed bar over the whole page on every scroll
+   frame, and a moving mask over full-size images on every mouse move: there
+   the bar is a plain solid bar and the lens is left out. */
+@supports (-moz-appearance: none) {
+  .nav { mix-blend-mode: normal; background: var(--ground); color: var(--ink); border-bottom: 1px solid var(--ground-2); }
+  .lens { display: none; }
+}
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 20px/1 var(--font-mark); }
 .brand-mark { width: 16px; height: 18px; }
 .brand-mark .bar-3 { fill: currentColor; }
@@ -97,7 +105,8 @@ html.booting .track { filter: blur(30px) brightness(0.45) saturate(0.9); }
 .hero.dragging .track { cursor: grabbing; }
 /* Lens: a sharp copy of the slides, as dim as the rest, in a soft circle around the mouse. */
 .lens { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.35s ease; -webkit-mask-image: radial-gradient(circle 280px at var(--mx, 50%) var(--my, 50%), #000 55%, transparent 100%); mask-image: radial-gradient(circle 280px at var(--mx, 50%) var(--my, 50%), #000 55%, transparent 100%); }
-.lens .shot img { filter: brightness(0.55); }
+.lens .slide { position: relative; }
+.lens .slide::after { content: ''; position: absolute; inset: 0; background: rgb(0 0 0 / 0.45); }
 .hero.lensing .lens { opacity: 1; }
 html.booting .lens { display: none; }
 @media (hover: none), (pointer: coarse) { .lens { display: none; } }
