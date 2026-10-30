@@ -1955,7 +1955,7 @@ function refreshSettingsUI() {
     btn.classList.toggle('active', btn.dataset.value === s.themeMode);
   });
   uiStyleToggle.querySelectorAll('button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'spotify'));
+    btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
   });
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
