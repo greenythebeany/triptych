@@ -3998,6 +3998,9 @@ function wirePlayer() {
   setInterval(() => { if (!player.audio.paused) saveResumeState(); }, 10000);
   window.addEventListener('pagehide', saveResumeState);
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveResumeState(); });
+  // Back from the background (phone unlocked, app switched back to): the
+  // lyrics didn't move while frames weren't being drawn.
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncLyricsToPlayback(); });
 
   player.on('trackchange', () => {
     const track = player.currentTrack;
@@ -4467,6 +4470,25 @@ function openNowPlaying() {
   // Its fill depends on the slider's width, which is 0 while the player
   // is closed -- recompute now that it's laid out.
   npVolumeBar.style.setProperty('--pct', rangeFillPercent(Number(npVolumeBar.value), npVolumeBar, 14));
+  // While it was closed the lyrics stood still (hidden panel = no updates,
+  // and the word-by-word loop stops itself) -- catch them up right away.
+  requestAnimationFrame(syncLyricsToPlayback);
+}
+
+// Puts the highlight, scroll position and word fill back on the current
+// playback position and restarts the word-by-word loop: after the
+// full-screen player reopens, or the app comes back from the background.
+// Without it they lagged until the next line, or until play/pause.
+function syncLyricsToPlayback() {
+  if (lyricsPanel.hidden || !currentLyrics?.synced) return;
+  const now = player.audio.currentTime || 0;
+  lyricLineEls[activeLyricIdx]?.classList.remove('active');
+  activeLyricIdx = -1;
+  updateActiveLyricLine(now);
+  const active = lyricLineEls[activeLyricIdx];
+  if (active) centerLyricLine(active, false);
+  fillLyricWords(now);
+  if (!player.audio.paused) startWordLoop();
 }
 
 // Slides the phone's full-screen player down before hiding it (desktop's
