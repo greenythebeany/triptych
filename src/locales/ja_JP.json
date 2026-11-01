@@ -412,7 +412,13 @@
     "ownIdentityTitle": "どこまでも Triptych",
     "ownIdentityDesc": "Triptych に独自のアプリ ID ができ、JellyWave という名前はどこにも残っていません。設定とリスニング統計はサーバーから引き継がれますが、スマートフォンではダウンロードした曲を再度ダウンロードする必要があります。",
     "installerTitle": "新しい Windows インストーラー",
-    "installerDesc": "Triptych のアートワーク、あなたの言語のようこそページ、そして同意するライセンス契約。"
+    "installerDesc": "Triptych のアートワーク、あなたの言語のようこそページ、そして同意するライセンス契約。",
+    "lyricsSourcesTitle": "歌詞がちゃんと表示される",
+    "lyricsSourcesDesc": "5 つの歌詞ソースに同時に問い合わせ、同期歌詞を優先します。「feat.」「Remastered」や YouTube 風のタイトルも正しく一致します。「現在歌詞を読み込めません」はもう出ません。",
+    "smoothLyricsTitle": "なめらかな同期歌詞",
+    "smoothLyricsDesc": "現在の行がフェードインし、歌詞はジャンプせずになめらかにスクロールします。",
+    "cjkLanguagesTitle": "中国語、日本語、韓国語",
+    "cjkLanguagesDesc": "Triptych が简体中文、繁體中文、日本語、韓国語に対応しました。初回起動時はシステムの言語を使います。"
   },
   "wrapped": {
     "bannerTitle": "あなたの {year} 年まとめ",

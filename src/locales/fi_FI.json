@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych kauttaaltaan",
     "ownIdentityDesc": "Triptychillä on nyt oma sovellustunnus, joten mikään ei enää ole nimeltään JellyWave. Asetuksesi ja kuuntelutilastosi palaavat palvelimeltasi; puhelimessa ladatut kappaleet täytyy ladata uudelleen.",
     "installerTitle": "Uusi Windows-asennusohjelma",
-    "installerDesc": "Triptych-grafiikka, tervetulosivu omalla kielelläsi ja hyväksyttävä käyttöoikeussopimus."
+    "installerDesc": "Triptych-grafiikka, tervetulosivu omalla kielelläsi ja hyväksyttävä käyttöoikeussopimus.",
+    "lyricsSourcesTitle": "Sanoitukset, jotka löytyvät",
+    "lyricsSourcesDesc": "Viittä lähdettä kysytään yhtä aikaa, synkronoidut sanoitukset ensin, ja nimet joissa on \"feat.\", \"Remastered\" tai YouTube-tyylinen nimi tunnistetaan oikein. Ei enää \"Sanoituksia ei voitu ladata\".",
+    "smoothLyricsTitle": "Sulavat synkronoidut sanoitukset",
+    "smoothLyricsDesc": "Nykyinen rivi häivytetään esiin ja sanoitukset liukuvat siihen hyppimisen sijaan.",
+    "cjkLanguagesTitle": "Kiina, japani ja korea",
+    "cjkLanguagesDesc": "Triptych puhuu nyt yksinkertaistettua ja perinteistä kiinaa, japania ja koreaa ja valitsee järjestelmän kielen ensimmäisellä käynnistyskerralla."
   },
   "wrapped": {
     "bannerTitle": "Sinun Wrapped {year}",

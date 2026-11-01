@@ -98,6 +98,15 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.0
+
+- Lyrics that show up: your Jellyfin server, lrclib.net, NetEase Cloud Music and Kugou are asked at the same time for synced lyrics, with lyrics.ovh as a plain-text fallback, and the best synced match appears as soon as it arrives
+- No more false "Couldn't load lyrics": lrclib's "server busy" answers for songs it doesn't have no longer count as an error, and Triptych now identifies itself to lrclib and honours its rate limit
+- Smarter matching: "feat.", "Remastered 2011", "- Live", "Official video", YouTube-style "Artist - Title (… Soundtrack)" uploads, titles in brackets, accents and Chinese/Japanese/Korean titles, checked against the song's length
+- Lyrics are cached per song on your device and fetched ahead for the next song, so they appear instantly
+- Smooth synced lyrics: the current line fades in and grows, and the lyrics glide to it instead of jumping, even with Windows animation effects turned off
+- Simplified Chinese, Traditional Chinese, Japanese and Korean, with proper CJK fonts in all three looks; the first start follows your system language
+
 ## What's new in 2.3.0
 
 - Triptych now has its own app id (`com.triptych.app`) everywhere, so nothing is called JellyWave anymore

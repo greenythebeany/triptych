@@ -1,6 +1,6 @@
 {
   "name": "triptych",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "A sleek, Spotify-style desktop client for your own Jellyfin music server",
   "main": "main.js",
   "author": "",

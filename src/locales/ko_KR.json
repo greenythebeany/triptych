@@ -412,7 +412,13 @@
     "ownIdentityTitle": "완전히 Triptych로",
     "ownIdentityDesc": "이제 Triptych에 고유한 앱 ID가 생겨 JellyWave라는 이름은 더 이상 남아 있지 않습니다. 설정과 감상 통계는 서버에서 가져오며, 휴대폰에서는 다운로드한 노래를 다시 다운로드해야 합니다.",
     "installerTitle": "새로운 Windows 설치 프로그램",
-    "installerDesc": "Triptych 아트워크, 사용자의 언어로 된 환영 페이지, 그리고 동의할 라이선스 계약."
+    "installerDesc": "Triptych 아트워크, 사용자의 언어로 된 환영 페이지, 그리고 동의할 라이선스 계약.",
+    "lyricsSourcesTitle": "언제나 보이는 가사",
+    "lyricsSourcesDesc": "다섯 개의 가사 소스에 동시에 요청하고 싱크 가사를 우선합니다. 'feat.', 'Remastered' 또는 YouTube식 제목도 제대로 찾습니다. 더 이상 '지금은 가사를 불러올 수 없습니다'가 뜨지 않습니다.",
+    "smoothLyricsTitle": "부드러운 싱크 가사",
+    "smoothLyricsDesc": "현재 줄이 서서히 강조되고 가사가 뛰지 않고 부드럽게 스크롤됩니다.",
+    "cjkLanguagesTitle": "중국어, 일본어, 한국어",
+    "cjkLanguagesDesc": "이제 Triptych가 简体中文, 繁體中文, 일본어, 한국어를 지원하며 처음 실행할 때 시스템 언어를 사용합니다."
   },
   "wrapped": {
     "bannerTitle": "나의 {year} 연말 결산",

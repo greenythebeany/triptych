@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych de bout en bout",
     "ownIdentityDesc": "Triptych a maintenant son propre identifiant d'application : plus rien ne s'appelle JellyWave. Vos réglages et statistiques d'écoute reviennent depuis votre serveur ; sur téléphone, les titres téléchargés doivent être téléchargés à nouveau.",
     "installerTitle": "Un nouveau programme d'installation Windows",
-    "installerDesc": "Les visuels Triptych, une page d'accueil dans votre langue et le contrat de licence à accepter."
+    "installerDesc": "Les visuels Triptych, une page d'accueil dans votre langue et le contrat de licence à accepter.",
+    "lyricsSourcesTitle": "Des paroles qui s'affichent",
+    "lyricsSourcesDesc": "Cinq sources sont interrogées en même temps, les paroles synchronisées passent en premier, et les titres avec « feat. », « Remastered » ou au format YouTube sont bien reconnus. Fini « Impossible de charger les paroles ».",
+    "smoothLyricsTitle": "Paroles synchronisées fluides",
+    "smoothLyricsDesc": "La ligne en cours apparaît en fondu et les paroles glissent jusqu'à elle au lieu de sauter.",
+    "cjkLanguagesTitle": "Chinois, japonais et coréen",
+    "cjkLanguagesDesc": "Triptych parle désormais chinois simplifié et traditionnel, japonais et coréen, et adopte la langue du système au premier lancement."
   },
   "wrapped": {
     "bannerTitle": "Votre Wrapped {year}",

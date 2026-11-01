@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych hele vejen",
     "ownIdentityDesc": "Triptych har nu sit eget app-id, så intet hedder JellyWave længere. Dine indstillinger og din lyttestatistik kommer tilbage fra din server; på telefonen skal downloadede sange downloades igen.",
     "installerTitle": "Et nyt installationsprogram til Windows",
-    "installerDesc": "Triptych-grafik, en velkomstside på dit sprog og licensaftalen, du skal acceptere."
+    "installerDesc": "Triptych-grafik, en velkomstside på dit sprog og licensaftalen, du skal acceptere.",
+    "lyricsSourcesTitle": "Sangtekster, der dukker op",
+    "lyricsSourcesDesc": "Fem kilder spørges på én gang, synkroniserede tekster kommer først, og titler med \"feat.\", \"Remastered\" eller YouTube-navne matches korrekt. Slut med \"Kunne ikke indlæse sangtekster\".",
+    "smoothLyricsTitle": "Glidende synkroniserede tekster",
+    "smoothLyricsDesc": "Den aktuelle linje toner frem, og teksten glider hen til den i stedet for at hoppe.",
+    "cjkLanguagesTitle": "Kinesisk, japansk og koreansk",
+    "cjkLanguagesDesc": "Triptych taler nu forenklet og traditionelt kinesisk, japansk og koreansk og vælger dit systemsprog ved første start."
   },
   "wrapped": {
     "bannerTitle": "Din Wrapped {year}",

@@ -412,7 +412,13 @@
     "ownIdentityTitle": "彻底成为 Triptych",
     "ownIdentityDesc": "Triptych 现在有了自己的应用 ID，不再有任何地方叫 JellyWave。你的设置和收听统计来自你的服务器；在手机上，已下载的歌曲需要重新下载。",
     "installerTitle": "全新的 Windows 安装程序",
-    "installerDesc": "Triptych 的插图、使用你的语言的欢迎页，以及需要接受的许可协议。"
+    "installerDesc": "Triptych 的插图、使用你的语言的欢迎页，以及需要接受的许可协议。",
+    "lyricsSourcesTitle": "歌词总能显示",
+    "lyricsSourcesDesc": "同时向五个歌词来源查询，优先使用同步歌词，带有“feat.”“Remastered”或 YouTube 式标题的歌曲也能正确匹配。不再出现“暂时无法加载歌词”。",
+    "smoothLyricsTitle": "流畅的同步歌词",
+    "smoothLyricsDesc": "当前行会淡入高亮，歌词平滑滚动过去，不再跳动。",
+    "cjkLanguagesTitle": "中文、日语和韩语",
+    "cjkLanguagesDesc": "Triptych 现已支持简体中文、繁體中文、日语和韩语，首次启动时会自动使用系统语言。"
   },
   "wrapped": {
     "bannerTitle": "你的 {year} 年度总结",

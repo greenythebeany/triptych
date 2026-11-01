@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Durch und durch Triptych",
     "ownIdentityDesc": "Triptych hat jetzt eine eigene App-ID, nichts heißt mehr JellyWave. Einstellungen und Hörstatistik kommen von deinem Server; auf dem Handy müssen heruntergeladene Songs neu geladen werden.",
     "installerTitle": "Ein neues Windows-Installationsprogramm",
-    "installerDesc": "Triptych-Grafik, eine Willkommensseite in deiner Sprache und die Lizenzvereinbarung zum Bestätigen."
+    "installerDesc": "Triptych-Grafik, eine Willkommensseite in deiner Sprache und die Lizenzvereinbarung zum Bestätigen.",
+    "lyricsSourcesTitle": "Songtexte, die auch kommen",
+    "lyricsSourcesDesc": "Fünf Quellen werden gleichzeitig gefragt, synchronisierte Texte haben Vorrang, und Titel mit „feat.“, „Remastered“ oder YouTube-Namen werden richtig erkannt. Kein „Songtext konnte nicht geladen werden“ mehr.",
+    "smoothLyricsTitle": "Flüssige synchronisierte Texte",
+    "smoothLyricsDesc": "Die aktuelle Zeile blendet sanft ein und der Text gleitet zu ihr, statt zu springen.",
+    "cjkLanguagesTitle": "Chinesisch, Japanisch und Koreanisch",
+    "cjkLanguagesDesc": "Triptych spricht jetzt vereinfachtes und traditionelles Chinesisch, Japanisch und Koreanisch und übernimmt beim ersten Start die Systemsprache."
   },
   "wrapped": {
     "bannerTitle": "Dein Wrapped {year}",

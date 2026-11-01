@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych skrz naskrz",
     "ownIdentityDesc": "Triptych má teď vlastní ID aplikace, takže už nic nenese název JellyWave. Nastavení a statistiky poslechu přijdou z tvého serveru; v telefonu je třeba stažené skladby stáhnout znovu.",
     "installerTitle": "Nový instalátor pro Windows",
-    "installerDesc": "Grafika Triptych, uvítací stránka v tvém jazyce a licenční smlouva k odsouhlasení."
+    "installerDesc": "Grafika Triptych, uvítací stránka v tvém jazyce a licenční smlouva k odsouhlasení.",
+    "lyricsSourcesTitle": "Texty, které se načtou",
+    "lyricsSourcesDesc": "Pět zdrojů textů se ptá najednou, synchronizované texty mají přednost a názvy s „feat.“, „Remastered“ nebo ve stylu YouTube se správně najdou. Žádné další „Texty se nepodařilo načíst“.",
+    "smoothLyricsTitle": "Plynulé synchronizované texty",
+    "smoothLyricsDesc": "Aktuální řádek se plynule rozsvítí a text k němu sklouzne, místo aby skákal.",
+    "cjkLanguagesTitle": "Čínština, japonština a korejština",
+    "cjkLanguagesDesc": "Triptych teď umí zjednodušenou i tradiční čínštinu, japonštinu a korejštinu a při prvním spuštění zvolí jazyk systému."
   },
   "wrapped": {
     "bannerTitle": "Tvůj Wrapped {year}",
