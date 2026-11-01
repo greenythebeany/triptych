@@ -451,5 +451,20 @@
   "duration": {
     "hoursMinutes": "{h} tim {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "eller",
+    "useOnDevice": "Använd musik på den här enheten",
+    "scanningStart": "Letar efter musik…",
+    "scanning": "Skannar… {done} av {total}",
+    "noMusic": "Inga musikfiler hittades i de valda mapparna.",
+    "accountName": "Den här enheten",
+    "settingsTitle": "Musik på den här enheten",
+    "folders": "Musikmappar",
+    "summary": "{songs} låtar · {albums} album",
+    "addFolder": "Lägg till mapp",
+    "rescan": "Skanna igen",
+    "removeFolder": "Ta bort mapp",
+    "homeEmpty": "Ingen musik än. Lägg till en mapp med dina musikfiler."
   }
 }

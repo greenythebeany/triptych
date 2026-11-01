@@ -451,5 +451,20 @@
   "duration": {
     "hoursMinutes": "{h} u {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "of",
+    "useOnDevice": "Muziek op dit apparaat gebruiken",
+    "scanningStart": "Muziek zoeken…",
+    "scanning": "Scannen… {done} van {total}",
+    "noMusic": "Geen muziekbestanden gevonden in de gekozen mappen.",
+    "accountName": "Dit apparaat",
+    "settingsTitle": "Muziek op dit apparaat",
+    "folders": "Muziekmappen",
+    "summary": "{songs} nummers · {albums} albums",
+    "addFolder": "Map toevoegen",
+    "rescan": "Opnieuw scannen",
+    "removeFolder": "Map verwijderen",
+    "homeEmpty": "Nog geen muziek. Voeg een map met je muziekbestanden toe."
   }
 }

@@ -451,5 +451,20 @@
   "duration": {
     "hoursMinutes": "{h} t {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "eller",
+    "useOnDevice": "Bruk musikk på denne enheten",
+    "scanningStart": "Leter etter musikk…",
+    "scanning": "Skanner… {done} av {total}",
+    "noMusic": "Fant ingen musikkfiler i de valgte mappene.",
+    "accountName": "Denne enheten",
+    "settingsTitle": "Musikk på denne enheten",
+    "folders": "Musikkmapper",
+    "summary": "{songs} sanger · {albums} album",
+    "addFolder": "Legg til mappe",
+    "rescan": "Skann på nytt",
+    "removeFolder": "Fjern mappe",
+    "homeEmpty": "Ingen musikk ennå. Legg til en mappe med musikkfilene dine."
   }
 }

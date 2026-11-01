@@ -257,6 +257,22 @@ body.platform-mac .titlebar-controls { display: none; }
 .btn-primary:hover { background: var(--accent-hover); transform: scale(1.015); }
 .btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; }
 .login-error { color: var(--danger); font-size: 12.5px; text-align: center; margin: 4px 0 0; }
+.login-local { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.login-local[hidden] { display: none; }
+.login-divider { display: flex; align-items: center; gap: 12px; color: var(--text-tertiary); font-size: 12px; }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+.login-local .btn-secondary { padding: 12px; font-size: 14px; }
+.login-local-status { color: var(--text-secondary); font-size: 12.5px; text-align: center; margin: 0; }
+.login-local-status.is-error { color: var(--danger); }
+
+/* Music on this device without a server: server-only features hidden. */
+body.local-mode .server-only { display: none !important; }
+.local-folder-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.local-folder-list:empty { display: none; }
+.local-folder-list li { display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 12px; border-radius: var(--radius-sm, 8px); background: var(--bg-highlight); font-size: 12.5px; }
+.local-folder-list li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.local-folder-actions { display: flex; gap: 8px; }
+.local-empty-actions { margin-top: 14px; }
 
 /* ---------- App shell ---------- */
 .app {

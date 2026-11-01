@@ -4,6 +4,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const { Client: DiscordRpcClient } = require('@xhayper/discord-rpc');
 const { checkForUpdates, downloadUpdate, installAndQuit } = require('./update-checker');
+const localLibrary = require('./local-library');
 
 // Up to 2.2 the data folder (login, settings, downloads, listening stats) was
 // named JellyWave. Move it to the Triptych one on the first start of 2.3;
@@ -20,6 +21,8 @@ const { checkForUpdates, downloadUpdate, installAndQuit } = require('./update-ch
     try { fs.cpSync(legacy, current, { recursive: true }); } catch (e) { console.log('[migrate] data folder:', e.message); }
   }
 })();
+
+localLibrary.registerScheme();
 
 const CONFIG_PATH = path.join(app.getPath('userData'), 'session.dat');
 const DISCORD_CLIENT_ID = '1534197353056174180';
@@ -170,7 +173,7 @@ ipcMain.on('smtc:setMetadata', (_event, meta) => {
       title: meta?.title || '',
       artist: meta?.artist || '',
       album: meta?.album || '',
-      coverUrl: meta?.coverUrl || undefined,
+      coverUrl: localLibrary.toOsCoverUrl(meta?.coverUrl) || undefined,
       durationMs: meta?.durationMs ?? undefined
     });
   } catch (err) {
@@ -204,6 +207,7 @@ if (!app.requestSingleInstanceLock()) {
 
 app.whenReady().then(() => {
   if (!app.hasSingleInstanceLock()) return;
+  localLibrary.setup(ipcMain, () => mainWindow);
   createWindow();
 
   app.on('activate', () => {

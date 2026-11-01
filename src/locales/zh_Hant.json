@@ -449,5 +449,20 @@
   "duration": {
     "hoursMinutes": "{h} 小時 {m} 分鐘",
     "minutes": "{m} 分鐘"
+  },
+  "local": {
+    "or": "或",
+    "useOnDevice": "使用此裝置上的音樂",
+    "scanningStart": "正在尋找音樂…",
+    "scanning": "正在掃描… {done} / {total}",
+    "noMusic": "所選資料夾中找不到音樂檔案。",
+    "accountName": "此裝置",
+    "settingsTitle": "此裝置上的音樂",
+    "folders": "音樂資料夾",
+    "summary": "{songs} 首歌曲 · {albums} 張專輯",
+    "addFolder": "新增資料夾",
+    "rescan": "重新掃描",
+    "removeFolder": "移除資料夾",
+    "homeEmpty": "還沒有音樂。請新增包含音樂檔案的資料夾。"
   }
 }

@@ -451,5 +451,20 @@
   "duration": {
     "hoursMinutes": "{h} h {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "tai",
+    "useOnDevice": "Käytä tämän laitteen musiikkia",
+    "scanningStart": "Etsitään musiikkia…",
+    "scanning": "Skannataan… {done}/{total}",
+    "noMusic": "Valituista kansioista ei löytynyt musiikkitiedostoja.",
+    "accountName": "Tämä laite",
+    "settingsTitle": "Tämän laitteen musiikki",
+    "folders": "Musiikkikansiot",
+    "summary": "{songs} kappaletta · {albums} albumia",
+    "addFolder": "Lisää kansio",
+    "rescan": "Skannaa uudelleen",
+    "removeFolder": "Poista kansio",
+    "homeEmpty": "Ei vielä musiikkia. Lisää kansio, jossa on musiikkitiedostojasi."
   }
 }

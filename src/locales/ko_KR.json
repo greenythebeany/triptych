@@ -449,5 +449,20 @@
   "duration": {
     "hoursMinutes": "{h}시간 {m}분",
     "minutes": "{m}분"
+  },
+  "local": {
+    "or": "또는",
+    "useOnDevice": "이 기기의 음악 사용",
+    "scanningStart": "음악을 찾는 중…",
+    "scanning": "검색 중… {total}개 중 {done}개",
+    "noMusic": "선택한 폴더에서 음악 파일을 찾지 못했습니다.",
+    "accountName": "이 기기",
+    "settingsTitle": "이 기기의 음악",
+    "folders": "음악 폴더",
+    "summary": "노래 {songs}곡 · 앨범 {albums}개",
+    "addFolder": "폴더 추가",
+    "rescan": "다시 검색",
+    "removeFolder": "폴더 제거",
+    "homeEmpty": "아직 음악이 없습니다. 음악 파일이 있는 폴더를 추가하세요."
   }
 }
