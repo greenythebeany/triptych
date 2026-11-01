@@ -31,7 +31,7 @@ export const AUDIO_QUALITIES = {
 const DEFAULTS = {
   themeMode: 'dark', // 'dark' | 'light' | 'system'
   palette: 'default', // a PALETTES key; 'default' = the interface style's own accent
-  uiStyle: 'spotify', // 'spotify' | 'apple' | 'nothing' -- see css/apple.css, css/nothing.css
+  uiStyle: 'nothing', // 'spotify' | 'apple' | 'nothing' -- see css/apple.css, css/nothing.css; new installs start in Nothing (red accent via palette 'default')
   nothingDottedSliders: true, // Nothing style only: dot-matrix seek/volume bars, off = plain lines
   audioQuality: 'auto',
   artBackground: false,
@@ -147,7 +147,7 @@ function resolvedThemeMode() {
 export function applySettings() {
   const root = document.documentElement;
   root.setAttribute('data-theme', resolvedThemeMode());
-  const ui = UI_STYLES.includes(current.uiStyle) ? current.uiStyle : 'spotify';
+  const ui = UI_STYLES.includes(current.uiStyle) ? current.uiStyle : 'nothing';
   // A picked accent applies to any style; 'default' (or a palette from an
   // older version that no longer exists) uses the style's own accent:
   // "spotify" (styles.css), "apple" (apple.css) or "nothing" (nothing.css).
