@@ -366,20 +366,6 @@
         <button id="btn-close-settings" class="btn-icon-plain" type="button" data-i18n-title="common.close" title="Close"><i class="fi fi-br-cross-small"></i></button>
       </div>
       <div class="modal-body">
-        <section class="settings-section" id="local-library-section">
-          <h3 data-i18n="local.settingsTitle">Music on this device</h3>
-          <div class="settings-row settings-row-stack">
-            <div>
-              <div class="settings-row-label" data-i18n="local.folders">Music folders</div>
-              <div class="settings-row-desc" id="local-library-status"></div>
-            </div>
-            <ul id="local-folder-list" class="local-folder-list"></ul>
-            <div class="local-folder-actions">
-              <button id="btn-local-add-folder" class="btn-secondary" type="button" data-i18n="local.addFolder">Add folder</button>
-              <button id="btn-local-rescan" class="btn-secondary" type="button" data-i18n="local.rescan">Rescan</button>
-            </div>
-          </div>
-        </section>
         <section class="settings-section">
           <h3 data-i18n="settings.appearance">Appearance</h3>
           <div class="settings-row">
@@ -597,6 +583,20 @@
               <div class="settings-row-desc" data-i18n="settings.discordPresenceDesc">Shows what you're listening to on your Discord profile (desktop only)</div>
             </div>
             <a id="discord-connect-link" href="https://discord.com/oauth2/authorize?client_id=1534197353056174180" target="_blank" rel="noopener noreferrer" class="attribution-link" data-i18n="settings.discordConnect">Connect</a>
+          </div>
+        </section>
+        <section class="settings-section" id="local-library-section">
+          <h3 data-i18n="local.settingsTitle">Music on this device</h3>
+          <div class="settings-row settings-row-stack">
+            <div>
+              <div class="settings-row-label" data-i18n="local.folders">Music folders</div>
+              <div class="settings-row-desc" id="local-library-status"></div>
+            </div>
+            <ul id="local-folder-list" class="local-folder-list"></ul>
+            <div class="local-folder-actions">
+              <button id="btn-local-add-folder" class="btn-secondary" type="button" data-i18n="local.addFolder">Add folder</button>
+              <button id="btn-local-rescan" class="btn-secondary" type="button" data-i18n="local.rescan">Rescan</button>
+            </div>
           </div>
         </section>
         <section class="settings-section" id="privacy-section">
