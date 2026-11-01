@@ -144,6 +144,7 @@
     "lyricsFailed": "現在歌詞を読み込めません。",
     "retry": "再試行",
     "queueEmpty": "再生キューは空です。",
+    "recommendedQueue": "おすすめのキュー",
     "title": "再生中",
     "nextInQueue": "キューの次の曲",
     "clearQueue": "クリア"
@@ -151,6 +152,7 @@
   "player": {
     "coverArtAlt": "{artist} の「{name}」のカバーアート",
     "shuffle": "シャッフル",
+    "smartShuffle": "スマートシャッフル",
     "previous": "前へ",
     "play": "再生",
     "pause": "一時停止",
@@ -214,6 +216,8 @@
     "privacy": "プライバシー",
     "albumArtLookup": "オンラインでアルバムアートを検索",
     "albumArtLookupDesc": "Jellyfin サーバーにカバーアートがない場合、アーティスト名とアルバム名を Deezer の公開検索 API に送信します。オフにすると、これらの情報がデバイスの外に出ることはありません。",
+    "relatedArtistsLookup": "関連アーティストをオンラインで検索",
+    "relatedArtistsLookupDesc": "再生中のアーティスト名を Deezer の公開 API に送信し、スマートシャッフルとホーム用にライブラリ内の似たアーティストを探します。オフにすると、この情報が端末の外に送信されることはありません。その場合、おすすめはライブラリと再生履歴だけを使います。",
     "autoUpdateCheck": "自動アップデート確認",
     "autoUpdateCheckDesc": "バックグラウンドで GitHub に新しい Triptych のリリースがあるか確認します。個人データは送信されず、バージョンを照会するだけです。オフにした場合はリリースページで手動で確認してください。",
     "catJamCredit": "「Cat Jam」アニメーションは BlafKing の spicetify-cat-jam-synced を元にしています",

@@ -144,6 +144,7 @@
     "lyricsFailed": "暂时无法加载歌词。",
     "retry": "重试",
     "queueEmpty": "播放队列为空。",
+    "recommendedQueue": "推荐队列",
     "title": "正在播放",
     "nextInQueue": "队列中的下一首",
     "clearQueue": "清空"
@@ -151,6 +152,7 @@
   "player": {
     "coverArtAlt": "{artist} 的《{name}》封面",
     "shuffle": "随机播放",
+    "smartShuffle": "智能随机播放",
     "previous": "上一首",
     "play": "播放",
     "pause": "暂停",
@@ -214,6 +216,8 @@
     "privacy": "隐私",
     "albumArtLookup": "在线查找专辑封面",
     "albumArtLookupDesc": "当你的 Jellyfin 服务器没有封面时，将艺人/专辑名称发送到 Deezer 的公开搜索 API。关闭后这些信息绝不会离开你的设备。",
+    "relatedArtistsLookup": "在线查找相关艺人",
+    "relatedArtistsLookupDesc": "将你播放的艺人名称发送到 Deezer 的公开 API，为智能随机播放和主页在你的音乐库中查找相似艺人。关闭后这些信息不会离开你的设备，推荐将仅使用你的音乐库和收听记录。",
     "autoUpdateCheck": "自动检查更新",
     "autoUpdateCheckDesc": "在后台检查 GitHub 上是否有新版 Triptych。不会发送任何个人数据，只是查询版本号。关闭后可在“发布”页面手动检查。",
     "catJamCredit": "“Cat Jam”动画改编自 BlafKing 的 spicetify-cat-jam-synced",

@@ -144,6 +144,7 @@
     "lyricsFailed": "Kunne ikke laste inn sangteksten akkurat nå.",
     "retry": "Prøv igjen",
     "queueEmpty": "Køen er tom.",
+    "recommendedQueue": "Anbefalt kø",
     "title": "Spilles nå",
     "nextInQueue": "Neste i køen",
     "clearQueue": "Tøm"
@@ -151,6 +152,7 @@
   "player": {
     "coverArtAlt": "Omslag for {name} av {artist}",
     "shuffle": "Shuffle",
+    "smartShuffle": "Smart shuffle",
     "previous": "Forrige",
     "play": "Spill av",
     "pause": "Pause",
@@ -214,6 +216,8 @@
     "privacy": "Personvern",
     "albumArtLookup": "Søk etter omslag på nett",
     "albumArtLookupDesc": "Sender artist-/albumnavnet til Deezers offentlige søke-API når Jellyfin-serveren din mangler omslag. Slå av så de dataene aldri forlater enheten din.",
+    "relatedArtistsLookup": "Nettsøk etter lignende artister",
+    "relatedArtistsLookupDesc": "Sender navnene på artistene du spiller til Deezers offentlige API for å finne lignende artister i biblioteket ditt, for smart shuffle og Hjem. Slå av for at det aldri skal forlate enheten din; anbefalinger bruker da bare biblioteket og lyttingen din.",
     "autoUpdateCheck": "Automatisk oppdateringssjekk",
     "autoUpdateCheckDesc": "Sjekker i bakgrunnen på GitHub om det finnes en nyere Triptych-versjon. Ingen personopplysninger sendes, bare et versjonsoppslag. Slå av for å sjekke selv på Releases-siden.",
     "catJamCredit": "«Cat Jam»-animasjon tilpasset fra BlafKings spicetify-cat-jam-synced",

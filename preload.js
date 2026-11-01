@@ -23,7 +23,8 @@ contextBridge.exposeInMainWorld('api', {
     clearActivity: () => ipcRenderer.invoke('discord:clearActivity')
   },
   deezer: {
-    searchAlbumArt: (artist, album, trackName) => ipcRenderer.invoke('deezer:searchAlbumArt', artist, album, trackName)
+    searchAlbumArt: (artist, album, trackName) => ipcRenderer.invoke('deezer:searchAlbumArt', artist, album, trackName),
+    get: (path, params) => ipcRenderer.invoke('deezer:get', path, params)
   },
   lyrics: {
     get: (url, timeoutMs) => ipcRenderer.invoke('lyrics:get', url, timeoutMs)

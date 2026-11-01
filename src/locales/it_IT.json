@@ -144,6 +144,7 @@
     "lyricsFailed": "Impossibile caricare il testo in questo momento.",
     "retry": "Riprova",
     "queueEmpty": "La coda è vuota.",
+    "recommendedQueue": "Coda consigliata",
     "title": "In riproduzione",
     "nextInQueue": "Prossimi in coda",
     "clearQueue": "Svuota"
@@ -151,6 +152,7 @@
   "player": {
     "coverArtAlt": "Copertina di {name} di {artist}",
     "shuffle": "Riproduzione casuale",
+    "smartShuffle": "Riproduzione casuale smart",
     "previous": "Precedente",
     "play": "Riproduci",
     "pause": "Pausa",
@@ -214,6 +216,8 @@
     "privacy": "Privacy",
     "albumArtLookup": "Ricerca copertine online",
     "albumArtLookupDesc": "Invia il nome dell'artista/album all'API di ricerca pubblica di Deezer quando il tuo server Jellyfin non ha la copertina. Disattiva per non far mai uscire questi dati dal tuo dispositivo.",
+    "relatedArtistsLookup": "Ricerca online di artisti simili",
+    "relatedArtistsLookupDesc": "Invia i nomi degli artisti che ascolti all'API pubblica di Deezer per trovare artisti simili nella tua libreria, per la riproduzione casuale smart e la Home. Disattiva per far sì che questi dati non lascino mai il tuo dispositivo; i consigli useranno allora solo la tua libreria e i tuoi ascolti.",
     "autoUpdateCheck": "Controllo automatico aggiornamenti",
     "autoUpdateCheckDesc": "Controlla in background su GitHub se esiste una versione più recente di Triptych. Non vengono inviati dati personali, solo una verifica della versione. Disattiva per controllare tu stesso dalla pagina Releases.",
     "catJamCredit": "Animazione «Cat Jam» adattata da spicetify-cat-jam-synced di BlafKing",

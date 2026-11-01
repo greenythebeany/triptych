@@ -109,6 +109,7 @@ export class Player {
     this.originalQueue = [];
     this.currentIndex = -1;
     this.shuffle = false;
+    this.smartShuffle = false; // upcoming songs are recommendations (marked __rec), see fillSmartShuffle in app.js
     this.repeat = RepeatMode.OFF;
     this.queueSourceId = null; // Id of the album/playlist this queue came from, if any
 
@@ -527,6 +528,7 @@ export class Player {
       this.originalQueue.splice(startIndex + 1, 0, ...pending);
     }
     this.queueSourceId = sourceId;
+    if (this.smartShuffle) this._stripUpcomingOwn();
     this._emit('queuechange');
     this._loadCurrent(true);
   }
@@ -560,12 +562,13 @@ export class Player {
   // Puts back a queue saved from a previous session (see the resume code in
   // app.js): same order, same song, same position, but paused -- the user
   // presses play to carry on.
-  restoreQueue(tracks, index, positionSeconds = 0, { shuffle = false, repeat } = {}) {
+  restoreQueue(tracks, index, positionSeconds = 0, { shuffle = false, smartShuffle = false, repeat } = {}) {
     if (!tracks?.length) return;
     this._cancelTransition();
     this.queue = [...tracks];
     this.originalQueue = [...tracks];
     this.shuffle = !!shuffle;
+    this.smartShuffle = this.shuffle && !!smartShuffle;
     if (repeat) this.repeat = repeat;
     this.currentIndex = Math.min(Math.max(0, index || 0), tracks.length - 1);
     this.queueSourceId = null;
@@ -627,6 +630,7 @@ export class Player {
     const intoBlock = toIndex > this.currentIndex - (fromIndex < this.currentIndex ? 1 : 0) && toIndex <= blockEnd;
     if (intoBlock && !moved.__queued) {
       const copy = { ...moved, __queued: true };
+      delete copy.__rec;
       const oi = this.originalQueue.indexOf(moved);
       if (oi >= 0) this.originalQueue[oi] = copy;
       moved = copy;
@@ -652,17 +656,75 @@ export class Player {
   }
 
   toggleShuffle() {
+    this.setShuffleMode(this.shuffle ? 'off' : 'on');
+  }
+
+  get shuffleMode() {
+    if (!this.shuffle) return 'off';
+    return this.smartShuffle ? 'smart' : 'on';
+  }
+
+  // The shuffle button: off -> on -> smart -> off.
+  cycleShuffle() {
+    const order = ['off', 'on', 'smart'];
+    this.setShuffleMode(order[(order.indexOf(this.shuffleMode) + 1) % order.length]);
+    return this.shuffleMode;
+  }
+
+  setShuffleMode(mode) {
+    const wantShuffle = mode !== 'off';
+    const wantSmart = mode === 'smart';
+    if (!wantSmart && this.smartShuffle) this._removeUpcomingRecommendations();
+    this.smartShuffle = wantSmart;
+    if (wantShuffle === this.shuffle) {
+      if (wantSmart) this._stripUpcomingOwn();
+      this._emit('queuechange');
+      return;
+    }
     this._cancelTransition();
     const current = this.currentTrack;
     // Queued songs aren't shuffled in -- they stay next, in order.
     const pending = this.pendingQueued();
     const base = this.originalQueue.filter((e) => !pending.includes(e));
-    this.shuffle = !this.shuffle;
+    if (current?.__rec) {
+      // A recommended song playing isn't part of the original order: keep it
+      // after the song it followed.
+      let i = this.currentIndex - 1;
+      while (i >= 0 && !base.includes(this.queue[i])) i--;
+      base.splice(i >= 0 ? base.indexOf(this.queue[i]) + 1 : 0, 0, current);
+    }
+    this.shuffle = wantShuffle;
     this.queue = this.shuffle ? this._shuffled(base) : [...base];
     this.currentIndex = current ? this.queue.indexOf(current) : -1;
     if (this.currentIndex < 0 && current) this.currentIndex = this.queue.findIndex((t) => t.Id === current.Id);
     if (pending.length && this.currentIndex >= 0) this.queue.splice(this.currentIndex + 1, 0, ...pending);
+    if (wantSmart) this._stripUpcomingOwn();
     this._emit('queuechange');
+  }
+
+  // Smart shuffle: adds a recommended song to the end of the queue. Not
+  // part of originalQueue, so it goes away with smart shuffle.
+  appendRecommendation(track) {
+    const entry = { ...track, __rec: true };
+    delete entry.__queued;
+    this.queue.push(entry);
+    this._emit('queuechange');
+  }
+
+  // Smart shuffle plays only recommendations after the current song (and
+  // the songs the user queued): the rest of the album/playlist leaves the
+  // queue but stays in originalQueue, so turning it off brings it back.
+  _stripUpcomingOwn() {
+    const keepUntil = this._queuedBlockEnd();
+    const before = this.queue.length;
+    this.queue = this.queue.filter((e, i) => i < keepUntil || e.__rec);
+    if (this.queue.length !== before) this._cancelTransition();
+  }
+
+  _removeUpcomingRecommendations() {
+    const before = this.queue.length;
+    this.queue = this.queue.filter((e, i) => i <= this.currentIndex || !e.__rec);
+    if (this.queue.length !== before) this._cancelTransition();
   }
 
   cycleRepeat() {

@@ -483,6 +483,26 @@ ipcMain.handle('deezer:searchAlbumArt', async (_event, artist, album, trackName)
   );
 });
 
+// Related artists for smart shuffle (see src/js/recommend.js) -- same
+// missing CORS headers. Only Deezer's artist search/lookup endpoints.
+const DEEZER_ARTIST_PATH = /^\/(?:search\/artist|artist\/\d+(?:\/(?:related|albums|top))?)$/;
+
+ipcMain.handle('deezer:get', async (_event, path, params) => {
+  if (typeof path !== 'string' || !DEEZER_ARTIST_PATH.test(path)) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const qs = new URLSearchParams(params && typeof params === 'object' ? params : {}).toString();
+    const res = await fetch(`https://api.deezer.com${path}${qs ? `?${qs}` : ''}`, { signal: controller.signal });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+});
+
 // NetEase and Kugou's lyrics APIs don't send CORS headers either (see
 // lyrics.js) -- fetched here, for those two hosts only.
 const LYRICS_HOSTS = new Set(['music.163.com', 'lyrics.kugou.com']);

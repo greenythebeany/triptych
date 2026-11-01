@@ -144,6 +144,7 @@
     "lyricsFailed": "Text sa teraz nepodarilo načítať.",
     "retry": "Skúsiť znova",
     "queueEmpty": "Fronta je prázdna.",
+    "recommendedQueue": "Odporúčaný rad",
     "title": "Práve sa prehráva",
     "nextInQueue": "Ďalej vo fronte",
     "clearQueue": "Vymazať"
@@ -151,6 +152,7 @@
   "player": {
     "coverArtAlt": "Obal {name} od {artist}",
     "shuffle": "Náhodné prehrávanie",
+    "smartShuffle": "Inteligentné náhodné prehrávanie",
     "previous": "Predchádzajúca",
     "play": "Prehrať",
     "pause": "Pozastaviť",
@@ -214,6 +216,8 @@
     "privacy": "Súkromie",
     "albumArtLookup": "Hľadanie obalov online",
     "albumArtLookupDesc": "Pošle meno interpreta/albumu do verejného vyhľadávacieho API Deezeru, keď tvoj server Jellyfin nemá obal. Vypni, aby tieto údaje nikdy neopustili tvoje zariadenie.",
+    "relatedArtistsLookup": "Hľadanie podobných interpretov online",
+    "relatedArtistsLookupDesc": "Posiela mená interpretov, ktorých počúvaš, do verejného API Deezeru, aby našlo podobných interpretov v tvojej knižnici pre inteligentné náhodné prehrávanie a Domov. Vypni, aby tieto údaje nikdy neopustili tvoje zariadenie; odporúčania potom vychádzajú len z tvojej knižnice a počúvania.",
     "autoUpdateCheck": "Automatická kontrola aktualizácií",
     "autoUpdateCheckDesc": "Na pozadí kontroluje na GitHube, či existuje novšia verzia Triptych. Neposielajú sa žiadne osobné údaje, len dopyt na verziu. Vypni a kontroluj ručne na stránke Releases.",
     "catJamCredit": "Animácia „Cat Jam“ upravená zo spicetify-cat-jam-synced od BlafKing",

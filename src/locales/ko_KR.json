@@ -144,6 +144,7 @@
     "lyricsFailed": "지금은 가사를 불러올 수 없습니다.",
     "retry": "다시 시도",
     "queueEmpty": "재생 대기열이 비어 있습니다.",
+    "recommendedQueue": "추천 대기열",
     "title": "지금 재생 중",
     "nextInQueue": "대기열의 다음 곡",
     "clearQueue": "지우기"
@@ -151,6 +152,7 @@
   "player": {
     "coverArtAlt": "{artist}의 {name} 커버 아트",
     "shuffle": "셔플",
+    "smartShuffle": "스마트 셔플",
     "previous": "이전",
     "play": "재생",
     "pause": "일시정지",
@@ -214,6 +216,8 @@
     "privacy": "개인정보",
     "albumArtLookup": "온라인 앨범 아트 검색",
     "albumArtLookupDesc": "Jellyfin 서버에 커버 아트가 없을 때 아티스트/앨범 이름을 Deezer의 공개 검색 API로 보냅니다. 끄면 이 정보가 기기 밖으로 나가지 않습니다.",
+    "relatedArtistsLookup": "관련 아티스트 온라인 검색",
+    "relatedArtistsLookupDesc": "재생 중인 아티스트 이름을 Deezer 공개 API로 보내 스마트 셔플과 홈에 쓸 비슷한 아티스트를 라이브러리에서 찾습니다. 끄면 이 정보가 기기 밖으로 나가지 않으며, 추천은 라이브러리와 감상 기록만 사용합니다.",
     "autoUpdateCheck": "자동 업데이트 확인",
     "autoUpdateCheckDesc": "백그라운드에서 GitHub에 새 Triptych 릴리스가 있는지 확인합니다. 개인 데이터는 보내지 않고 버전만 조회합니다. 끄면 릴리스 페이지에서 직접 확인하세요.",
     "catJamCredit": "'Cat Jam' 애니메이션은 BlafKing의 spicetify-cat-jam-synced를 바탕으로 했습니다",
