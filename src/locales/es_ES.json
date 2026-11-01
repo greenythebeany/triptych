@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Chino, japonés y coreano",
     "cjkLanguagesDesc": "Triptych ahora habla chino simplificado y tradicional, japonés y coreano, y usa el idioma del sistema al iniciarse por primera vez.",
     "wordLyricsTitle": "Letra palabra por palabra",
+    "localMusicTitle": "Música en este dispositivo",
+    "localMusicDesc": "En tu ordenador, reproduce archivos de música de tus propias carpetas: solos, sin servidor Jellyfin, o mezclados con tu biblioteca de Jellyfin. Añade carpetas en Ajustes. Los móviles llegarán pronto.",
+    "motion240Title": "Más fluido en todas partes",
+    "motion240Desc": "El resaltado de la barra lateral se desliza entre páginas, el punto rojo viaja como una gota en el estilo Nothing y el menú de la cuenta se abre desde tu avatar.",
+    "fixes240Title": "Correcciones",
+    "fixes240Desc": "Las canciones descargadas muestran su portada en la pantalla de bloqueo y en las notificaciones, la letra se pone al día al reabrir el reproductor y desaparecen las letras raras en el texto de puntos.",
+    "mac240Title": "Ahora en Mac",
+    "mac240Desc": "Triptych funciona en Mac con Apple silicon e Intel.",
     "wordLyricsDesc": "Actívala en Ajustes → Apariencia: cada palabra se rellena y crece mientras se canta. Gasta más batería, así que viene desactivada."
   },
   "wrapped": {
@@ -451,5 +459,20 @@
   "duration": {
     "hoursMinutes": "{h} h {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "o",
+    "useOnDevice": "Usar la música de este dispositivo",
+    "scanningStart": "Buscando música…",
+    "scanning": "Analizando… {done} de {total}",
+    "noMusic": "No se encontraron archivos de música en las carpetas elegidas.",
+    "accountName": "Este dispositivo",
+    "settingsTitle": "Música de este dispositivo",
+    "folders": "Carpetas de música",
+    "summary": "{songs} canciones · {albums} álbumes",
+    "addFolder": "Añadir carpeta",
+    "rescan": "Volver a analizar",
+    "removeFolder": "Quitar carpeta",
+    "homeEmpty": "Aún no hay música. Añade una carpeta con tus archivos de música."
   }
 }

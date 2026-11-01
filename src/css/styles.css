@@ -257,6 +257,22 @@ body.platform-mac .titlebar-controls { display: none; }
 .btn-primary:hover { background: var(--accent-hover); transform: scale(1.015); }
 .btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; }
 .login-error { color: var(--danger); font-size: 12.5px; text-align: center; margin: 4px 0 0; }
+.login-local { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.login-local[hidden] { display: none; }
+.login-divider { display: flex; align-items: center; gap: 12px; color: var(--text-tertiary); font-size: 12px; }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+.login-local .btn-secondary { padding: 12px; font-size: 14px; }
+.login-local-status { color: var(--text-secondary); font-size: 12.5px; text-align: center; margin: 0; }
+.login-local-status.is-error { color: var(--danger); }
+
+/* Music on this device without a server: server-only features hidden. */
+body.local-mode .server-only { display: none !important; }
+.local-folder-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.local-folder-list:empty { display: none; }
+.local-folder-list li { display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 12px; border-radius: var(--radius-sm, 8px); background: var(--bg-highlight); font-size: 12.5px; }
+.local-folder-list li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.local-folder-actions { display: flex; gap: 8px; }
+.local-empty-actions { margin-top: 14px; }
 
 /* ---------- App shell ---------- */
 .app {
@@ -444,6 +460,40 @@ body.platform-mac .titlebar-controls { display: none; }
 .account-menu button:hover { background: var(--bg-card-hover); }
 .account-menu button .fi { font-size: 16px; color: var(--text-secondary); }
 .account-menu button.danger { color: var(--danger); }
+
+/* ---------- Nav glider + sticky dot (app.js moveNavGliders) ----------
+   The active sidebar item's highlight slides to the new item instead of
+   jumping, and in the Nothing look the accent dot travels like a drop of
+   liquid: it stretches toward the new item, then its back end catches up
+   (sidebar: right end of the pill; phone tab bar: under the icon). */
+.sidebar-nav { position: relative; }
+.sidebar-nav > .nav-item { position: relative; z-index: 1; }
+:root[data-ui] .sidebar-nav .nav-item.active { background: transparent; }
+.nav-glider {
+  position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; opacity: 0;
+  border-radius: var(--radius-sm); background: var(--bg-highlight);
+  transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1), width 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+    height 0.42s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
+}
+.nav-glider.instant { transition: none; }
+:root[data-ui="nothing"] .nav-glider { border-radius: 999px; background: var(--bg-card); }
+:root[data-ui="apple"] .nav-glider { border-radius: 8px; }
+.nav-dot {
+  display: none; position: absolute; left: 0; top: 0; z-index: 2;
+  width: 6px; height: 6px; border-radius: 3px; background: var(--accent);
+  pointer-events: none; opacity: 0; transition: opacity 0.2s ease;
+}
+:root[data-ui="nothing"] .nav-dot { display: block; }
+:root[data-ui="nothing"] .nav-item.active::after,
+:root[data-ui="nothing"] .bottom-nav-item.active::after { visibility: hidden; }
+
+/* Account menu (app.js openAccountMenu): while it's open the avatar
+   shrinks into an accent dot and the menu opens out of it. */
+.user-badge { position: relative; }
+.pm-dot {
+  position: absolute; left: 4px; top: 4px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); pointer-events: none; opacity: 0;
+}
 .account-menu button.danger .fi { color: var(--danger); }
 
 .view-root { padding: 8px 24px 32px; flex: 1; }
@@ -1455,7 +1505,7 @@ body.platform-mobile .titlebar { display: none; }
   .mobile-now-playing-controls .ctrl-btn-play svg { width: 26px; height: 26px; }
 
   .bottom-nav {
-    grid-area: nav;
+    grid-area: nav; position: relative;
     display: flex; justify-content: space-around; align-items: center;
     height: auto; flex-shrink: 0;
     background: var(--bg-elevated); border-top: 1px solid var(--border-subtle);

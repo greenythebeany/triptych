@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' http: https: data:; media-src 'self' http: https: file: content: blob:; connect-src 'self' http: https: ws: wss:; style-src 'self' 'unsafe-inline' https:; script-src 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' http: https: data: blob: tlocal:; media-src 'self' http: https: file: content: blob: tlocal:; connect-src 'self' http: https: ws: wss: tlocal:; style-src 'self' 'unsafe-inline' https:; script-src 'self';" />
   <title>Triptych</title>
   <link rel="stylesheet" href="vendor/poppins/latin-400.css" />
   <link rel="stylesheet" href="vendor/poppins/latin-500.css" />
@@ -98,6 +98,11 @@
         <p id="login-error" class="login-error" hidden></p>
         <button type="button" id="btn-retry-connection" class="btn-primary" hidden data-i18n="login.retry">Retry</button>
       </form>
+      <div id="login-local" class="login-local" hidden>
+        <div class="login-divider"><span data-i18n="local.or">or</span></div>
+        <button type="button" id="btn-use-local" class="btn-secondary" data-i18n="local.useOnDevice">Use music on this device</button>
+        <p id="login-local-status" class="login-local-status" hidden></p>
+      </div>
     </div>
   </div>
 
@@ -105,6 +110,8 @@
   <div id="app" class="app" hidden>
     <aside class="sidebar">
       <nav class="sidebar-nav">
+        <span class="nav-glider" aria-hidden="true"></span>
+        <span class="nav-dot" aria-hidden="true"></span>
         <button class="nav-item active" data-view="home">
           <i class="fi fi-br-home"></i>
           <span data-i18n="nav.home">Home</span>
@@ -121,7 +128,7 @@
           <i class="fi fi-br-heart"></i>
           <span data-i18n="nav.liked">Liked Songs</span>
         </button>
-        <button class="nav-item" data-view="downloads">
+        <button class="nav-item server-only" data-view="downloads">
           <i class="fi fi-br-download"></i>
           <span data-i18n="nav.downloads">Downloads</span>
         </button>
@@ -171,6 +178,7 @@
         <div class="header-user">
           <button id="btn-account" class="user-badge">
             <span class="avatar" id="account-avatar"></span>
+            <span class="pm-dot" aria-hidden="true"></span>
             <span id="account-username"></span>
           </button>
           <div id="account-menu" class="account-menu" hidden>
@@ -196,7 +204,7 @@
       <div class="lyrics-header">
         <button id="btn-close-lyrics" class="btn-icon-plain np-collapse-btn" data-i18n-title="nowPlaying.title" title="Now Playing"><i class="fi fi-br-angle-small-down"></i></button>
         <div class="lyrics-header-actions">
-          <button id="btn-connect-mobile" class="btn-icon-plain" type="button" data-i18n-title="connect.title" title="Connect"><i class="fi fi-br-screencast"></i></button>
+          <button id="btn-connect-mobile" class="btn-icon-plain server-only" type="button" data-i18n-title="connect.title" title="Connect"><i class="fi fi-br-screencast"></i></button>
           <button id="btn-sleep-timer-mobile" class="btn-icon-plain" type="button" data-i18n-title="player.sleepTimer" title="Sleep timer"><i class="fi fi-br-moon"></i></button>
           <button id="btn-lyrics-mobile" class="btn-icon-plain btn-queue-mobile" type="button" data-i18n-title="nowPlaying.lyricsTab" title="Lyrics"><i class="fi fi-br-quote-right"></i></button>
           <button id="btn-queue-mobile" class="btn-icon-plain btn-queue-mobile" type="button" data-i18n-title="nowPlaying.queueTab" title="Queue"><i class="fi fi-br-list-music"></i></button>
@@ -305,7 +313,7 @@
           </button>
           <span id="sleep-timer-badge" class="sleep-timer-badge" hidden></span>
         </div>
-        <button id="btn-connect" class="ctrl-btn" data-i18n-title="connect.title" title="Connect">
+        <button id="btn-connect" class="ctrl-btn server-only" data-i18n-title="connect.title" title="Connect">
           <i class="fi fi-br-screencast"></i>
         </button>
         <button id="btn-lyrics" class="ctrl-btn" data-i18n-title="nowPlaying.title" title="Now Playing">
@@ -317,6 +325,7 @@
     </footer>
 
     <nav class="bottom-nav">
+      <span class="nav-dot" aria-hidden="true"></span>
       <button class="bottom-nav-item active" data-view="home">
         <i class="fi fi-br-home"></i>
         <span data-i18n="nav.home">Home</span>
@@ -357,6 +366,20 @@
         <button id="btn-close-settings" class="btn-icon-plain" type="button" data-i18n-title="common.close" title="Close"><i class="fi fi-br-cross-small"></i></button>
       </div>
       <div class="modal-body">
+        <section class="settings-section" id="local-library-section">
+          <h3 data-i18n="local.settingsTitle">Music on this device</h3>
+          <div class="settings-row settings-row-stack">
+            <div>
+              <div class="settings-row-label" data-i18n="local.folders">Music folders</div>
+              <div class="settings-row-desc" id="local-library-status"></div>
+            </div>
+            <ul id="local-folder-list" class="local-folder-list"></ul>
+            <div class="local-folder-actions">
+              <button id="btn-local-add-folder" class="btn-secondary" type="button" data-i18n="local.addFolder">Add folder</button>
+              <button id="btn-local-rescan" class="btn-secondary" type="button" data-i18n="local.rescan">Rescan</button>
+            </div>
+          </div>
+        </section>
         <section class="settings-section">
           <h3 data-i18n="settings.appearance">Appearance</h3>
           <div class="settings-row">
@@ -458,7 +481,7 @@
         </section>
         <section class="settings-section">
           <h3 data-i18n="settings.audio">Audio</h3>
-          <div class="settings-row">
+          <div class="settings-row server-only">
             <div>
               <div class="settings-row-label" data-i18n="settings.quality">Streaming quality</div>
               <div class="settings-row-desc" data-i18n="settings.qualityDesc">Lower quality uses less bandwidth</div>
@@ -599,7 +622,7 @@
             </label>
           </div>
         </section>
-        <section class="settings-section" id="storage-section">
+        <section class="settings-section server-only" id="storage-section">
           <h3 data-i18n="settings.storage">Storage</h3>
           <div class="settings-row">
             <div>
@@ -695,13 +718,14 @@
             <li><strong>Your Jellyfin session</strong> (server address, username, access token) — saved to a local file (<code>session.dat</code> in Triptych's app-data folder) using your OS's encryption (Electron <code>safeStorage</code>) when the OS supports it. If your OS doesn't support that encryption, the file is saved as plain text instead — worth knowing if your device disk itself isn't encrypted.</li>
             <li><strong>App preferences</strong> (theme, language, audio settings, etc.) — stored in local browser storage on desktop, and via the Capacitor Preferences plugin on Android. These also sync to your own Jellyfin server's user-data store so they follow you between your own devices — that sync target is your server, never the developer.</li>
             <li><strong>Downloaded tracks</strong> — saved as ordinary audio files in Triptych's app-data folder for offline playback.</li>
+            <li><strong>Music on this device</strong> (desktop, optional) — if you pick music folders, Triptych reads the audio files in them and their tags (title, artist, album, track number, length, cover art). The folder list and the tags are saved in <code>local-library.json</code>, and smaller copies of the cover art in a <code>local-covers</code> folder, both in Triptych's app-data folder; likes, play counts and playlists for these songs are kept in local storage. Your files are only read, never changed, moved or uploaded anywhere — not even to your Jellyfin server.</li>
             <li><strong>Listening stats</strong> (top artists/tracks, play history) — computed from your local playback and stored the same way as preferences, above.</li>
           </ul>
           <h4>Data sent to other services (never to the developer)</h4>
           <ul>
             <li><strong>Your own Jellyfin server</strong> — the app talks to it directly with your credentials to stream your library. This is infrastructure you control.</li>
             <li><strong>GitHub (api.github.com)</strong> — a background check for a newer Triptych release. Sends a generic app identifier, nothing that identifies you. Can be turned off in Settings → Privacy.</li>
-            <li><strong>Deezer (api.deezer.com)</strong> — when your server has no cover art for a track, the current artist/album/track name is sent to Deezer's public search to find one. No account or personal identifier is sent. Can be turned off in Settings → Privacy.</li>
+            <li><strong>Deezer (api.deezer.com)</strong> — when your server (or a song file on this device) has no cover art for a track, the current artist/album/track name is sent to Deezer's public search to find one. No account or personal identifier is sent. Can be turned off in Settings → Privacy.</li>
             <li><strong>Lyrics: lrclib.net, then lyrics.ovh</strong> — when you view lyrics, the current track's title, artist, album and length are sent to lrclib.net's public lyrics API to find them. If lrclib and your own Jellyfin server don't have them, the title and first artist are also sent to lyrics.ovh. No account or personal identifier is sent; lyrics are only kept in memory while the app is open. If you turn on <strong>Search by lyrics</strong> (Settings → Privacy, off by default), the same lookups also run in the background for the songs in your library, about one per second, and the lyrics found are stored on your device so you can search them; turning it off stops this.</li>
             <li><strong>Discord</strong> — only if you explicitly connect it in Settings → Audio → Discord Rich Presence. While connected, the currently playing track/artist and its cover art URL are sent to your local Discord client so it can show on your Discord profile. Off by default; disconnect any time.</li>
             <li><strong>YouTube / YouTube Music / SoundCloud</strong> — only if you use the "Import" feature to paste a link, which fetches that specific media directly to your device. See the Terms of Service section below for the responsibility that comes with this feature.</li>
@@ -754,6 +778,7 @@
             <li><strong>Jellyfin</strong> — the media server this app connects to. Triptych is an independent, unofficial client, not affiliated with or endorsed by the Jellyfin project. See <a href="https://jellyfin.org/" target="_blank" rel="noopener noreferrer">jellyfin.org</a>.</li>
             <li><strong>Electron</strong> and <strong>Capacitor</strong> (and its official plugins: app, filesystem, haptics, local-notifications, preferences, android/ios core) — open-source app runtimes, MIT-licensed.</li>
             <li><strong>@xhayper/discord-rpc</strong> — MIT-licensed library used for the optional Discord Rich Presence integration.</li>
+            <li><strong>music-metadata</strong> (by Borewit) — MIT-licensed library that reads tags and cover art from audio files for "Music on this device" on desktop.</li>
             <li><strong>Poppins</strong> font, via Fontsource — licensed under the SIL Open Font License 1.1, bundled and self-hosted (never loaded from Google Fonts or any other third-party CDN).</li>
             <li><strong>Doto</strong> (dot-matrix headings) and <strong>Space Mono</strong> (labels) fonts, used by the Nothing interface style, via Fontsource — licensed under the SIL Open Font License 1.1, bundled and self-hosted like Poppins.</li>
             <li>The <strong>Nothing</strong> interface style is inspired by the look of Nothing OS. Triptych is not affiliated with or endorsed by Nothing Technology Limited, and uses none of its fonts or artwork.</li>

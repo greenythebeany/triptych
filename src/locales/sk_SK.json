@@ -422,6 +422,14 @@
     "cjkLanguagesTitle": "Čínština, japončina a kórejčina",
     "cjkLanguagesDesc": "Triptych teraz vie zjednodušenú aj tradičnú čínštinu, japončinu a kórejčinu a pri prvom spustení zvolí jazyk systému.",
     "wordLyricsTitle": "Text slovo po slove",
+    "localMusicTitle": "Hudba v tomto zariadení",
+    "localMusicDesc": "Na počítači prehrávaj hudobné súbory z vlastných priečinkov: samostatne, bez servera Jellyfin, alebo spolu s knižnicou Jellyfin. Priečinky pridáš v Nastaveniach. Telefóny prídu čoskoro.",
+    "motion240Title": "Všade plynulejšie",
+    "motion240Desc": "Zvýraznenie v bočnom paneli kĺže medzi stránkami, červená bodka vo vzhľade Nothing putuje ako kvapka a menu účtu sa otvára z tvojho avatara.",
+    "fixes240Title": "Opravy",
+    "fixes240Desc": "Stiahnuté skladby ukazujú obal na zamknutej obrazovke aj v upozorneniach, texty sa po opätovnom otvorení prehrávača hneď dorovnajú a zvláštne písmená v bodkovaných textoch zmizli.",
+    "mac240Title": "Teraz aj na Macu",
+    "mac240Desc": "Triptych beží na Macoch s Apple silicon aj Intel.",
     "wordLyricsDesc": "Zapni v Nastavenia → Vzhľad: každé slovo sa vyplní a zväčší, keď sa spieva. Spotrebuje viac batérie, preto je predvolene vypnuté."
   },
   "wrapped": {
@@ -449,5 +457,20 @@
   "duration": {
     "hoursMinutes": "{h} h {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "alebo",
+    "useOnDevice": "Použiť hudbu v tomto zariadení",
+    "scanningStart": "Hľadám hudbu…",
+    "scanning": "Prehľadávam… {done} z {total}",
+    "noMusic": "Vo vybraných priečinkoch sa nenašli žiadne hudobné súbory.",
+    "accountName": "Toto zariadenie",
+    "settingsTitle": "Hudba v tomto zariadení",
+    "folders": "Priečinky s hudbou",
+    "summary": "{songs} skladieb · {albums} albumov",
+    "addFolder": "Pridať priečinok",
+    "rescan": "Znova prehľadať",
+    "removeFolder": "Odobrať priečinok",
+    "homeEmpty": "Zatiaľ tu nie je žiadna hudba. Pridajte priečinok so svojimi hudobnými súbormi."
   }
 }

@@ -422,6 +422,14 @@
     "cjkLanguagesTitle": "中国語、日本語、韓国語",
     "cjkLanguagesDesc": "Triptych が简体中文、繁體中文、日本語、韓国語に対応しました。初回起動時はシステムの言語を使います。",
     "wordLyricsTitle": "単語ごとの歌詞",
+    "localMusicTitle": "このデバイスの音楽",
+    "localMusicDesc": "パソコンで自分のフォルダーの音楽ファイルを再生できます。Jellyfin サーバーなしで単独でも、Jellyfin ライブラリと混ぜても使えます。フォルダーは設定で追加します。スマートフォン版はまもなく登場します。",
+    "motion240Title": "あらゆる場所でなめらかに",
+    "motion240Desc": "サイドバーのハイライトがページ間をスライドし、Nothing スタイルの赤いドットはしずくのように移動し、アカウントメニューはアバターから開きます。",
+    "fixes240Title": "修正",
+    "fixes240Desc": "ダウンロードした曲がロック画面と通知にカバーを表示し、プレーヤーを開き直すと歌詞がすぐに追いつき、ドット文字の歌詞の変な文字もなくなりました。",
+    "mac240Title": "Mac に対応",
+    "mac240Desc": "Triptych が Apple シリコンと Intel の Mac で動くようになりました。",
     "wordLyricsDesc": "「設定 → 外観」でオンにすると、歌われるのに合わせて単語が塗られ、少し大きくなります。バッテリーを多く使うため、初期設定ではオフです。"
   },
   "wrapped": {
@@ -449,5 +457,20 @@
   "duration": {
     "hoursMinutes": "{h} 時間 {m} 分",
     "minutes": "{m} 分"
+  },
+  "local": {
+    "or": "または",
+    "useOnDevice": "このデバイスの音楽を使う",
+    "scanningStart": "音楽を探しています…",
+    "scanning": "スキャン中… {done} / {total}",
+    "noMusic": "選択したフォルダーに音楽ファイルが見つかりません。",
+    "accountName": "このデバイス",
+    "settingsTitle": "このデバイスの音楽",
+    "folders": "音楽フォルダー",
+    "summary": "{songs} 曲 · {albums} 枚のアルバム",
+    "addFolder": "フォルダーを追加",
+    "rescan": "再スキャン",
+    "removeFolder": "フォルダーを削除",
+    "homeEmpty": "まだ音楽がありません。音楽ファイルのあるフォルダーを追加してください。"
   }
 }

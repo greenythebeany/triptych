@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Chinees, Japans en Koreaans",
     "cjkLanguagesDesc": "Triptych spreekt nu vereenvoudigd en traditioneel Chinees, Japans en Koreaans, en kiest bij de eerste start je systeemtaal.",
     "wordLyricsTitle": "Songtekst woord voor woord",
+    "localMusicTitle": "Muziek op dit apparaat",
+    "localMusicDesc": "Speel op je computer muziekbestanden uit je eigen mappen af: los, zonder Jellyfin-server, of samen met je Jellyfin-bibliotheek. Voeg mappen toe in Instellingen. Telefoons volgen binnenkort.",
+    "motion240Title": "Overal soepeler",
+    "motion240Desc": "De markering in de zijbalk glijdt tussen pagina's, de rode stip reist als een druppel in de Nothing-stijl en het accountmenu opent vanuit je avatar.",
+    "fixes240Title": "Verbeteringen",
+    "fixes240Desc": "Gedownloade nummers tonen hun hoes op het vergrendelscherm en in meldingen, de songtekst loopt meteen weer gelijk als je de speler heropent, en vreemde letters in de stippentekst zijn weg.",
+    "mac240Title": "Nu op Mac",
+    "mac240Desc": "Triptych draait op Macs met Apple silicon en Intel.",
     "wordLyricsDesc": "Zet het aan via Instellingen → Weergave: elk woord vult zich en groeit terwijl het gezongen wordt. Kost meer batterij, dus het staat standaard uit."
   },
   "wrapped": {
@@ -451,5 +459,20 @@
   "duration": {
     "hoursMinutes": "{h} u {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "of",
+    "useOnDevice": "Muziek op dit apparaat gebruiken",
+    "scanningStart": "Muziek zoeken…",
+    "scanning": "Scannen… {done} van {total}",
+    "noMusic": "Geen muziekbestanden gevonden in de gekozen mappen.",
+    "accountName": "Dit apparaat",
+    "settingsTitle": "Muziek op dit apparaat",
+    "folders": "Muziekmappen",
+    "summary": "{songs} nummers · {albums} albums",
+    "addFolder": "Map toevoegen",
+    "rescan": "Opnieuw scannen",
+    "removeFolder": "Map verwijderen",
+    "homeEmpty": "Nog geen muziek. Voeg een map met je muziekbestanden toe."
   }
 }

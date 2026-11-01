@@ -1,5 +1,5 @@
 import { isDesktop, isAndroid } from './platform.js';
-import { isDownloaded, getLocalUri } from './downloads.js';
+import { isDownloaded, getLocalUri, getLocalArtwork } from './downloads.js';
 
 export const RepeatMode = {
   OFF: 'off',
@@ -386,8 +386,22 @@ export class Player {
     });
   }
 
+  // Downloaded songs use the cover saved with them, so the lock screen /
+  // notification / Windows media flyout still show it when the server can't
+  // be reached (which is when downloads get played) -- the server URL used
+  // to leave them blank there.
   _updateMediaSessionMetadata() {
     const track = this.currentTrack;
+    const token = (this._artworkToken = (this._artworkToken || 0) + 1);
+    if (!track || !isDownloaded(track.Id)) {
+      this._applyMediaSessionMetadata(track, null);
+      return;
+    }
+    const apply = (local) => { if (token === this._artworkToken) this._applyMediaSessionMetadata(track, local); };
+    getLocalArtwork(track.Id).then(apply, () => apply(null));
+  }
+
+  _applyMediaSessionMetadata(track, localArtwork) {
     const artist = track ? ((track.Artists && track.Artists.length ? track.Artists.join(', ') : track.AlbumArtist) || '') : '';
     // Each declared size needs to actually BE that size — every entry
     // pointed at the same fixed-resolution URL before, just relabeled, so
@@ -404,7 +418,9 @@ export class Player {
     // parse `sizes` at all — it just uses artwork[0] unconditionally. With
     // ascending order that was the 96x96 entry, stretched to fill the much
     // larger notification/lock-screen art area — hence the pixelation.
-    const artwork = track
+    const artwork = localArtwork
+      ? [{ src: localArtwork, sizes: '512x512', type: localArtwork.startsWith('data:') ? localArtwork.slice(5, localArtwork.indexOf(';')) : 'image/jpeg' }]
+      : track
       ? [512, 384, 256, 192, 96].map((size) => ({ src: this.jellyfin.imageUrl(track, 'Primary', size), sizes: `${size}x${size}`, type: 'image/jpeg' })).filter((a) => a.src)
       : [];
 
@@ -417,7 +433,7 @@ export class Player {
       title: track?.Name || '',
       artist,
       album: track?.Album || '',
-      coverUrl: track ? this.jellyfin.imageUrl(track, 'Primary', 512) : null,
+      coverUrl: localArtwork || (track ? this.jellyfin.imageUrl(track, 'Primary', 512) : null),
       durationMs: track?.RunTimeTicks ? track.RunTimeTicks / 10000 : null
     });
 
@@ -431,7 +447,23 @@ export class Player {
       navigator.mediaSession.metadata = null;
       return;
     }
-    navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '', artwork });
+    const local = artwork.find((a) => a.src.startsWith('tlocal:'));
+    if (!local) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '', artwork });
+      return;
+    }
+    // MediaMetadata only takes http(s)/data/blob images, so a cover from a
+    // file on this device (tlocal://, see localLibrary.js) goes in as a blob.
+    navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '' });
+    fetch(local.src).then((res) => res.blob()).then((blob) => {
+      if (this.currentTrack !== track) return;
+      if (this._mediaSessionBlobUrl) URL.revokeObjectURL(this._mediaSessionBlobUrl);
+      this._mediaSessionBlobUrl = URL.createObjectURL(blob);
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.Name || '', artist, album: track.Album || '',
+        artwork: [{ src: this._mediaSessionBlobUrl, sizes: '512x512', type: 'image/jpeg' }]
+      });
+    }).catch(() => {});
   }
 
   _setMediaSessionPlaybackState() {

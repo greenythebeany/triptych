@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Kiina, japani ja korea",
     "cjkLanguagesDesc": "Triptych puhuu nyt yksinkertaistettua ja perinteistä kiinaa, japania ja koreaa ja valitsee järjestelmän kielen ensimmäisellä käynnistyskerralla.",
     "wordLyricsTitle": "Sanoitukset sana sanalta",
+    "localMusicTitle": "Musiikki tällä laitteella",
+    "localMusicDesc": "Toista tietokoneella musiikkitiedostoja omista kansioistasi: yksinään ilman Jellyfin-palvelinta tai Jellyfin-kirjastoon yhdistettynä. Lisää kansiot asetuksista. Puhelimet tulevat pian.",
+    "motion240Title": "Sulavampi kaikkialla",
+    "motion240Desc": "Sivupalkin korostus liukuu sivujen välillä, punainen piste kulkee Nothing-tyylissä kuin pisara, ja tilivalikko aukeaa avatarisi kohdalta.",
+    "fixes240Title": "Korjauksia",
+    "fixes240Desc": "Ladatut kappaleet näyttävät kansikuvansa lukitusnäytöllä ja ilmoituksissa, sanoitukset ovat heti ajan tasalla kun soitin avataan uudelleen, ja oudot kirjaimet pistematriisisanoituksissa ovat poissa.",
+    "mac240Title": "Nyt Macilla",
+    "mac240Desc": "Triptych toimii Maceilla, joissa on Apple silicon tai Intel.",
     "wordLyricsDesc": "Ota käyttöön kohdassa Asetukset → Ulkoasu: jokainen sana täyttyy ja kasvaa, kun se lauletaan. Kuluttaa enemmän akkua, joten se on oletuksena pois päältä."
   },
   "wrapped": {
@@ -451,5 +459,20 @@
   "duration": {
     "hoursMinutes": "{h} h {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "tai",
+    "useOnDevice": "Käytä tämän laitteen musiikkia",
+    "scanningStart": "Etsitään musiikkia…",
+    "scanning": "Skannataan… {done}/{total}",
+    "noMusic": "Valituista kansioista ei löytynyt musiikkitiedostoja.",
+    "accountName": "Tämä laite",
+    "settingsTitle": "Tämän laitteen musiikki",
+    "folders": "Musiikkikansiot",
+    "summary": "{songs} kappaletta · {albums} albumia",
+    "addFolder": "Lisää kansio",
+    "rescan": "Skannaa uudelleen",
+    "removeFolder": "Poista kansio",
+    "homeEmpty": "Ei vielä musiikkia. Lisää kansio, jossa on musiikkitiedostojasi."
   }
 }

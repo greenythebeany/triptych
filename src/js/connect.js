@@ -199,10 +199,12 @@ export function createConnect(jellyfin, player) {
   }
 
   function connectSocket() {
-    if (stopped) return;
+    const url = jellyfin.wsUrl();
+    // No server to connect to (music-on-this-device mode).
+    if (stopped || !url) return;
     let socket;
     try {
-      socket = new WebSocket(jellyfin.wsUrl());
+      socket = new WebSocket(url);
     } catch (err) {
       scheduleReconnect();
       return;

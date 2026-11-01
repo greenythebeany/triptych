@@ -52,7 +52,7 @@ const LEGACY_PREFS = { listening: 'JellyWaveListening', settings: 'JellyWaveSett
 // literal below is only the fallback for the brief window before that
 // resolves (or if neither bridge is available, e.g. running in a plain
 // browser during development).
-let CLIENT_VERSION = '2.3.2';
+let CLIENT_VERSION = '2.4.0';
 
 export function getClientVersion() {
   return CLIENT_VERSION;
@@ -698,6 +698,10 @@ export class JellyfinClient {
     const params = new URLSearchParams({ maxWidth: maxSize, maxHeight: maxSize, quality: 90 });
     if (tag) params.set('tag', tag);
     return `${this.serverUrl}/Items/${id}/Images/${type}?${params.toString()}`;
+  }
+
+  artistPhotoUrl(artistId, maxSize = 600) {
+    return `${this.serverUrl}/Items/${artistId}/Images/Primary?maxWidth=${maxSize}&quality=90`;
   }
 
   // Backdrops live in their own BackdropImageTags array rather than in

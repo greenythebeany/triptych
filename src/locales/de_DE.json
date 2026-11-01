@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Chinesisch, Japanisch und Koreanisch",
     "cjkLanguagesDesc": "Triptych spricht jetzt vereinfachtes und traditionelles Chinesisch, Japanisch und Koreanisch und übernimmt beim ersten Start die Systemsprache.",
     "wordLyricsTitle": "Songtext Wort für Wort",
+    "localMusicTitle": "Musik auf diesem Gerät",
+    "localMusicDesc": "Spiele am Computer Musikdateien aus deinen eigenen Ordnern ab: allein, ohne Jellyfin-Server, oder gemischt mit deiner Jellyfin-Bibliothek. Ordner fügst du in den Einstellungen hinzu. Smartphones folgen bald.",
+    "motion240Title": "Überall flüssiger",
+    "motion240Desc": "Die Markierung in der Seitenleiste gleitet zwischen den Seiten, der rote Punkt wandert im Nothing-Look wie ein Tropfen, und das Kontomenü öffnet sich aus deinem Avatar.",
+    "fixes240Title": "Korrekturen",
+    "fixes240Desc": "Heruntergeladene Songs zeigen ihr Cover auf dem Sperrbildschirm und in Benachrichtigungen, der Songtext holt beim erneuten Öffnen des Players sofort auf, und seltsame Buchstaben in Punktmatrix-Texten sind weg.",
+    "mac240Title": "Jetzt auf dem Mac",
+    "mac240Desc": "Triptych läuft auf Macs mit Apple Silicon und Intel.",
     "wordLyricsDesc": "Unter Einstellungen → Darstellung einschalten: Jedes Wort füllt sich und wird größer, während es gesungen wird. Braucht mehr Akku, deshalb standardmäßig aus."
   },
   "wrapped": {
@@ -451,5 +459,20 @@
   "duration": {
     "hoursMinutes": "{h} Std. {m} Min.",
     "minutes": "{m} Min."
+  },
+  "local": {
+    "or": "oder",
+    "useOnDevice": "Musik auf diesem Gerät verwenden",
+    "scanningStart": "Suche nach Musik…",
+    "scanning": "Durchsuche… {done} von {total}",
+    "noMusic": "In den gewählten Ordnern wurden keine Musikdateien gefunden.",
+    "accountName": "Dieses Gerät",
+    "settingsTitle": "Musik auf diesem Gerät",
+    "folders": "Musikordner",
+    "summary": "{songs} Titel · {albums} Alben",
+    "addFolder": "Ordner hinzufügen",
+    "rescan": "Neu durchsuchen",
+    "removeFolder": "Ordner entfernen",
+    "homeEmpty": "Noch keine Musik. Füge einen Ordner mit deinen Musikdateien hinzu."
   }
 }

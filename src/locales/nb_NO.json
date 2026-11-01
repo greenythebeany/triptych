@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Kinesisk, japansk og koreansk",
     "cjkLanguagesDesc": "Triptych snakker nå forenklet og tradisjonell kinesisk, japansk og koreansk, og velger systemspråket ved første oppstart.",
     "wordLyricsTitle": "Sangtekst ord for ord",
+    "localMusicTitle": "Musikk på denne enheten",
+    "localMusicDesc": "På datamaskinen kan du spille musikkfiler fra dine egne mapper: alene, uten Jellyfin-server, eller sammen med Jellyfin-biblioteket ditt. Legg til mapper i Innstillinger. Telefoner kommer snart.",
+    "motion240Title": "Mykere overalt",
+    "motion240Desc": "Markeringen i sidepanelet glir mellom sidene, den røde prikken beveger seg som en dråpe i Nothing-utseendet, og kontomenyen åpner seg fra avataren din.",
+    "fixes240Title": "Rettelser",
+    "fixes240Desc": "Nedlastede sanger viser coveret på låseskjermen og i varsler, sangteksten tar igjen med en gang når du åpner spilleren igjen, og rare bokstaver i punkttekst er borte.",
+    "mac240Title": "Nå på Mac",
+    "mac240Desc": "Triptych kjører på Mac med Apple silicon og Intel.",
     "wordLyricsDesc": "Slå det på under Innstillinger → Utseende: hvert ord fylles ut og vokser mens det synges. Det bruker mer batteri, så det er av som standard."
   },
   "wrapped": {
@@ -451,5 +459,20 @@
   "duration": {
     "hoursMinutes": "{h} t {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "eller",
+    "useOnDevice": "Bruk musikk på denne enheten",
+    "scanningStart": "Leter etter musikk…",
+    "scanning": "Skanner… {done} av {total}",
+    "noMusic": "Fant ingen musikkfiler i de valgte mappene.",
+    "accountName": "Denne enheten",
+    "settingsTitle": "Musikk på denne enheten",
+    "folders": "Musikkmapper",
+    "summary": "{songs} sanger · {albums} album",
+    "addFolder": "Legg til mappe",
+    "rescan": "Skann på nytt",
+    "removeFolder": "Fjern mappe",
+    "homeEmpty": "Ingen musikk ennå. Legg til en mappe med musikkfilene dine."
   }
 }

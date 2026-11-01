@@ -60,6 +60,19 @@ contextBridge.exposeInMainWorld('api', {
     delete: (itemId) => ipcRenderer.invoke('downloads:delete', itemId),
     getPath: (itemId) => ipcRenderer.invoke('downloads:getPath', itemId)
   },
+  local: {
+    pickFolders: () => ipcRenderer.invoke('local:pickFolders'),
+    getFolders: () => ipcRenderer.invoke('local:getFolders'),
+    setFolders: (folders) => ipcRenderer.invoke('local:setFolders', folders),
+    scan: () => ipcRenderer.invoke('local:scan'),
+    onScanProgress: (callback) => {
+      const listener = (_event, progress) => callback(progress);
+      ipcRenderer.on('local:scanProgress', listener);
+      return () => ipcRenderer.removeListener('local:scanProgress', listener);
+    },
+    getTracks: () => ipcRenderer.invoke('local:getTracks'),
+    getLyrics: (id) => ipcRenderer.invoke('local:getLyrics', id)
+  },
   grab: {
     pickFolder: () => ipcRenderer.invoke('grab:pickFolder'),
     start: (url, outputDir) => ipcRenderer.send('grab:start', { url, outputDir }),

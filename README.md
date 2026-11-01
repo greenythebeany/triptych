@@ -31,6 +31,7 @@ https://github.com/user-attachments/assets/4d5fa0a4-d05b-4bf4-8921-1810018c48fb
 ## Features
 
 - Full library browsing: Home, Search, All Songs, Liked Songs, Genres, Albums, Artists, and Playlists
+- Music on this device (desktop): pick one or more folders and Triptych plays the audio files in them (MP3, FLAC, M4A/AAC, Ogg, Opus, WAV) with their tags and cover art. Use it on its own without a Jellyfin server ("Use music on this device" on the sign-in screen), or next to your server, where the local songs show up in the same library. Likes, play counts and playlists for local songs stay on the device; `.lrc` files next to a song and lyrics embedded in its tags are used for lyrics. Folders and Rescan are in Settings → Music on this device
 - Gapless playback with optional crossfade (0-12 seconds) between tracks
 - ReplayGain-based volume normalization, using loudness data from your server
 - Synced lyrics for the currently playing track, with the current line easing into focus as it's sung. Your own Jellyfin server, lrclib.net, NetEase Cloud Music and Kugou are all asked at once and the best synced match is taken as soon as it arrives; plain lyrics (also from lyrics.ovh) only when nobody has synced ones. Titles are matched loosely ("feat.", "Remastered 2011", "- Live", brackets, accents and Chinese/Japanese/Korean titles) and checked against the song's length, and lyrics are cached per song and fetched ahead for the next song
@@ -98,6 +99,16 @@ npm run dist        # build a Windows installer
 ```
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
+
+## What's new in 2.4.0
+
+- Music on this device (Windows, Mac, Linux): play music files from folders on your computer, on their own without a Jellyfin server, or mixed into your Jellyfin library (Settings → Music on this device). Android and iPhone follow in 2.4.1
+- Smoother everywhere: the sidebar highlight slides between pages, the red dot travels like a drop in the Nothing look (sidebar and phone tab bar), and the account menu opens out of your avatar
+- Downloaded songs show their cover on the lock screen, in notifications and in the Windows media flyout, even when your server can't be reached
+- Lyrics catch up right away when you reopen the phone player or come back to the app
+- Lyrics with a Cyrillic lookalike hidden in a Latin word (e.g. "Prеsne") no longer show one letter in a different font in the Nothing look
+- New installs start in the Nothing look with its red accent
+- Everything from 2.3.1 and 2.3.2 too: lyrics from five sources at once with smarter matching, word-by-word lyrics, a smooth line highlight, Simplified and Traditional Chinese, Japanese and Korean, and Mac downloads
 
 ## What's new in 2.3.2
 

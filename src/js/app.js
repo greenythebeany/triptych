@@ -1,5 +1,6 @@
 import './migrate.js'; // must stay first: renames storage keys before other modules read them
 import { JellyfinClient, initClientVersion, getClientVersion } from './jellyfin.js';
+import { LocalLibraryClient, CombinedClient, isLocalLibrarySupported, isLocalItemId } from './localLibrary.js';
 import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
@@ -164,6 +165,18 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  // Everything since 2.3.0 (2.3.1 and 2.3.2 included): only the newest
+  // version's list is shown, and many people will come straight from 2.3.0.
+  '2.4.0': [
+    { icon: 'fi-br-headphones', key: 'localMusic' },
+    { icon: 'fi-br-quote-right', key: 'lyricsSources' },
+    { icon: 'fi-br-magic-wand', key: 'wordLyrics' },
+    { icon: 'fi-br-rocket-lunch', key: 'smoothLyrics' },
+    { icon: 'fi-br-language', key: 'cjkLanguages' },
+    { icon: 'fi-br-palette', key: 'motion240' },
+    { icon: 'fi-br-download', key: 'fixes240' },
+    { icon: 'fi-br-mobile', key: 'mac240' }
+  ],
   // Also repeats 2.3.1's highlights: only the newest version's list is
   // shown, and most people will come straight from 2.3.0.
   '2.3.2': [
@@ -503,6 +516,11 @@ function withOfflineArtFallback(imgEl, track) {
   };
 }
 
+// Nothing to download when the music is already on this device.
+function canDownload(track) {
+  return downloadsSupported() && !jellyfin?.isLocal && !isLocalItemId(track?.Id);
+}
+
 function el(tag, className, html) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -582,6 +600,11 @@ async function init() {
 // banner explains why things might look empty.
 async function tryRestoreSession() {
   const saved = await sessionStore.load();
+  if (saved?.mode === 'local' && isLocalLibrarySupported()) {
+    jellyfin = await new LocalLibraryClient().load();
+    await enterApp(t('local.accountName'));
+    return;
+  }
   if (!saved || !saved.serverUrl || !saved.accessToken || !saved.userId) {
     showLogin();
     return;
@@ -638,12 +661,17 @@ async function enterApp(username) {
   // were, same as any other view that degrades without a server.
   // Fetched alongside the settings sync rather than after it -- one less
   // sequential round trip before home can start loading.
+  // Music on this device alongside the server (desktop): one merged library.
+  if (isLocalLibrarySupported() && !jellyfin.isLocal && !jellyfin.local) {
+    jellyfin = new CombinedClient(jellyfin, await new LocalLibraryClient().load());
+  }
   const libsPromise = jellyfin.getMusicLibraries();
   libsPromise.catch(() => {});
   await initRemoteSync(jellyfin);
 
   loginScreen.hidden = true;
   appRoot.hidden = false;
+  document.body.classList.toggle('local-mode', !!jellyfin.isLocal);
 
   player = new Player(jellyfin, currentBitrateKbps);
   const savedSettings = getSettings();
@@ -698,7 +726,7 @@ async function enterApp(username) {
   navigateTo({ view: libs ? 'home' : 'downloads' });
   restoreResumeState();
   if (libs) listeningLoad = loadListeningFromServer().catch(() => {}).finally(maybeAutoOpenWrapped);
-  if (libs) startConnectionProbing();
+  if (libs && !jellyfin.isLocal) startConnectionProbing();
   if (libs && getSettings().lyricsSearchEnabled) setTimeout(startLyricsIndexing, 15000);
   hideBootSplash();
   // After the splash has faded, so it doesn't pop up mid-transition.
@@ -744,6 +772,100 @@ loginForm.addEventListener('submit', async (evt) => {
   }
 });
 
+// ---------- Music on this device ----------
+const loginLocal = document.getElementById('login-local');
+const btnUseLocal = document.getElementById('btn-use-local');
+const loginLocalStatus = document.getElementById('login-local-status');
+setHidden(loginLocal, !isLocalLibrarySupported());
+setHidden(document.getElementById('local-library-section'), !isLocalLibrarySupported());
+
+function scanProgressText({ done, total }) {
+  return t('local.scanning', { done, total });
+}
+
+btnUseLocal.addEventListener('click', async () => {
+  const client = new LocalLibraryClient();
+  const folders = await client.pickFolders();
+  if (!folders.length) return;
+  btnUseLocal.disabled = true;
+  btnLogin.disabled = true;
+  loginLocalStatus.classList.remove('is-error');
+  loginLocalStatus.textContent = t('local.scanningStart');
+  loginLocalStatus.hidden = false;
+  try {
+    await client.setFolders(folders);
+    await client.scan((progress) => { loginLocalStatus.textContent = scanProgressText(progress); });
+    if (!client.trackCount) {
+      loginLocalStatus.textContent = t('local.noMusic');
+      loginLocalStatus.classList.add('is-error');
+      return;
+    }
+    jellyfin = client;
+    await sessionStore.save({ mode: 'local' });
+    loginLocalStatus.hidden = true;
+    await enterApp(t('local.accountName'));
+  } catch (err) {
+    loginLocalStatus.textContent = err?.message || t('login.errorGeneric');
+    loginLocalStatus.classList.add('is-error');
+  } finally {
+    btnUseLocal.disabled = false;
+    btnLogin.disabled = false;
+  }
+});
+
+const localFolderList = document.getElementById('local-folder-list');
+const localLibraryStatus = document.getElementById('local-library-status');
+const btnLocalAddFolder = document.getElementById('btn-local-add-folder');
+const btnLocalRescan = document.getElementById('btn-local-rescan');
+
+async function refreshLocalLibrarySettings() {
+  if (!jellyfin?.getFolders) return;
+  const folders = await jellyfin.getFolders();
+  localFolderList.innerHTML = '';
+  folders.forEach((folder) => {
+    const li = el('li');
+    const label = el('span');
+    label.textContent = folder;
+    label.title = folder;
+    const remove = el('button', 'btn-icon-plain', '<i class="fi fi-br-cross-small"></i>');
+    remove.type = 'button';
+    remove.title = t('local.removeFolder');
+    remove.setAttribute('aria-label', t('local.removeFolder'));
+    remove.addEventListener('click', () => rescanLocalLibrary(folders.filter((f) => f !== folder)));
+    li.append(label, remove);
+    localFolderList.appendChild(li);
+  });
+  localLibraryStatus.textContent = t('local.summary', { songs: jellyfin.trackCount, albums: jellyfin.albumCount });
+}
+
+// folders: the new folder list, or omitted to rescan the current ones.
+async function rescanLocalLibrary(folders) {
+  if (!jellyfin?.getFolders) return;
+  btnLocalAddFolder.disabled = true;
+  btnLocalRescan.disabled = true;
+  localLibraryStatus.textContent = t('local.scanningStart');
+  try {
+    if (folders) await jellyfin.setFolders(folders);
+    await jellyfin.scan((progress) => { localLibraryStatus.textContent = scanProgressText(progress); });
+    allSongsCachePromise = null;
+    await refreshCurrentView();
+  } finally {
+    btnLocalAddFolder.disabled = false;
+    btnLocalRescan.disabled = false;
+    await refreshLocalLibrarySettings();
+  }
+}
+
+async function addLocalFolders() {
+  const picked = await jellyfin.pickFolders();
+  if (!picked.length) return;
+  const current = await jellyfin.getFolders();
+  await rescanLocalLibrary([...current, ...picked]);
+}
+
+btnLocalAddFolder.addEventListener('click', () => addLocalFolders());
+btnLocalRescan.addEventListener('click', () => rescanLocalLibrary());
+
 function translateLoginError(err) {
   if (err?.code === 'wrong_credentials') return t('login.errorWrongCredentials');
   if (err?.code === 'server_error') return t('login.errorServer', { status: err.status });
@@ -751,13 +873,85 @@ function translateLoginError(err) {
 }
 
 // ---------- Account menu ----------
+// Opens like a drop (as in MessageMe): the avatar shrinks into an accent
+// dot, the menu grows out of it in a circle and its rows slide in one after
+// another; closing sinks the menu back into the dot and the avatar springs
+// back out of it.
+const accountPmDot = btnAccount.querySelector('.pm-dot');
+const MENU_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
+let finishAccountMenuClose = null;
+
+function accountMenuOrigin() {
+  const a = accountAvatar.getBoundingClientRect();
+  const m = accountMenu.getBoundingClientRect();
+  return { x: a.left + a.width / 2 - m.left, y: a.top + a.height / 2 - m.top, r: a.width / 2, w: m.width, h: m.height, size: a.width };
+}
+
+function morphAccountAvatar(toDot, duration) {
+  const small = `scale(${Math.min(0.32, 10 / (accountAvatar.offsetWidth || 30))})`;
+  const opts = { duration, fill: 'forwards' };
+  if (toDot) {
+    accountAvatar.animate([{ transform: 'none', opacity: 1 }, { transform: small, opacity: 0 }], { ...opts, easing: MENU_EASE });
+    return accountPmDot.animate([{ transform: 'none', opacity: 0 }, { transform: small, opacity: 1 }], { ...opts, easing: MENU_EASE });
+  }
+  const grow = [
+    { transform: small, easing: 'cubic-bezier(0.3, 0, 0.2, 1)' },
+    { transform: 'scale(1.12)', offset: 0.55, easing: 'ease-in-out' },
+    { transform: 'scale(0.95)', offset: 0.78, easing: 'ease-in-out' },
+    { transform: 'none' }
+  ];
+  accountAvatar.animate(grow.map((k, i) => ({ ...k, opacity: i ? 1 : 0 })), opts);
+  return accountPmDot.animate(grow.map((k, i) => ({ ...k, opacity: i ? 0 : 1 })), opts);
+}
+
+function openAccountMenu() {
+  finishAccountMenuClose?.();
+  if (!accountMenu.hidden) return;
+  accountMenu.hidden = false;
+  accountMenu.getAnimations().forEach((an) => an.cancel());
+  const o = accountMenuOrigin();
+  const full = Math.hypot(Math.max(o.x, o.w - o.x), Math.max(o.y, o.h - o.y)) + 4;
+  const circle = (r) => `circle(${r}px at ${o.x}px ${o.y}px)`;
+  morphAccountAvatar(true, 320);
+  accountMenu.animate([{ clipPath: circle(o.r) }, { clipPath: circle(full) }], { duration: 460, easing: MENU_EASE });
+  [...accountMenu.children].forEach((row, i) =>
+    row.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 300, delay: 120 + i * 40, easing: MENU_EASE, fill: 'backwards' }));
+}
+
+function closeAccountMenu() {
+  if (accountMenu.hidden || finishAccountMenuClose) return;
+  const o = accountMenuOrigin();
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    accountMenu.hidden = true;
+    accountMenu.getAnimations().forEach((an) => an.cancel());
+    accountMenu.style.transformOrigin = '';
+    accountAvatar.getAnimations().forEach((an) => an.cancel());
+    accountPmDot.getAnimations().forEach((an) => an.cancel());
+    finishAccountMenuClose = null;
+  };
+  finishAccountMenuClose = finish;
+  // Also on a timer: a window that isn't drawing frames never finishes the
+  // animations.
+  setTimeout(finish, 560);
+  accountMenu.style.transformOrigin = `${o.x}px ${o.y}px`;
+  accountMenu.animate([{ transform: 'none', opacity: 1 }, { transform: 'scale(0.6)', opacity: 0 }],
+    { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' })
+    .finished.then(() => { accountMenu.hidden = true; }, () => {});
+  morphAccountAvatar(false, 460).finished.then(finish, finish);
+}
+
 btnAccount.addEventListener('click', (evt) => {
   evt.stopPropagation();
-  accountMenu.hidden = !accountMenu.hidden;
+  if (accountMenu.hidden || finishAccountMenuClose) openAccountMenu();
+  else closeAccountMenu();
 });
 document.addEventListener('click', (evt) => {
-  if (!accountMenu.hidden && !accountMenu.contains(evt.target) && evt.target !== btnAccount) {
-    accountMenu.hidden = true;
+  if (!accountMenu.hidden && !accountMenu.contains(evt.target) && !btnAccount.contains(evt.target)) {
+    closeAccountMenu();
   }
 });
 
@@ -771,7 +965,7 @@ document.addEventListener('keydown', (evt) => {
   if (!legalOverlay.hidden) { closeLegal(); return; }
   if (!settingsOverlay.hidden) { closeSettings(); return; }
   if (!createPlaylistOverlay.hidden) { closeCreatePlaylist(); return; }
-  if (!accountMenu.hidden) { accountMenu.hidden = true; btnAccount.focus(); return; }
+  if (!accountMenu.hidden) { closeAccountMenu(); btnAccount.focus(); return; }
   if (!sleepTimerMenu.hidden) { sleepTimerMenu.hidden = true; return; }
   if (!connectMenu.hidden) { connectMenu.hidden = true; }
 });
@@ -807,7 +1001,7 @@ menuLogout.addEventListener('click', async () => {
   location.reload();
 });
 menuSettings.addEventListener('click', () => {
-  accountMenu.hidden = true;
+  closeAccountMenu();
   openSettings();
 });
 
@@ -850,6 +1044,7 @@ function wireSettingsUI() {
       updateSettings({ uiStyle: btn.dataset.value });
       refreshSettingsUI();
       updateBgArt(); // Apple style always shows the blurred art behind the player
+      requestAnimationFrame(() => moveNavGliders({ instant: true }));
     });
   });
 
@@ -1622,9 +1817,9 @@ function bitrateForThroughput(mbit) {
 }
 
 async function probeConnection() {
-  if (probeRunning || !jellyfin || getSettings().audioQuality !== 'auto' || navigator.onLine === false) return;
-  const track = player?.currentTrack || allSongsCache?.[0];
-  if (!track?.Id || isDownloaded(track.Id)) return;
+  if (probeRunning || !jellyfin || jellyfin.isLocal || getSettings().audioQuality !== 'auto' || navigator.onLine === false) return;
+  const track = player?.currentTrack || allSongsCache?.find((tr) => !isLocalItemId(tr.Id));
+  if (!track?.Id || isDownloaded(track.Id) || isLocalItemId(track.Id)) return;
   probeRunning = true;
   try {
     const res = await fetch(jellyfin.streamUrl(track, 0), { headers: { Range: 'bytes=0-786431' }, cache: 'no-store' });
@@ -1979,7 +2174,7 @@ function refreshSettingsUI() {
     btn.classList.toggle('active', btn.dataset.value === s.themeMode);
   });
   uiStyleToggle.querySelectorAll('button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'spotify'));
+    btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
   });
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
@@ -1990,6 +2185,7 @@ function refreshSettingsUI() {
 let settingsTriggerEl = null;
 function openSettings() {
   refreshSettingsUI();
+  refreshLocalLibrarySettings().catch(() => {});
   settingsTriggerEl = document.activeElement;
   settingsOverlay.hidden = false;
   btnCloseSettings.focus();
@@ -2088,7 +2284,7 @@ function wireBackButton() {
     if (!whatsNewOverlay.hidden) { closeWhatsNew(); return; }
     if (!settingsOverlay.hidden) { closeSettings(); return; }
     if (!createPlaylistOverlay.hidden) { closeCreatePlaylist(); return; }
-    if (!accountMenu.hidden) { accountMenu.hidden = true; return; }
+    if (!accountMenu.hidden) { closeAccountMenu(); return; }
     if (activeAddMenu) { closeAddToPlaylistMenu(); return; }
     if (queueSheetOpen || lyricsSheetOpen) { closeQueueSheet(); return; }
     if (!lyricsPanel.hidden) { closeNowPlaying(); return; }
@@ -2150,12 +2346,76 @@ function loadPinnedAlbumsSidebar() {
   });
 }
 
+// ---------- Nav glider + sticky dot ----------
+// The highlight behind the active sidebar item slides to the new item, and
+// (Nothing look) the accent dot moves like a drop of liquid -- in the
+// sidebar and in the phone's tab bar. Ported from MessageMe.
+const NAV_DOT = 6;
+function moveNavGliders({ instant = false } = {}) {
+  for (const nav of document.querySelectorAll('.sidebar-nav, .bottom-nav')) {
+    const glider = nav.querySelector('.nav-glider');
+    const dot = nav.querySelector('.nav-dot');
+    const active = nav.querySelector('[data-view].active');
+    if (!active || !active.offsetWidth) {
+      for (const node of [glider, dot]) if (node) node.style.opacity = '0';
+      continue;
+    }
+    const tab = nav.classList.contains('bottom-nav');
+    if (glider) {
+      glider.classList.toggle('instant', instant || !glider.dataset.placed);
+      glider.style.transform = `translate3d(${active.offsetLeft}px, ${active.offsetTop}px, 0)`;
+      glider.style.width = `${active.offsetWidth}px`;
+      glider.style.height = `${active.offsetHeight}px`;
+      glider.style.opacity = '1';
+      glider.dataset.placed = '1';
+    }
+    if (dot && getComputedStyle(dot).display !== 'none') {
+      const to = tab
+        ? { x: active.offsetLeft + active.offsetWidth / 2, y: active.offsetTop + active.offsetHeight - NAV_DOT / 2 }
+        : { x: active.offsetLeft + active.offsetWidth - 15, y: active.offsetTop + active.offsetHeight / 2 };
+      stickyNavDot(dot, to, { axis: tab ? 'x' : 'y', instant });
+    }
+  }
+}
+
+// It stretches toward the new item (leading edge first), then the trailing
+// edge lets go and catches up.
+function stickyNavDot(dot, to, { axis, instant }) {
+  const from = dot.dataset.x ? { x: Number(dot.dataset.x), y: Number(dot.dataset.y) } : null;
+  dot.dataset.x = String(to.x);
+  dot.dataset.y = String(to.y);
+  dot.style.opacity = '1';
+  const at = (p) => `translate3d(${p.x - NAV_DOT / 2}px, ${p.y - NAV_DOT / 2}px, 0)`;
+  dot.style.transform = at(to);
+  dot.style.width = dot.style.height = `${NAV_DOT}px`;
+  if (!from || instant) return;
+  const d = axis === 'x' ? to.x - from.x : to.y - from.y;
+  if (Math.abs(d) < 1) return;
+  const size = axis === 'x' ? 'width' : 'height';
+  const lead = d > 0 ? from : to;
+  dot.getAnimations().forEach((an) => an.cancel());
+  dot.animate([
+    { transform: at(from), [size]: `${NAV_DOT}px`, offset: 0 },
+    { transform: at(lead), [size]: `${Math.abs(d) + NAV_DOT}px`, offset: 0.45 },
+    { transform: at(to), [size]: `${NAV_DOT}px`, offset: 1 }
+  ], { duration: 460, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+}
+
+// Re-place them whenever the bars change size (window resize, the app
+// appearing, switching look) -- without animating.
+if (window.ResizeObserver) {
+  const navObserver = new ResizeObserver(() => moveNavGliders({ instant: true }));
+  document.querySelectorAll('.sidebar-nav, .bottom-nav').forEach((nav) => navObserver.observe(nav));
+}
+window.addEventListener('resize', () => moveNavGliders({ instant: true }));
+
 // ---------- View router with back/forward ----------
 function navigateTo(state, pushHistory = true) {
   if (pushHistory && viewHistory.length) viewFuture = [];
   if (pushHistory) viewHistory.push(state);
   renderView(state);
   document.querySelectorAll('.nav-item, .bottom-nav-item').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
+  moveNavGliders();
   globalSearchWrap.hidden = state.view !== 'search';
   if (state.view === 'search') globalSearchInput.focus();
 }
@@ -2551,6 +2811,17 @@ async function renderHome() {
 
   viewRoot.innerHTML = '';
   viewRoot.appendChild(el('div', 'view-title', t('home.greeting')));
+  if (jellyfin.isLocal && !albums.length) {
+    const empty = el('div', 'empty-state', escapeHtml(t('local.homeEmpty')));
+    const actions = el('div', 'local-empty-actions');
+    const add = el('button', 'btn-secondary', escapeHtml(t('local.addFolder')));
+    add.type = 'button';
+    add.addEventListener('click', () => addLocalFolders());
+    actions.appendChild(add);
+    empty.appendChild(actions);
+    viewRoot.appendChild(empty);
+    return;
+  }
   // Around New Year, Wrapped gets the top spot on Home too.
   const wrappedBanner = buildWrappedBanner();
   if (wrappedBanner && recentSource?.length) viewRoot.appendChild(wrappedBanner);
@@ -3468,10 +3739,11 @@ function buildDetailHeader({ kind, title, sub, art, logo, backdrop, round, onPla
     });
     actions.appendChild(playBtn);
 
-    if (downloadTracks && downloadTracks.length && downloadsSupported()) {
+    const serverTracks = (downloadTracks || []).filter((tr) => canDownload(tr));
+    if (serverTracks.length) {
       const dlBtn = el('button', 'detail-download-btn');
       dlBtn.type = 'button';
-      wireAlbumDownloadButton(dlBtn, downloadTracks);
+      wireAlbumDownloadButton(dlBtn, serverTracks);
       actions.appendChild(dlBtn);
     }
 
@@ -3649,7 +3921,7 @@ function buildTrackTable(tracks, queueRef, opts = {}) {
     });
     addCellInner.appendChild(addBtn);
 
-    if (downloadsSupported()) {
+    if (canDownload(track)) {
       const downloadBtn = el('button', 'track-add-btn track-download-btn');
       downloadBtn.type = 'button';
       wireDownloadButton(downloadBtn, track, row);
@@ -3998,6 +4270,9 @@ function wirePlayer() {
   setInterval(() => { if (!player.audio.paused) saveResumeState(); }, 10000);
   window.addEventListener('pagehide', saveResumeState);
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveResumeState(); });
+  // Back from the background (phone unlocked, app switched back to): the
+  // lyrics didn't move while frames weren't being drawn.
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncLyricsToPlayback(); });
 
   player.on('trackchange', () => {
     const track = player.currentTrack;
@@ -4302,7 +4577,7 @@ function buildTrackContextMenuItems(track, queueCtx = {}) {
     icon: 'fi-br-add',
     onClick: (evt) => openAddToPlaylistMenu(track, queueCtx.anchorEl || document.body)
   });
-  if (downloadsSupported()) {
+  if (canDownload(track)) {
     const downloaded = isDownloaded(track.Id);
     items.push({
       label: downloaded ? t('track.removeDownload') : t('track.download'),
@@ -4467,6 +4742,25 @@ function openNowPlaying() {
   // Its fill depends on the slider's width, which is 0 while the player
   // is closed -- recompute now that it's laid out.
   npVolumeBar.style.setProperty('--pct', rangeFillPercent(Number(npVolumeBar.value), npVolumeBar, 14));
+  // While it was closed the lyrics stood still (hidden panel = no updates,
+  // and the word-by-word loop stops itself) -- catch them up right away.
+  requestAnimationFrame(syncLyricsToPlayback);
+}
+
+// Puts the highlight, scroll position and word fill back on the current
+// playback position and restarts the word-by-word loop: after the
+// full-screen player reopens, or the app comes back from the background.
+// Without it they lagged until the next line, or until play/pause.
+function syncLyricsToPlayback() {
+  if (lyricsPanel.hidden || !currentLyrics?.synced) return;
+  const now = player.audio.currentTime || 0;
+  lyricLineEls[activeLyricIdx]?.classList.remove('active');
+  activeLyricIdx = -1;
+  updateActiveLyricLine(now);
+  const active = lyricLineEls[activeLyricIdx];
+  if (active) centerLyricLine(active, false);
+  fillLyricWords(now);
+  if (!player.audio.paused) startWordLoop();
 }
 
 // Slides the phone's full-screen player down before hiding it (desktop's
@@ -5064,7 +5358,7 @@ async function withArtistImages(data) {
   ta.albumArt = tr ? artUrl(tr, 'album', 220) : placeholderArt('artist');
   const ref = tr?.ArtistItems?.find((a) => formatDisplayName(a.Name) === ta.name) || tr?.ArtistItems?.[0];
   if (!ref?.Id) return data;
-  ta.photo = `${jellyfin.serverUrl}/Items/${ref.Id}/Images/Primary?maxWidth=600&quality=90`;
+  ta.photo = jellyfin.artistPhotoUrl(ref.Id, 600);
   const item = await jellyfin.getItem(ref.Id).catch(() => null);
   if (item) {
     ta.backdrop = jellyfin.backdropUrl(item, 1600);

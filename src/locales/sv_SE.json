@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Kinesiska, japanska och koreanska",
     "cjkLanguagesDesc": "Triptych talar nu förenklad och traditionell kinesiska, japanska och koreanska, och väljer systemspråket vid första start.",
     "wordLyricsTitle": "Låttext ord för ord",
+    "localMusicTitle": "Musik på den här enheten",
+    "localMusicDesc": "Spela musikfiler från dina egna mappar på datorn: fristående, utan Jellyfin-server, eller tillsammans med ditt Jellyfin-bibliotek. Lägg till mappar i Inställningar. Telefoner kommer snart.",
+    "motion240Title": "Mjukare överallt",
+    "motion240Desc": "Markeringen i sidofältet glider mellan sidorna, den röda pricken färdas som en droppe i Nothing-utseendet och kontomenyn öppnas ur din avatar.",
+    "fixes240Title": "Rättningar",
+    "fixes240Desc": "Nedladdade låtar visar sitt omslag på låsskärmen och i aviseringar, låttexten hinner ikapp direkt när du öppnar spelaren igen, och konstiga bokstäver i punkttexten är borta.",
+    "mac240Title": "Nu på Mac",
+    "mac240Desc": "Triptych fungerar på Mac med Apple silicon och Intel.",
     "wordLyricsDesc": "Slå på under Inställningar → Utseende: varje ord fylls i och växer när det sjungs. Det drar mer batteri, så det är avstängt som standard."
   },
   "wrapped": {
@@ -451,5 +459,20 @@
   "duration": {
     "hoursMinutes": "{h} tim {m} min",
     "minutes": "{m} min"
+  },
+  "local": {
+    "or": "eller",
+    "useOnDevice": "Använd musik på den här enheten",
+    "scanningStart": "Letar efter musik…",
+    "scanning": "Skannar… {done} av {total}",
+    "noMusic": "Inga musikfiler hittades i de valda mapparna.",
+    "accountName": "Den här enheten",
+    "settingsTitle": "Musik på den här enheten",
+    "folders": "Musikmappar",
+    "summary": "{songs} låtar · {albums} album",
+    "addFolder": "Lägg till mapp",
+    "rescan": "Skanna igen",
+    "removeFolder": "Ta bort mapp",
+    "homeEmpty": "Ingen musik än. Lägg till en mapp med dina musikfiler."
   }
 }
