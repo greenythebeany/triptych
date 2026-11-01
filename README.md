@@ -100,6 +100,16 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.0
+
+- Music on this device: play music files from folders on your device, on their own without a Jellyfin server, or mixed into your Jellyfin library (Settings → Music on this device)
+- Smoother everywhere: the sidebar highlight slides between pages, the red dot travels like a drop in the Nothing look (sidebar and phone tab bar), and the account menu opens out of your avatar
+- Downloaded songs show their cover on the lock screen, in notifications and in the Windows media flyout, even when your server can't be reached
+- Lyrics catch up right away when you reopen the phone player or come back to the app
+- Lyrics with a Cyrillic lookalike hidden in a Latin word (e.g. "Prеsne") no longer show one letter in a different font in the Nothing look
+- New installs start in the Nothing look with its red accent
+- Everything from 2.3.1 and 2.3.2 too: lyrics from five sources at once with smarter matching, word-by-word lyrics, a smooth line highlight, Simplified and Traditional Chinese, Japanese and Korean, and Mac downloads
+
 ## What's new in 2.3.2
 
 - Word-by-word lyrics (Settings → Appearance, off by default): each word fills in and grows as it's sung. Real word timing comes from Kugou and lrclib where a song has it, with an estimate from the line timing otherwise. It redraws every frame, so it uses more battery

@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Kinesiska, japanska och koreanska",
     "cjkLanguagesDesc": "Triptych talar nu förenklad och traditionell kinesiska, japanska och koreanska, och väljer systemspråket vid första start.",
     "wordLyricsTitle": "Låttext ord för ord",
+    "localMusicTitle": "Musik på den här enheten",
+    "localMusicDesc": "Spela musikfiler från enheten: fristående, utan Jellyfin-server, eller tillsammans med ditt Jellyfin-bibliotek. Lägg till mappar i Inställningar.",
+    "motion240Title": "Mjukare överallt",
+    "motion240Desc": "Markeringen i sidofältet glider mellan sidorna, den röda pricken färdas som en droppe i Nothing-utseendet och kontomenyn öppnas ur din avatar.",
+    "fixes240Title": "Rättningar",
+    "fixes240Desc": "Nedladdade låtar visar sitt omslag på låsskärmen och i aviseringar, låttexten hinner ikapp direkt när du öppnar spelaren igen, och konstiga bokstäver i punkttexten är borta.",
+    "mac240Title": "Nu på Mac",
+    "mac240Desc": "Triptych fungerar på Mac med Apple silicon och Intel.",
     "wordLyricsDesc": "Slå på under Inställningar → Utseende: varje ord fylls i och växer när det sjungs. Det drar mer batteri, så det är avstängt som standard."
   },
   "wrapped": {

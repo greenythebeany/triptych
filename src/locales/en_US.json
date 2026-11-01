@@ -422,6 +422,14 @@
     "cjkLanguagesTitle": "Chinese, Japanese and Korean",
     "cjkLanguagesDesc": "Triptych now speaks Simplified and Traditional Chinese, Japanese and Korean, and picks your system language on first start.",
     "wordLyricsTitle": "Word-by-word lyrics",
+    "localMusicTitle": "Music on this device",
+    "localMusicDesc": "Play music files from your device: on their own, without a Jellyfin server, or mixed into your Jellyfin library. Add folders in Settings.",
+    "motion240Title": "Smoother everywhere",
+    "motion240Desc": "The sidebar highlight slides between pages, the red dot travels like a drop in the Nothing look, and the account menu opens out of your avatar.",
+    "fixes240Title": "Fixes",
+    "fixes240Desc": "Downloaded songs show their cover on the lock screen and in notifications, lyrics catch up right away when you reopen the player, and odd letters in dot-matrix lyrics are gone.",
+    "mac240Title": "Now on Mac",
+    "mac240Desc": "Triptych runs on Macs with Apple silicon and Intel.",
     "wordLyricsDesc": "Turn it on in Settings → Appearance: each word fills in and grows as it's sung. It uses more battery, so it's off by default."
   },
   "wrapped": {

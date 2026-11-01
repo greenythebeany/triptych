@@ -165,6 +165,18 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  // Everything since 2.3.0 (2.3.1 and 2.3.2 included): only the newest
+  // version's list is shown, and many people will come straight from 2.3.0.
+  '2.4.0': [
+    { icon: 'fi-br-headphones', key: 'localMusic' },
+    { icon: 'fi-br-quote-right', key: 'lyricsSources' },
+    { icon: 'fi-br-magic-wand', key: 'wordLyrics' },
+    { icon: 'fi-br-rocket-lunch', key: 'smoothLyrics' },
+    { icon: 'fi-br-language', key: 'cjkLanguages' },
+    { icon: 'fi-br-palette', key: 'motion240' },
+    { icon: 'fi-br-download', key: 'fixes240' },
+    { icon: 'fi-br-mobile', key: 'mac240' }
+  ],
   // Also repeats 2.3.1's highlights: only the newest version's list is
   // shown, and most people will come straight from 2.3.0.
   '2.3.2': [

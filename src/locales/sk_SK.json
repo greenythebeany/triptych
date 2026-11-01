@@ -422,6 +422,14 @@
     "cjkLanguagesTitle": "Čínština, japončina a kórejčina",
     "cjkLanguagesDesc": "Triptych teraz vie zjednodušenú aj tradičnú čínštinu, japončinu a kórejčinu a pri prvom spustení zvolí jazyk systému.",
     "wordLyricsTitle": "Text slovo po slove",
+    "localMusicTitle": "Hudba v tomto zariadení",
+    "localMusicDesc": "Prehrávaj hudobné súbory zo zariadenia: samostatne, bez servera Jellyfin, alebo spolu s knižnicou Jellyfin. Priečinky pridáš v Nastaveniach.",
+    "motion240Title": "Všade plynulejšie",
+    "motion240Desc": "Zvýraznenie v bočnom paneli kĺže medzi stránkami, červená bodka vo vzhľade Nothing putuje ako kvapka a menu účtu sa otvára z tvojho avatara.",
+    "fixes240Title": "Opravy",
+    "fixes240Desc": "Stiahnuté skladby ukazujú obal na zamknutej obrazovke aj v upozorneniach, texty sa po opätovnom otvorení prehrávača hneď dorovnajú a zvláštne písmená v bodkovaných textoch zmizli.",
+    "mac240Title": "Teraz aj na Macu",
+    "mac240Desc": "Triptych beží na Macoch s Apple silicon aj Intel.",
     "wordLyricsDesc": "Zapni v Nastavenia → Vzhľad: každé slovo sa vyplní a zväčší, keď sa spieva. Spotrebuje viac batérie, preto je predvolene vypnuté."
   },
   "wrapped": {

@@ -422,6 +422,14 @@
     "cjkLanguagesTitle": "中文、日语和韩语",
     "cjkLanguagesDesc": "Triptych 现已支持简体中文、繁體中文、日语和韩语，首次启动时会自动使用系统语言。",
     "wordLyricsTitle": "逐字歌词",
+    "localMusicTitle": "本机音乐",
+    "localMusicDesc": "播放设备上的音乐文件：可以不用 Jellyfin 服务器单独使用，也可以与 Jellyfin 音乐库混合。在设置中添加文件夹。",
+    "motion240Title": "处处更流畅",
+    "motion240Desc": "侧边栏的高亮会在页面间滑动，Nothing 风格中的红点像水滴一样移动，账户菜单从头像中展开。",
+    "fixes240Title": "修复",
+    "fixes240Desc": "已下载的歌曲在锁屏和通知中显示封面，重新打开播放器时歌词会立即跟上，点阵歌词中的怪异字母也消失了。",
+    "mac240Title": "现已支持 Mac",
+    "mac240Desc": "Triptych 可在搭载 Apple 芯片和 Intel 的 Mac 上运行。",
     "wordLyricsDesc": "在“设置 → 外观”中开启：每个字会随着演唱填充并放大。它更耗电，所以默认关闭。"
   },
   "wrapped": {

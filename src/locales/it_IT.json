@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Cinese, giapponese e coreano",
     "cjkLanguagesDesc": "Triptych ora parla cinese semplificato e tradizionale, giapponese e coreano, e al primo avvio usa la lingua di sistema.",
     "wordLyricsTitle": "Testo parola per parola",
+    "localMusicTitle": "Musica su questo dispositivo",
+    "localMusicDesc": "Riproduci i file musicali del dispositivo: da soli, senza server Jellyfin, o insieme alla tua libreria Jellyfin. Aggiungi le cartelle nelle Impostazioni.",
+    "motion240Title": "Più fluido ovunque",
+    "motion240Desc": "L'evidenziazione della barra laterale scorre tra le pagine, il punto rosso viaggia come una goccia nello stile Nothing e il menu dell'account si apre dal tuo avatar.",
+    "fixes240Title": "Correzioni",
+    "fixes240Desc": "I brani scaricati mostrano la copertina nella schermata di blocco e nelle notifiche, il testo si riallinea subito quando riapri il lettore e le lettere strane nel testo a punti sono sparite.",
+    "mac240Title": "Ora su Mac",
+    "mac240Desc": "Triptych funziona sui Mac con Apple silicon e Intel.",
     "wordLyricsDesc": "Attivalo in Impostazioni → Aspetto: ogni parola si riempie e si ingrandisce mentre viene cantata. Consuma più batteria, quindi è disattivato di default."
   },
   "wrapped": {

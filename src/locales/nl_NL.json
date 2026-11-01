@@ -424,6 +424,14 @@
     "cjkLanguagesTitle": "Chinees, Japans en Koreaans",
     "cjkLanguagesDesc": "Triptych spreekt nu vereenvoudigd en traditioneel Chinees, Japans en Koreaans, en kiest bij de eerste start je systeemtaal.",
     "wordLyricsTitle": "Songtekst woord voor woord",
+    "localMusicTitle": "Muziek op dit apparaat",
+    "localMusicDesc": "Speel muziekbestanden van je apparaat af: los, zonder Jellyfin-server, of samen met je Jellyfin-bibliotheek. Voeg mappen toe in Instellingen.",
+    "motion240Title": "Overal soepeler",
+    "motion240Desc": "De markering in de zijbalk glijdt tussen pagina's, de rode stip reist als een druppel in de Nothing-stijl en het accountmenu opent vanuit je avatar.",
+    "fixes240Title": "Verbeteringen",
+    "fixes240Desc": "Gedownloade nummers tonen hun hoes op het vergrendelscherm en in meldingen, de songtekst loopt meteen weer gelijk als je de speler heropent, en vreemde letters in de stippentekst zijn weg.",
+    "mac240Title": "Nu op Mac",
+    "mac240Desc": "Triptych draait op Macs met Apple silicon en Intel.",
     "wordLyricsDesc": "Zet het aan via Instellingen → Weergave: elk woord vult zich en groeit terwijl het gezongen wordt. Kost meer batterij, dus het staat standaard uit."
   },
   "wrapped": {
