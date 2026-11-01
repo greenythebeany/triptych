@@ -180,6 +180,8 @@
     "accentColorDesc": "Vyberte barevné schéma aplikace",
     "blurBg": "Rozmazané pozadí z obalu",
     "blurBgDesc": "Vyplní pozadí rozmazanou verzí obalu aktuální skladby",
+    "wordLyrics": "Text slovo po slově",
+    "wordLyricsDesc": "Každé slovo se vyplní a zvětší, když se zpívá. Spotřebuje víc baterie, protože se text překresluje v každém snímku.",
     "dynamicAccentColor": "Dynamická barva zvýraznění",
     "dynamicAccentColorDesc": "Obarví barvu zvýraznění aplikace podle obalu aktuální skladby",
     "language": "Jazyk",
@@ -420,7 +422,9 @@
     "smoothLyricsTitle": "Plynulé synchronizované texty",
     "smoothLyricsDesc": "Aktuální řádek se plynule rozsvítí a text k němu sklouzne, místo aby skákal.",
     "cjkLanguagesTitle": "Čínština, japonština a korejština",
-    "cjkLanguagesDesc": "Triptych teď umí zjednodušenou i tradiční čínštinu, japonštinu a korejštinu a při prvním spuštění zvolí jazyk systému."
+    "cjkLanguagesDesc": "Triptych teď umí zjednodušenou i tradiční čínštinu, japonštinu a korejštinu a při prvním spuštění zvolí jazyk systému.",
+    "wordLyricsTitle": "Text slovo po slově",
+    "wordLyricsDesc": "Zapni v Nastavení → Vzhled: každé slovo se vyplní a zvětší, když se zpívá. Spotřebuje víc baterie, proto je ve výchozím stavu vypnuté."
   },
   "wrapped": {
     "bannerTitle": "Tvůj Wrapped {year}",

@@ -35,6 +35,7 @@ const DEFAULTS = {
   nothingDottedSliders: true, // Nothing style only: dot-matrix seek/volume bars, off = plain lines
   audioQuality: 'auto',
   artBackground: false,
+  wordSyncLyrics: false, // on = word-by-word lyrics that fill as they're sung (see lyrics.js / app.js renderLyrics)
   dynamicAccentColor: false,
   language: detectLocale(), // first run follows the system language; saved choices win
   customCss: '',

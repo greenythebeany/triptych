@@ -180,6 +180,8 @@
     "accentColorDesc": "Elige el esquema de color de la aplicación",
     "blurBg": "Fondo difuminado de la portada",
     "blurBgDesc": "Rellena el fondo con una versión difuminada de la portada actual",
+    "wordLyrics": "Letra palabra por palabra",
+    "wordLyricsDesc": "Cada palabra se rellena y crece mientras se canta. Gasta más batería, porque la letra se redibuja en cada fotograma.",
     "dynamicAccentColor": "Color de acento dinámico",
     "dynamicAccentColorDesc": "Tiñe el color de acento de la app según la portada de la canción actual",
     "language": "Idioma",
@@ -420,7 +422,9 @@
     "smoothLyricsTitle": "Letras sincronizadas fluidas",
     "smoothLyricsDesc": "La línea actual aparece suavemente y la letra se desliza hasta ella en lugar de saltar.",
     "cjkLanguagesTitle": "Chino, japonés y coreano",
-    "cjkLanguagesDesc": "Triptych ahora habla chino simplificado y tradicional, japonés y coreano, y usa el idioma del sistema al iniciarse por primera vez."
+    "cjkLanguagesDesc": "Triptych ahora habla chino simplificado y tradicional, japonés y coreano, y usa el idioma del sistema al iniciarse por primera vez.",
+    "wordLyricsTitle": "Letra palabra por palabra",
+    "wordLyricsDesc": "Actívala en Ajustes → Apariencia: cada palabra se rellena y crece mientras se canta. Gasta más batería, así que viene desactivada."
   },
   "wrapped": {
     "bannerTitle": "Tu Wrapped {year}",

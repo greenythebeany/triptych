@@ -12,6 +12,11 @@
 // Results are cached per track in memory and in IndexedDB, so a track's
 // lyrics are only ever looked up once (a "none" is re-checked after a few
 // days).
+//
+// Word-by-word lyrics (Settings -> Appearance, `query.wordSync`): synced
+// lines can also carry `words: [{ time, end, text }]`, from Kugou's KRC
+// format or lrclib's enhanced LRC (<mm:ss.xx> word tags). With the setting
+// on, word-timed lyrics win over line-timed ones, which win over plain.
 
 import { isDesktop, isMobile } from './platform.js';
 
@@ -30,6 +35,9 @@ const SOURCE_TIMEOUT_MS = 9000;
 // long for a better one from another source.
 const STRONG_MATCH = 0.85;
 const SYNCED_GRACE_MS = 500;
+// With word-by-word on, line-synced lyrics wait this long for word-timed
+// ones (a later word-timed result still replaces them).
+const WORD_GRACE_MS = 1500;
 // With plain lyrics in hand, stop waiting for synced ones after this long
 // (a later synced result still replaces them, see onLyricsUpgraded).
 const PLAIN_DEADLINE_MS = 3500;
@@ -46,6 +54,25 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // ---------- LRC parsing ----------
 
 const TIME_TAG = /\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g;
+const WORD_TAG = /<(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?>/g;
+
+const tagSeconds = (m, s, f) => parseInt(m, 10) * 60 + parseInt(s, 10) + (f ? parseInt(f.padEnd(3, '0'), 10) / 1000 : 0);
+
+// Enhanced LRC: "[00:12.00]<00:12.00>Never <00:12.40>gonna <00:12.90>give".
+// Each word runs until the next tag (a trailing tag closes the last word).
+function parseWordTags(body, offset) {
+  const marks = [...body.matchAll(WORD_TAG)];
+  if (marks.length < 2) return null;
+  const words = [];
+  marks.forEach((m, i) => {
+    const start = m.index + m[0].length;
+    const text = body.slice(start, marks[i + 1] ? marks[i + 1].index : undefined);
+    const time = Math.max(0, tagSeconds(m[1], m[2], m[3]) - offset);
+    if (words.length && words[words.length - 1].end == null) words[words.length - 1].end = time;
+    if (text.trim()) words.push({ time, end: null, text });
+  });
+  return words.length ? words : null;
+}
 
 export function parseLrc(lrc) {
   if (!lrc) return null;
@@ -55,11 +82,12 @@ export function parseLrc(lrc) {
   for (const line of lrc.split(/\r?\n/)) {
     const tags = [...line.matchAll(TIME_TAG)];
     if (!tags.length) continue;
-    const text = line.replace(TIME_TAG, '').replace(/<\d+:\d+(?:\.\d+)?>/g, '').trim();
+    const body = line.replace(TIME_TAG, '');
+    const text = body.replace(WORD_TAG, '').trim();
+    const words = tags.length === 1 ? parseWordTags(body, offset) : null;
     for (const tag of tags) {
-      const fraction = tag[3] ? parseInt(tag[3].padEnd(3, '0'), 10) / 1000 : 0;
-      const time = Math.max(0, parseInt(tag[1], 10) * 60 + parseInt(tag[2], 10) + fraction - offset);
-      result.push({ time, text });
+      const time = Math.max(0, tagSeconds(tag[1], tag[2], tag[3]) - offset);
+      result.push(words ? { time, text, words } : { time, text });
     }
   }
   result.sort((a, b) => a.time - b.time);
@@ -382,6 +410,34 @@ async function lookupNetease(q) {
   return { synced: synced?.length >= 2 ? synced : null, plain: plain || null, instrumental: false, score: best.score };
 }
 
+// Kugou's KRC: base64 of "krc1" + zlib data XOR-ed with a fixed key, which
+// inflates to lines like "[12000,3400]<0,400,0>Never<400,500,0> gonna".
+const KRC_KEY = [64, 71, 97, 119, 94, 50, 116, 71, 81, 54, 49, 45, 206, 210, 110, 105];
+
+async function decodeKrc(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length - 4);
+  for (let i = 4; i < bin.length; i++) bytes[i - 4] = bin.charCodeAt(i) ^ KRC_KEY[(i - 4) % 16];
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+  return new Response(stream).text();
+}
+
+function parseKrc(krc) {
+  const lines = [];
+  for (const raw of krc.split(/\r?\n/)) {
+    const head = raw.match(/^\[(\d+),(\d+)\]/);
+    if (!head) continue;
+    const start = parseInt(head[1], 10);
+    const words = [...raw.slice(head[0].length).matchAll(/<(\d+),(\d+),\d+>([^<]*)/g)]
+      .map((m) => ({ time: (start + parseInt(m[1], 10)) / 1000, end: (start + parseInt(m[1], 10) + parseInt(m[2], 10)) / 1000, text: m[3] }))
+      .filter((w) => w.text);
+    const text = words.map((w) => w.text).join('').trim();
+    lines.push(words.some((w) => w.text.trim()) ? { time: start / 1000, text, words } : { time: start / 1000, text });
+  }
+  lines.sort((a, b) => a.time - b.time);
+  return lines.length >= 2 ? lines : null;
+}
+
 function decodeBase64Utf8(b64) {
   const bin = atob(b64);
   const bytes = Uint8Array.from(bin, (ch) => ch.charCodeAt(0));
@@ -403,6 +459,19 @@ async function lookupKugou(q) {
     if (best) break;
   }
   if (!best) return null;
+  if (q.wordSync) {
+    try {
+      const krc = await nativeGet(`${KUGOU_BASE}/download?${new URLSearchParams({ ver: 1, client: 'pc', id: best.id, accesskey: best.accesskey, fmt: 'krc', charset: 'utf8' })}`, REQUEST_TIMEOUT_MS);
+      const content = krc.status === 200 && parseJson(krc)?.content;
+      const parsed = content ? parseKrc(await decodeKrc(content)) : null;
+      const synced = parsed ? stripCredits(parsed, best) : null;
+      if (synced?.length >= 2) {
+        return { synced, plain: synced.map((l) => l.text).join('\n'), instrumental: false, score: best.score };
+      }
+    } catch (err) {
+      // No KRC for this song (or no DecompressionStream) -- plain LRC below.
+    }
+  }
   const dl = await nativeGet(`${KUGOU_BASE}/download?${new URLSearchParams({ ver: 1, client: 'pc', id: best.id, accesskey: best.accesskey, fmt: 'lrc', charset: 'utf8' })}`, REQUEST_TIMEOUT_MS);
   if (dl.status !== 200) throw new SourceError(`kugou responded ${dl.status}`);
   const content = parseJson(dl)?.content;
@@ -440,7 +509,14 @@ function withTimeout(promise, ms) {
   return Promise.race([promise, sleep(ms).then(() => { throw new SourceError('timeout'); })]);
 }
 
-const strip = ({ synced, plain, instrumental, source }) => ({ synced: synced || null, plain: plain || null, instrumental: !!instrumental, source });
+const hasWords = (r) => !!r?.synced?.some((l) => l.words?.length > 1);
+const strip = ({ synced, plain, instrumental, source }) => ({
+  synced: synced || null,
+  plain: plain || null,
+  instrumental: !!instrumental,
+  wordSynced: !!synced?.some((l) => l.words?.length > 1),
+  source
+});
 
 // Runs every source in parallel. Resolves { result, complete } with the
 // first strong synced match (or the best synced one after a short grace
@@ -448,7 +524,8 @@ const strip = ({ synced, plain, instrumental, source }) => ({ synced: synced || 
 // result null when no source had any -- `complete` false if some of them
 // couldn't be asked, so that "none" isn't cached. Rejects only when no
 // source could be reached at all. `onLate` gets a synced result that turns
-// up after plain lyrics were already returned.
+// up after plain lyrics were already returned, or word-timed lyrics that turn
+// up after line-timed ones (word-by-word on).
 function lookupLyrics(query, onLate) {
   const q = prepareQuery(query);
   const started = Date.now();
@@ -461,10 +538,15 @@ function lookupLyrics(query, onLate) {
     let settled = null; // what was resolved: 'synced' | 'plain' | 'other'
     let graceTimer = null;
     let plainTimer = null;
+    // 0 plain, 1 line-synced, 2 word-synced (only counts when asked for).
+    const tier = (r) => (r?.synced?.length ? (q.wordSync && hasWords(r) ? 2 : 1) : 0);
+    const topTier = q.wordSync ? 2 : 1;
+    let shownTier = -1;
 
     const done = (value, kind) => {
       if (settled) return;
       settled = kind;
+      shownTier = value ? tier(value) : -1;
       clearTimeout(graceTimer);
       clearTimeout(plainTimer);
       resolve({ result: value && strip(value), complete: true });
@@ -486,10 +568,13 @@ function lookupLyrics(query, onLate) {
         r.source = src.name;
         r.priority = priority;
         if (r.synced?.length) {
-          if (settled === 'plain') { if (!bestSynced) { bestSynced = r; onLate?.(strip(r)); } return; }
-          if (!bestSynced || r.score > bestSynced.score) bestSynced = r;
-          if (bestSynced.score >= STRONG_MATCH) done(bestSynced, 'synced');
-          else if (!graceTimer) graceTimer = setTimeout(() => done(bestSynced, 'synced'), SYNCED_GRACE_MS);
+          if (settled) {
+            if (settled !== 'other' && tier(r) > shownTier) { shownTier = tier(r); onLate?.(strip(r)); }
+            return;
+          }
+          if (!bestSynced || tier(r) > tier(bestSynced) || (tier(r) === tier(bestSynced) && r.score > bestSynced.score)) bestSynced = r;
+          if (tier(bestSynced) === topTier && bestSynced.score >= STRONG_MATCH) done(bestSynced, 'synced');
+          else if (!graceTimer) graceTimer = setTimeout(() => done(bestSynced, 'synced'), tier(bestSynced) === topTier ? SYNCED_GRACE_MS : WORD_GRACE_MS);
         } else if (r.plain) {
           plains.push(r);
           if (!plainTimer && !settled) {
@@ -562,9 +647,10 @@ async function writeStored(key, result) {
 }
 
 function cacheKey(query) {
-  if (query.trackId) return `id:${query.trackId}`;
+  const mode = query.wordSync ? ':w' : '';
+  if (query.trackId) return `id:${query.trackId}${mode}`;
   const { title, artist, album, durationSeconds } = query;
-  return [title, artist, album, Math.round(durationSeconds || 0)].map((v) => (v ?? '')).join('\u0001').toLowerCase();
+  return [title, artist, album, Math.round(durationSeconds || 0)].map((v) => (v ?? '')).join('\u0001').toLowerCase() + mode;
 }
 
 // Called with (trackId, result) when synced lyrics turn up for a track

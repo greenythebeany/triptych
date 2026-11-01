@@ -180,6 +180,8 @@
     "accentColorDesc": "Välj appens färgschema",
     "blurBg": "Suddig bakgrund från omslagsbild",
     "blurBgDesc": "Fyller bakgrunden med en suddig version av den aktuella låtens omslagsbild",
+    "wordLyrics": "Låttext ord för ord",
+    "wordLyricsDesc": "Varje ord fylls i och växer när det sjungs. Drar mer batteri, eftersom texten ritas om i varje bildruta.",
     "dynamicAccentColor": "Dynamisk accentfärg",
     "dynamicAccentColorDesc": "Färgar appens accentfärg efter omslaget för aktuell låt",
     "language": "Språk",
@@ -420,7 +422,9 @@
     "smoothLyricsTitle": "Mjuka synkade texter",
     "smoothLyricsDesc": "Den aktuella raden tonas in och texten glider dit i stället för att hoppa.",
     "cjkLanguagesTitle": "Kinesiska, japanska och koreanska",
-    "cjkLanguagesDesc": "Triptych talar nu förenklad och traditionell kinesiska, japanska och koreanska, och väljer systemspråket vid första start."
+    "cjkLanguagesDesc": "Triptych talar nu förenklad och traditionell kinesiska, japanska och koreanska, och väljer systemspråket vid första start.",
+    "wordLyricsTitle": "Låttext ord för ord",
+    "wordLyricsDesc": "Slå på under Inställningar → Utseende: varje ord fylls i och växer när det sjungs. Det drar mer batteri, så det är avstängt som standard."
   },
   "wrapped": {
     "bannerTitle": "Din Wrapped {year}",

@@ -180,6 +180,8 @@
     "accentColorDesc": "Valitse sovelluksen väriteema",
     "blurBg": "Sumea tausta kansikuvasta",
     "blurBgDesc": "Täyttää taustan nykyisen kappaleen kansikuvan sumealla versiolla",
+    "wordLyrics": "Sanoitukset sana sanalta",
+    "wordLyricsDesc": "Jokainen sana täyttyy ja kasvaa, kun se lauletaan. Kuluttaa enemmän akkua, koska sanoitukset piirretään joka ruudussa uudelleen.",
     "dynamicAccentColor": "Dynaaminen korostusväri",
     "dynamicAccentColorDesc": "Sävyttää sovelluksen korostusvärin nykyisen kappaleen kannen mukaan",
     "language": "Kieli",
@@ -420,7 +422,9 @@
     "smoothLyricsTitle": "Sulavat synkronoidut sanoitukset",
     "smoothLyricsDesc": "Nykyinen rivi häivytetään esiin ja sanoitukset liukuvat siihen hyppimisen sijaan.",
     "cjkLanguagesTitle": "Kiina, japani ja korea",
-    "cjkLanguagesDesc": "Triptych puhuu nyt yksinkertaistettua ja perinteistä kiinaa, japania ja koreaa ja valitsee järjestelmän kielen ensimmäisellä käynnistyskerralla."
+    "cjkLanguagesDesc": "Triptych puhuu nyt yksinkertaistettua ja perinteistä kiinaa, japania ja koreaa ja valitsee järjestelmän kielen ensimmäisellä käynnistyskerralla.",
+    "wordLyricsTitle": "Sanoitukset sana sanalta",
+    "wordLyricsDesc": "Ota käyttöön kohdassa Asetukset → Ulkoasu: jokainen sana täyttyy ja kasvaa, kun se lauletaan. Kuluttaa enemmän akkua, joten se on oletuksena pois päältä."
   },
   "wrapped": {
     "bannerTitle": "Sinun Wrapped {year}",

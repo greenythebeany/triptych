@@ -180,6 +180,8 @@
     "accentColorDesc": "Pick the app's color scheme",
     "blurBg": "Blurred cover art background",
     "blurBgDesc": "Fill the background with a blurred version of the current song's art",
+    "wordLyrics": "Word-by-word lyrics",
+    "wordLyricsDesc": "Each word fills in and grows as it's sung. Uses more battery, since the lyrics are redrawn every frame.",
     "dynamicAccentColor": "Dynamic accent color",
     "dynamicAccentColorDesc": "Tint the app's accent color to match the current song's cover art",
     "language": "Language",
@@ -418,7 +420,9 @@
     "smoothLyricsTitle": "Smooth synced lyrics",
     "smoothLyricsDesc": "The current line fades in and the lyrics glide to it instead of jumping.",
     "cjkLanguagesTitle": "Chinese, Japanese and Korean",
-    "cjkLanguagesDesc": "Triptych now speaks Simplified and Traditional Chinese, Japanese and Korean, and picks your system language on first start."
+    "cjkLanguagesDesc": "Triptych now speaks Simplified and Traditional Chinese, Japanese and Korean, and picks your system language on first start.",
+    "wordLyricsTitle": "Word-by-word lyrics",
+    "wordLyricsDesc": "Turn it on in Settings → Appearance: each word fills in and grows as it's sung. It uses more battery, so it's off by default."
   },
   "wrapped": {
     "bannerTitle": "Your {year} Wrapped",

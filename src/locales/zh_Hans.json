@@ -180,6 +180,8 @@
     "accentColorDesc": "选择应用的配色",
     "blurBg": "模糊封面背景",
     "blurBgDesc": "用当前歌曲封面的模糊版本填充背景",
+    "wordLyrics": "逐字歌词",
+    "wordLyricsDesc": "每个字会随着演唱填充并放大。由于歌词每一帧都会重新绘制，会更耗电。",
     "dynamicAccentColor": "动态强调色",
     "dynamicAccentColorDesc": "让应用的强调色跟随当前歌曲的封面变化",
     "language": "语言",
@@ -418,7 +420,9 @@
     "smoothLyricsTitle": "流畅的同步歌词",
     "smoothLyricsDesc": "当前行会淡入高亮，歌词平滑滚动过去，不再跳动。",
     "cjkLanguagesTitle": "中文、日语和韩语",
-    "cjkLanguagesDesc": "Triptych 现已支持简体中文、繁體中文、日语和韩语，首次启动时会自动使用系统语言。"
+    "cjkLanguagesDesc": "Triptych 现已支持简体中文、繁體中文、日语和韩语，首次启动时会自动使用系统语言。",
+    "wordLyricsTitle": "逐字歌词",
+    "wordLyricsDesc": "在“设置 → 外观”中开启：每个字会随着演唱填充并放大。它更耗电，所以默认关闭。"
   },
   "wrapped": {
     "bannerTitle": "你的 {year} 年度总结",
