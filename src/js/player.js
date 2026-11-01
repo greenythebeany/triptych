@@ -1,5 +1,6 @@
 import { isDesktop, isAndroid } from './platform.js';
 import { isDownloaded, getLocalUri, getLocalArtwork } from './downloads.js';
+import { isLocalMediaUrl } from './localLibrary.js';
 
 export const RepeatMode = {
   OFF: 'off',
@@ -437,9 +438,28 @@ export class Player {
       durationMs: track?.RunTimeTicks ? track.RunTimeTicks / 10000 : null
     });
 
+    // A cover from a song on this device (see localLibrary.js) is only
+    // reachable from inside the app: MediaMetadata rejects tlocal:// and the
+    // native plugin can't fetch the WebView's own origin. So it's fetched here
+    // and handed on as a data: URL (native) or blob: URL (MediaMetadata).
+    const local = artwork.find((a) => isLocalMediaUrl(a.src));
     const native = this._nativeMediaSession();
     if (native) {
-      native.setMetadata({ title: track?.Name || '', artist, album: track?.Album || '', artwork }).catch(() => {});
+      const meta = { title: track?.Name || '', artist, album: track?.Album || '' };
+      if (!local) {
+        native.setMetadata({ ...meta, artwork }).catch(() => {});
+        return;
+      }
+      native.setMetadata({ ...meta, artwork: [] }).catch(() => {});
+      fetch(local.src).then((res) => res.blob()).then((blob) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      })).then((dataUrl) => {
+        if (this.currentTrack !== track) return;
+        native.setMetadata({ ...meta, artwork: [{ src: dataUrl, sizes: '512x512', type: 'image/jpeg' }] }).catch(() => {});
+      }).catch(() => {});
       return;
     }
     if (!('mediaSession' in navigator)) return;
@@ -447,13 +467,10 @@ export class Player {
       navigator.mediaSession.metadata = null;
       return;
     }
-    const local = artwork.find((a) => a.src.startsWith('tlocal:'));
     if (!local) {
       navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '', artwork });
       return;
     }
-    // MediaMetadata only takes http(s)/data/blob images, so a cover from a
-    // file on this device (tlocal://, see localLibrary.js) goes in as a blob.
     navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '' });
     fetch(local.src).then((res) => res.blob()).then((blob) => {
       if (this.currentTrack !== track) return;

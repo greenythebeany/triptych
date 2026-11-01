@@ -471,6 +471,10 @@
     "addFolder": "添加文件夹",
     "rescan": "重新扫描",
     "removeFolder": "移除文件夹",
-    "homeEmpty": "还没有音乐。请添加包含音乐文件的文件夹。"
+    "homeEmpty": "还没有音乐。请添加包含音乐文件的文件夹。",
+    "allowAccess": "允许访问",
+    "turnOff": "关闭",
+    "phoneDesc": "与服务器一起播放此手机上保存的音乐。",
+    "permissionDenied": "Triptych 需要读取此手机上音乐的权限。你可以在系统设置的“应用 → Triptych → 权限”中允许。"
   }
 }

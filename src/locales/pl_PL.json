@@ -473,6 +473,10 @@
     "addFolder": "Dodaj folder",
     "rescan": "Skanuj ponownie",
     "removeFolder": "Usuń folder",
-    "homeEmpty": "Nie ma jeszcze muzyki. Dodaj folder z plikami muzycznymi."
+    "homeEmpty": "Nie ma jeszcze muzyki. Dodaj folder z plikami muzycznymi.",
+    "allowAccess": "Zezwól na dostęp",
+    "turnOff": "Wyłącz",
+    "phoneDesc": "Odtwarzaj muzykę zapisaną na tym telefonie razem z serwerem.",
+    "permissionDenied": "Triptych potrzebuje uprawnienia do odczytu muzyki na tym telefonie. Możesz je przyznać w ustawieniach systemu: Aplikacje → Triptych → Uprawnienia."
   }
 }

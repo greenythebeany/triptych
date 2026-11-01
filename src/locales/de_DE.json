@@ -473,6 +473,10 @@
     "addFolder": "Ordner hinzufügen",
     "rescan": "Neu durchsuchen",
     "removeFolder": "Ordner entfernen",
-    "homeEmpty": "Noch keine Musik. Füge einen Ordner mit deinen Musikdateien hinzu."
+    "homeEmpty": "Noch keine Musik. Füge einen Ordner mit deinen Musikdateien hinzu.",
+    "allowAccess": "Zugriff erlauben",
+    "turnOff": "Ausschalten",
+    "phoneDesc": "Spiele die auf diesem Handy gespeicherte Musik zusammen mit deinem Server ab.",
+    "permissionDenied": "Triptych braucht die Berechtigung, die Musik auf diesem Handy zu lesen. Du kannst sie in den Systemeinstellungen unter Apps → Triptych → Berechtigungen erteilen."
   }
 }

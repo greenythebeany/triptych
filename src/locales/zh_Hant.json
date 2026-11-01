@@ -471,6 +471,10 @@
     "addFolder": "新增資料夾",
     "rescan": "重新掃描",
     "removeFolder": "移除資料夾",
-    "homeEmpty": "還沒有音樂。請新增包含音樂檔案的資料夾。"
+    "homeEmpty": "還沒有音樂。請新增包含音樂檔案的資料夾。",
+    "allowAccess": "允許存取",
+    "turnOff": "關閉",
+    "phoneDesc": "與伺服器一起播放此手機上儲存的音樂。",
+    "permissionDenied": "Triptych 需要讀取此手機上音樂的權限。你可以在系統設定的「應用程式 → Triptych → 權限」中允許。"
   }
 }

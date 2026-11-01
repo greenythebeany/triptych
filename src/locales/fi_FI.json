@@ -473,6 +473,10 @@
     "addFolder": "Lisää kansio",
     "rescan": "Skannaa uudelleen",
     "removeFolder": "Poista kansio",
-    "homeEmpty": "Ei vielä musiikkia. Lisää kansio, jossa on musiikkitiedostojasi."
+    "homeEmpty": "Ei vielä musiikkia. Lisää kansio, jossa on musiikkitiedostojasi.",
+    "allowAccess": "Salli käyttö",
+    "turnOff": "Poista käytöstä",
+    "phoneDesc": "Toista tähän puhelimeen tallennettua musiikkia palvelimesi rinnalla.",
+    "permissionDenied": "Triptych tarvitsee luvan lukea tämän puhelimen musiikkia. Voit sallia sen järjestelmän asetuksissa kohdassa Sovellukset → Triptych → Luvat."
   }
 }
