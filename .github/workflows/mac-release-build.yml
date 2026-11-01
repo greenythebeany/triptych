@@ -1,0 +1,66 @@
+name: macOS Release Build
+
+# Builds the macOS .dmg files (Apple silicon and Intel) with electron-builder
+# (targets are set under "mac" in package.json). Runs on pushes to release/**
+# and mac/** branches, or manually from the Actions tab. If a draft/published
+# GitHub release for this version exists, both files are attached to it too.
+#
+# The app is not signed with an Apple Developer ID, so macOS quarantines it
+# after download; the release notes say how to open it.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['release/**', 'mac/**']
+
+permissions:
+  contents: write
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dmg (arm64 and x64)
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --mac --publish never
+
+      # Apple silicon refuses to run code with no signature at all; make sure
+      # the app carries at least an ad-hoc one.
+      - name: Check signatures
+        run: |
+          for app in dist/mac*/Triptych.app; do
+            codesign -dv "$app" 2>&1 | grep -E 'Signature|Identifier|flags' || true
+            codesign --verify --deep --strict "$app"
+          done
+
+      - name: Collect version
+        id: ver
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Triptych-${{ steps.ver.outputs.version }}-mac
+          path: dist/*.dmg
+          retention-days: 14
+
+      - name: Attach to GitHub release (if one exists)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.ver.outputs.version }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.dmg --clobber
+          else
+            echo "No release $TAG yet -- files are only in the run's artifacts."
+          fi

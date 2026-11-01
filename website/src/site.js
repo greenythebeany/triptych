@@ -28,6 +28,8 @@ export function useLatestRelease() {
     android: asset((n) => /\.apk$/i.test(n)),
     appimage: asset((n) => /\.appimage$/i.test(n)),
     snap: asset((n) => /\.snap$/i.test(n)),
+    macArm: asset((n) => /arm64\.dmg$/i.test(n)),
+    macIntel: asset((n) => /x64\.dmg$/i.test(n)),
     ipa: asset((n) => /\.ipa$/i.test(n))
   };
 }
