@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "calidad original",
     "lyricsSearch": "Buscar por letra",
-    "lyricsSearchDesc": "Encuentra canciones por una línea de su letra. Descarga las letras de tu biblioteca en segundo plano (los títulos y artistas se envían a lrclib.net y lyrics.ovh) y las guarda en este dispositivo.",
+    "lyricsSearchDesc": "Encuentra canciones por una línea de su letra. Descarga las letras de tu biblioteca en segundo plano (los títulos y artistas se envían a lrclib.net, NetEase, Kugou y lyrics.ovh) y las guarda en este dispositivo.",
     "lyricsSearchStatus": "{done} de {total} canciones indexadas ({found} con letra)."
   },
   "privacyNotice": {
@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych de principio a fin",
     "ownIdentityDesc": "Triptych ahora tiene su propio ID de aplicación, así que ya nada se llama JellyWave. Tus ajustes y estadísticas de escucha vuelven desde tu servidor; en el móvil, las canciones descargadas hay que descargarlas de nuevo.",
     "installerTitle": "Un nuevo instalador para Windows",
-    "installerDesc": "Gráficos de Triptych, una página de bienvenida en tu idioma y el acuerdo de licencia para aceptar."
+    "installerDesc": "Gráficos de Triptych, una página de bienvenida en tu idioma y el acuerdo de licencia para aceptar.",
+    "lyricsSourcesTitle": "Letras que sí aparecen",
+    "lyricsSourcesDesc": "Se consultan cinco fuentes a la vez, primero las letras sincronizadas, y los títulos con «feat.», «Remastered» o nombres de YouTube se reconocen bien. Se acabó el «No se pudieron cargar las letras».",
+    "smoothLyricsTitle": "Letras sincronizadas fluidas",
+    "smoothLyricsDesc": "La línea actual aparece suavemente y la letra se desliza hasta ella en lugar de saltar.",
+    "cjkLanguagesTitle": "Chino, japonés y coreano",
+    "cjkLanguagesDesc": "Triptych ahora habla chino simplificado y tradicional, japonés y coreano, y usa el idioma del sistema al iniciarse por primera vez."
   },
   "wrapped": {
     "bannerTitle": "Tu Wrapped {year}",

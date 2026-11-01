@@ -1,7 +1,7 @@
 import './migrate.js'; // must stay first: renames storage keys before other modules read them
 import { JellyfinClient, initClientVersion, getClientVersion } from './jellyfin.js';
 import { Player, RepeatMode, EQ_PRESETS } from './player.js';
-import { fetchLyrics, getCachedLyrics } from './lyrics.js';
+import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
 import { addListening, persistLocal as persistListening, getOwnLog, isDirty as listeningDirty, markSynced as listeningSynced, adoptIfLarger, combineLogs, dayKey } from './listening.js';
 import { getSettings, updateSettings, applySettings, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
@@ -163,6 +163,11 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  '2.3.1': [
+    { icon: 'fi-br-quote-right', key: 'lyricsSources' },
+    { icon: 'fi-br-magic-wand', key: 'smoothLyrics' },
+    { icon: 'fi-br-language', key: 'cjkLanguages' }
+  ],
   '2.3.0': [
     { icon: 'fi-br-shield-check', key: 'ownIdentity' },
     { icon: 'fi-br-download', key: 'installer' }
@@ -4761,11 +4766,13 @@ function highlightPlayingRow(trackId) {
 
 function lyricsQueryFor(track) {
   return {
+    trackId: track.Id,
     title: track.Name,
     artist: artistNames(track),
     album: track.Album,
     durationSeconds: ticksToSeconds(track.RunTimeTicks),
-    // Second source, after lrclib: the server's own lyrics for this track.
+    // The server's own lyrics for this track (.lrc / embedded), one source
+    // among several -- see lyrics.js.
     fromServer: jellyfin ? () => jellyfin.getLyrics(track.Id) : null
   };
 }
@@ -4793,7 +4800,8 @@ async function loadLyricsForCurrentTrack() {
     result = await fetchLyrics(query);
   } catch (err) {
     if (lyricsTrackId !== track.Id) return;
-    // lrclib didn't answer (after retries) -- not the same as "no lyrics".
+    // A source couldn't be reached and none had lyrics -- not the same as
+    // "no lyrics".
     currentLyrics = null;
     lyricsTrackId = null; // so reopening the panel tries again
     lyricsBody.innerHTML = '';
@@ -4808,9 +4816,13 @@ async function loadLyricsForCurrentTrack() {
 
   rememberLyrics(track.Id, result);
   if (lyricsTrackId !== track.Id) return; // track changed while fetching
-  currentLyrics = result;
   prefetchNextLyrics();
+  renderLyrics(result);
+}
 
+function renderLyrics(result) {
+  currentLyrics = result;
+  activeLyricIdx = -1;
   if (!result || (!result.synced && !result.plain)) {
     lyricsBody.innerHTML = `<div class="lyrics-empty">${escapeHtml(t('nowPlaying.noLyrics'))}</div>`;
     return;
@@ -4831,25 +4843,60 @@ async function loadLyricsForCurrentTrack() {
   }
 }
 
+// Plain lyrics were on screen and a source has since come up with synced
+// ones: swap them in.
+onLyricsUpgraded((trackId, result) => {
+  if (trackId && trackId === lyricsTrackId) renderLyrics(result);
+});
+
+// Only touches the DOM when the active line changes, so the highlight and
+// scroll transitions (styles.css .lyric-line) run to the end instead of
+// being restarted on every timeupdate.
+let activeLyricIdx = -1;
 function updateActiveLyricLine(currentTime) {
   if (lyricsPanel.hidden || !currentLyrics || !currentLyrics.synced) return;
   const lines = lyricsBody.querySelectorAll('.lyric-line');
   if (!lines.length) return;
-  let activeIdx = -1;
+  let idx = -1;
   lines.forEach((line, i) => {
     const t = Number(line.dataset.time);
-    if (!isNaN(t) && t <= currentTime) activeIdx = i;
+    if (!isNaN(t) && t <= currentTime + 0.15) idx = i;
   });
-  lines.forEach((line, i) => line.classList.toggle('active', i === activeIdx));
-  if (activeIdx >= 0) centerLyricLine(lines[activeIdx], true);
+  if (idx === activeLyricIdx && (idx < 0 || lines[idx].classList.contains('active'))) return;
+  lines[activeLyricIdx]?.classList.remove('active');
+  lines.forEach((line, i) => line.classList.toggle('past', i < idx));
+  activeLyricIdx = idx;
+  if (idx >= 0) {
+    lines[idx].classList.add('active');
+    centerLyricLine(lines[idx], true);
+  }
 }
 
 // Scrolls only the lyrics list itself. scrollIntoView() would also scroll
 // every ancestor -- including the overflow:hidden full-screen player --
 // shoving the whole player (header icons and all) up off the screen.
+// Animated by hand: Chromium turns `behavior: 'smooth'` into a jump when
+// the OS has animations off (Windows "Animation effects"), which made the
+// lyrics snap from line to line.
+let lyricScrollFrame = 0;
 function centerLyricLine(line, smooth) {
-  const top = line.offsetTop - (lyricsBody.clientHeight - line.offsetHeight) / 2;
-  lyricsBody.scrollTo({ top: Math.max(0, top), behavior: smooth ? 'smooth' : 'auto' });
+  cancelAnimationFrame(lyricScrollFrame);
+  const max = lyricsBody.scrollHeight - lyricsBody.clientHeight;
+  const target = Math.min(max, Math.max(0, line.offsetTop - (lyricsBody.clientHeight - line.offsetHeight) / 2));
+  const from = lyricsBody.scrollTop;
+  if (!smooth || Math.abs(target - from) < 1 || Math.abs(target - from) > lyricsBody.clientHeight * 2) {
+    lyricsBody.scrollTop = target;
+    return;
+  }
+  const start = performance.now();
+  const duration = 450;
+  const step = (now) => {
+    const p = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    lyricsBody.scrollTop = from + (target - from) * eased;
+    if (p < 1) lyricScrollFrame = requestAnimationFrame(step);
+  };
+  lyricScrollFrame = requestAnimationFrame(step);
 }
 
 // ---------- Wrapped (year in review) ----------

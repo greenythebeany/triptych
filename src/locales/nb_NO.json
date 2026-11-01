@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "original kvalitet",
     "lyricsSearch": "Søk etter sangtekst",
-    "lyricsSearchDesc": "Finn sanger ut fra en linje i teksten. Henter sangtekstene i biblioteket ditt i bakgrunnen (titler og artister sendes til lrclib.net og lyrics.ovh) og lagrer dem på denne enheten.",
+    "lyricsSearchDesc": "Finn sanger ut fra en linje i teksten. Henter sangtekstene i biblioteket ditt i bakgrunnen (titler og artister sendes til lrclib.net, NetEase, Kugou og lyrics.ovh) og lagrer dem på denne enheten.",
     "lyricsSearchStatus": "{done} av {total} sanger behandlet ({found} med tekst)."
   },
   "privacyNotice": {
@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych hele veien",
     "ownIdentityDesc": "Triptych har nå sin egen app-ID, så ingenting heter JellyWave lenger. Innstillingene og lyttestatistikken din kommer tilbake fra serveren; på telefonen må nedlastede sanger lastes ned på nytt.",
     "installerTitle": "Et nytt installasjonsprogram for Windows",
-    "installerDesc": "Triptych-grafikk, en velkomstside på ditt språk og lisensavtalen du skal godta."
+    "installerDesc": "Triptych-grafikk, en velkomstside på ditt språk og lisensavtalen du skal godta.",
+    "lyricsSourcesTitle": "Sangtekster som dukker opp",
+    "lyricsSourcesDesc": "Fem kilder spørres samtidig, synkroniserte tekster kommer først, og titler med «feat.», «Remastered» eller YouTube-navn gjenkjennes riktig. Slutt på «Kunne ikke laste inn sangtekster».",
+    "smoothLyricsTitle": "Myke synkroniserte tekster",
+    "smoothLyricsDesc": "Den gjeldende linjen tones inn og teksten glir dit i stedet for å hoppe.",
+    "cjkLanguagesTitle": "Kinesisk, japansk og koreansk",
+    "cjkLanguagesDesc": "Triptych snakker nå forenklet og tradisjonell kinesisk, japansk og koreansk, og velger systemspråket ved første oppstart."
   },
   "wrapped": {
     "bannerTitle": "Din Wrapped {year}",

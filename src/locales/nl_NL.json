@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "originele kwaliteit",
     "lyricsSearch": "Zoeken op songtekst",
-    "lyricsSearchDesc": "Vind nummers aan de hand van een regel uit de tekst. Haalt de songteksten van je bibliotheek op de achtergrond op (titels en artiesten gaan naar lrclib.net en lyrics.ovh) en bewaart ze op dit apparaat.",
+    "lyricsSearchDesc": "Vind nummers aan de hand van een regel uit de tekst. Haalt de songteksten van je bibliotheek op de achtergrond op (titels en artiesten gaan naar lrclib.net, NetEase, Kugou en lyrics.ovh) en bewaart ze op dit apparaat.",
     "lyricsSearchStatus": "{done} van {total} nummers verwerkt ({found} met tekst)."
   },
   "privacyNotice": {
@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Helemaal Triptych",
     "ownIdentityDesc": "Triptych heeft nu een eigen app-id, dus niets heet meer JellyWave. Je instellingen en luisterstatistieken komen terug van je server; op je telefoon moet je gedownloade nummers opnieuw downloaden.",
     "installerTitle": "Een nieuw Windows-installatieprogramma",
-    "installerDesc": "Triptych-artwork, een welkomstpagina in jouw taal en de licentieovereenkomst om te accepteren."
+    "installerDesc": "Triptych-artwork, een welkomstpagina in jouw taal en de licentieovereenkomst om te accepteren.",
+    "lyricsSourcesTitle": "Songteksten die er gewoon zijn",
+    "lyricsSourcesDesc": "Vijf bronnen worden tegelijk gevraagd, gesynchroniseerde teksten gaan voor, en titels met \"feat.\", \"Remastered\" of YouTube-namen worden goed herkend. Geen \"Kon songtekst niet laden\" meer.",
+    "smoothLyricsTitle": "Vloeiende gesynchroniseerde teksten",
+    "smoothLyricsDesc": "De huidige regel faadt in en de tekst glijdt ernaartoe in plaats van te springen.",
+    "cjkLanguagesTitle": "Chinees, Japans en Koreaans",
+    "cjkLanguagesDesc": "Triptych spreekt nu vereenvoudigd en traditioneel Chinees, Japans en Koreaans, en kiest bij de eerste start je systeemtaal."
   },
   "wrapped": {
     "bannerTitle": "Jouw Wrapped {year}",

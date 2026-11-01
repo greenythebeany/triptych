@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kb/s",
     "qualityOriginal": "oryginalna jakość",
     "lyricsSearch": "Wyszukiwanie po tekście",
-    "lyricsSearchDesc": "Znajduj utwory po wersie tekstu. Pobiera w tle teksty z Twojej biblioteki (tytuły i wykonawcy trafiają do lrclib.net i lyrics.ovh) i przechowuje je na tym urządzeniu.",
+    "lyricsSearchDesc": "Znajduj utwory po wersie tekstu. Pobiera w tle teksty z Twojej biblioteki (tytuły i wykonawcy trafiają do lrclib.net, NetEase, Kugou i lyrics.ovh) i przechowuje je na tym urządzeniu.",
     "lyricsSearchStatus": "Przetworzono {done} z {total} utworów ({found} z tekstem)."
   },
   "privacyNotice": {
@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych w całości",
     "ownIdentityDesc": "Triptych ma teraz własny identyfikator aplikacji, więc nic nie nazywa się już JellyWave. Ustawienia i statystyki słuchania wrócą z Twojego serwera; na telefonie pobrane utwory trzeba pobrać ponownie.",
     "installerTitle": "Nowy instalator dla Windows",
-    "installerDesc": "Grafika Triptych, strona powitalna w Twoim języku i umowa licencyjna do zaakceptowania."
+    "installerDesc": "Grafika Triptych, strona powitalna w Twoim języku i umowa licencyjna do zaakceptowania.",
+    "lyricsSourcesTitle": "Teksty, które się wczytują",
+    "lyricsSourcesDesc": "Pięć źródeł pytanych jest naraz, teksty synchronizowane mają pierwszeństwo, a tytuły z „feat.”, „Remastered” lub w stylu YouTube są poprawnie rozpoznawane. Koniec z „Nie udało się wczytać tekstu”.",
+    "smoothLyricsTitle": "Płynne teksty synchronizowane",
+    "smoothLyricsDesc": "Bieżący wers płynnie się rozjaśnia, a tekst przesuwa się do niego zamiast skakać.",
+    "cjkLanguagesTitle": "Chiński, japoński i koreański",
+    "cjkLanguagesDesc": "Triptych mówi teraz po chińsku (uproszczonym i tradycyjnym), japońsku i koreańsku, a przy pierwszym uruchomieniu wybiera język systemu."
   },
   "wrapped": {
     "bannerTitle": "Twój Wrapped {year}",

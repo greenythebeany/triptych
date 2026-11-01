@@ -17,8 +17,37 @@ export const LOCALES = {
   fi_FI: 'Suomi',
   da_DK: 'Dansk',
   nl_NL: 'Nederlands',
-  it_IT: 'Italiano'
+  it_IT: 'Italiano',
+  zh_Hans: '简体中文',
+  zh_Hant: '繁體中文',
+  ja_JP: '日本語',
+  ko_KR: '한국어'
 };
+
+// Picks the first supported locale from the system's preferred languages
+// (navigator.languages, e.g. ["zh-TW", "en"]), English if none match.
+// Chinese goes by script: zh-Hans/-CN/-SG -> Simplified, zh-Hant/-TW/-HK/-MO
+// -> Traditional.
+export function detectLocale(languages = (typeof navigator !== 'undefined' && (navigator.languages?.length ? navigator.languages : [navigator.language])) || []) {
+  const codes = Object.keys(LOCALES);
+  for (const tag of languages) {
+    if (!tag) continue;
+    const parts = tag.replace(/_/g, '-').split('-');
+    const lang = parts[0].toLowerCase();
+    if (lang === 'zh') {
+      const rest = parts.slice(1).map((p) => p.toUpperCase());
+      if (rest.includes('HANT') || rest.some((r) => ['TW', 'HK', 'MO'].includes(r))) return 'zh_Hant';
+      return 'zh_Hans';
+    }
+    const region = parts.find((p, i) => i > 0 && p.length === 2)?.toUpperCase();
+    const exact = codes.find((c) => c === `${lang}_${region}`);
+    if (exact) return exact;
+    const byLang = codes.find((c) => c.split('_')[0] === lang);
+    if (byLang) return byLang;
+    if (lang === 'no' || lang === 'nn') return 'nb_NO';
+  }
+  return 'en_US';
+}
 
 let fallback = {};
 let strings = {};
@@ -54,9 +83,10 @@ export async function loadLocale(code) {
   }
   currentLocale = code;
   // Screen readers and spellcheckers rely on a correct lang attribute to
-  // pick the right pronunciation/dictionary — the locale code's language
-  // part (e.g. "sk" out of "sk_SK") is also valid BCP-47 on its own.
-  document.documentElement.lang = code.split('_')[0];
+  // pick the right pronunciation/dictionary, and CJK font selection
+  // (styles.css --font-cjk) keys off it: "sk_SK" -> "sk-SK", "zh_Hant" ->
+  // "zh-Hant", all valid BCP-47.
+  document.documentElement.lang = code.replace('_', '-');
 }
 
 export function getLocale() {

@@ -469,6 +469,29 @@ ipcMain.handle('deezer:searchAlbumArt', async (_event, artist, album, trackName)
   );
 });
 
+// NetEase and Kugou's lyrics APIs don't send CORS headers either (see
+// lyrics.js) -- fetched here, for those two hosts only.
+const LYRICS_HOSTS = new Set(['music.163.com', 'lyrics.kugou.com']);
+
+ipcMain.handle('lyrics:get', async (_event, url, timeoutMs) => {
+  let target;
+  try {
+    target = new URL(url);
+  } catch (err) {
+    return { status: 0, error: 'bad url' };
+  }
+  if (target.protocol !== 'https:' || !LYRICS_HOSTS.has(target.hostname)) return { status: 0, error: 'host not allowed' };
+  try {
+    const res = await fetch(target, {
+      headers: { 'User-Agent': `Triptych/${app.getVersion()} (https://github.com/greenythebeany/triptych)` },
+      signal: AbortSignal.timeout(Math.min(Number(timeoutMs) || 5000, 15000))
+    });
+    return { status: res.status, body: await res.text() };
+  } catch (err) {
+    return { status: 0, error: String(err) };
+  }
+});
+
 // --- Offline downloads ---
 // Fetched here (not the renderer) so a multi-MB audio file never has to
 // cross the IPC boundary as one big message — only the resulting file path

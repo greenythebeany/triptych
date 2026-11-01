@@ -1,3 +1,5 @@
+import { detectLocale } from './i18n.js';
+
 const STORAGE_KEY = 'triptych:settings';
 
 export const PALETTES = {
@@ -34,7 +36,7 @@ const DEFAULTS = {
   audioQuality: 'auto',
   artBackground: false,
   dynamicAccentColor: false,
-  language: 'en_US',
+  language: detectLocale(), // first run follows the system language; saved choices win
   customCss: '',
   crossfadeSeconds: 0, // 0-12, 0 = off (gapless preloading is always on regardless)
   replayGainEnabled: false,

@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "qualità originale",
     "lyricsSearch": "Cerca per testo",
-    "lyricsSearchDesc": "Trova i brani da una riga del testo. Scarica i testi della tua libreria in background (titoli e artisti vengono inviati a lrclib.net e lyrics.ovh) e li conserva su questo dispositivo.",
+    "lyricsSearchDesc": "Trova i brani da una riga del testo. Scarica i testi della tua libreria in background (titoli e artisti vengono inviati a lrclib.net, NetEase, Kugou e lyrics.ovh) e li conserva su questo dispositivo.",
     "lyricsSearchStatus": "{done} brani su {total} indicizzati ({found} con testo)."
   },
   "privacyNotice": {
@@ -414,7 +414,13 @@
     "ownIdentityTitle": "Triptych fino in fondo",
     "ownIdentityDesc": "Triptych ora ha un proprio ID app, quindi niente si chiama più JellyWave. Impostazioni e statistiche di ascolto tornano dal tuo server; sul telefono i brani scaricati vanno scaricati di nuovo.",
     "installerTitle": "Un nuovo programma di installazione per Windows",
-    "installerDesc": "Grafica Triptych, una pagina di benvenuto nella tua lingua e il contratto di licenza da accettare."
+    "installerDesc": "Grafica Triptych, una pagina di benvenuto nella tua lingua e il contratto di licenza da accettare.",
+    "lyricsSourcesTitle": "Testi che compaiono",
+    "lyricsSourcesDesc": "Cinque fonti vengono interrogate insieme, prima i testi sincronizzati, e i titoli con \"feat.\", \"Remastered\" o in stile YouTube vengono riconosciuti correttamente. Basta con \"Impossibile caricare il testo\".",
+    "smoothLyricsTitle": "Testi sincronizzati fluidi",
+    "smoothLyricsDesc": "La riga corrente appare in dissolvenza e il testo scorre fino a lei invece di saltare.",
+    "cjkLanguagesTitle": "Cinese, giapponese e coreano",
+    "cjkLanguagesDesc": "Triptych ora parla cinese semplificato e tradizionale, giapponese e coreano, e al primo avvio usa la lingua di sistema."
   },
   "wrapped": {
     "bannerTitle": "Il tuo Wrapped {year}",

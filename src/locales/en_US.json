@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "original quality",
     "lyricsSearch": "Search by lyrics",
-    "lyricsSearchDesc": "Lets you find songs by a line of their lyrics. Fetches your library's lyrics in the background (song titles and artists go to lrclib.net and lyrics.ovh) and keeps them on this device.",
+    "lyricsSearchDesc": "Lets you find songs by a line of their lyrics. Fetches your library's lyrics in the background (song titles and artists go to lrclib.net, NetEase, Kugou and lyrics.ovh) and keeps them on this device.",
     "lyricsSearchStatus": "Indexed {done} of {total} songs ({found} with lyrics)."
   },
   "privacyNotice": {
@@ -412,7 +412,13 @@
     "ownIdentityTitle": "Triptych all the way through",
     "ownIdentityDesc": "Triptych now has its own app id, so nothing is called JellyWave anymore. Your settings and listening stats come from your server; on phones, downloaded songs need to be downloaded again.",
     "installerTitle": "A new Windows installer",
-    "installerDesc": "Triptych artwork, a welcome page in your language, and the license agreement to accept."
+    "installerDesc": "Triptych artwork, a welcome page in your language, and the license agreement to accept.",
+    "lyricsSourcesTitle": "Lyrics that show up",
+    "lyricsSourcesDesc": "Five lyrics sources are asked at once, synced lyrics come first, and titles with \"feat.\", \"Remastered\" or YouTube-style names are matched properly. No more \"Couldn't load lyrics\".",
+    "smoothLyricsTitle": "Smooth synced lyrics",
+    "smoothLyricsDesc": "The current line fades in and the lyrics glide to it instead of jumping.",
+    "cjkLanguagesTitle": "Chinese, Japanese and Korean",
+    "cjkLanguagesDesc": "Triptych now speaks Simplified and Traditional Chinese, Japanese and Korean, and picks your system language on first start."
   },
   "wrapped": {
     "bannerTitle": "Your {year} Wrapped",

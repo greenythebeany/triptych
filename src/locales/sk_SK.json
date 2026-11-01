@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "pôvodná kvalita",
     "lyricsSearch": "Hľadanie podľa textu",
-    "lyricsSearchDesc": "Nájdeš skladby podľa riadku z ich textu. Texty tvojej knižnice sa sťahujú na pozadí (názvy skladieb a interpreti idú na lrclib.net a lyrics.ovh) a ostávajú v tomto zariadení.",
+    "lyricsSearchDesc": "Nájdeš skladby podľa riadku z ich textu. Texty tvojej knižnice sa sťahujú na pozadí (názvy skladieb a interpreti idú na lrclib.net, NetEase, Kugou a lyrics.ovh) a ostávajú v tomto zariadení.",
     "lyricsSearchStatus": "Spracované {done} z {total} skladieb ({found} s textom)."
   },
   "privacyNotice": {
@@ -412,7 +412,13 @@
     "ownIdentityTitle": "Triptych naskrz",
     "ownIdentityDesc": "Triptych má teraz vlastné ID aplikácie, takže už nič nesie názov JellyWave. Nastavenia a štatistiky počúvania prídu z tvojho servera; v telefóne treba stiahnuté skladby stiahnuť znova.",
     "installerTitle": "Nový inštalátor pre Windows",
-    "installerDesc": "Grafika Triptych, uvítacia stránka v tvojom jazyku a licenčná zmluva na odsúhlasenie."
+    "installerDesc": "Grafika Triptych, uvítacia stránka v tvojom jazyku a licenčná zmluva na odsúhlasenie.",
+    "lyricsSourcesTitle": "Texty, ktoré sa načítajú",
+    "lyricsSourcesDesc": "Päť zdrojov textov sa pýta naraz, synchronizované texty majú prednosť a názvy s „feat.“, „Remastered“ alebo v štýle YouTube sa správne nájdu. Žiadne ďalšie „Texty sa nepodarilo načítať“.",
+    "smoothLyricsTitle": "Plynulé synchronizované texty",
+    "smoothLyricsDesc": "Aktuálny riadok sa plynulo rozsvieti a text k nemu skĺzne, namiesto toho, aby skákal.",
+    "cjkLanguagesTitle": "Čínština, japončina a kórejčina",
+    "cjkLanguagesDesc": "Triptych teraz vie zjednodušenú aj tradičnú čínštinu, japončinu a kórejčinu a pri prvom spustení zvolí jazyk systému."
   },
   "wrapped": {
     "bannerTitle": "Tvoj rok {year} v hudbe",
