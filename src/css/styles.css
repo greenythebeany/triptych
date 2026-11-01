@@ -904,12 +904,8 @@ svg { fill: currentColor; width: 100%; height: 100%; }
 }
 .lyric-line.past { opacity: 0.75; }
 .lyric-line.active { color: var(--text-primary); font-size: 17px; opacity: 1; }
-/* Reduced motion (e.g. Windows "Animation effects" off): no growing text,
-   but the highlight still fades from line to line instead of snapping. */
-@media (prefers-reduced-motion: reduce) {
-  .lyric-line { transition: color 0.45s ease, opacity 0.45s ease; }
-  .lyric-line.active { font-size: inherit; }
-}
+/* Deliberately not turned off for prefers-reduced-motion: Windows reports it
+   whenever "Animation effects" is off, and the lyrics then snapped. */
 .lyrics-empty { color: var(--text-tertiary); font-size: 13.5px; text-align: center; margin-top: 30px; }
 .lyrics-retry-btn {
   display: block; margin: 14px auto 0; padding: 8px 18px; border-radius: 999px;
