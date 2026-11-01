@@ -98,6 +98,7 @@ const settingsOverlay = document.getElementById('settings-overlay');
 const btnCloseSettings = document.getElementById('btn-close-settings');
 const themeModeToggle = document.getElementById('theme-mode-toggle');
 const uiStyleToggle = document.getElementById('ui-style-toggle');
+const motionToggle = document.getElementById('motion-toggle');
 const npVolumeBar = document.getElementById('np-volume-bar');
 const paletteGrid = document.getElementById('palette-grid');
 const audioQualitySelect = document.getElementById('audio-quality-select');
@@ -889,6 +890,13 @@ function accountMenuOrigin() {
   return { x: a.left + a.width / 2 - m.left, y: a.top + a.height / 2 - m.top, r: a.width / 2, w: m.width, h: m.height, size: a.width };
 }
 
+// Settings -> Appearance -> Animations: Static. CSS animations and
+// transitions are switched off in styles.css; the ones animated from here
+// check this.
+function isStaticMotion() {
+  return document.documentElement.getAttribute('data-motion') === 'static';
+}
+
 function morphAccountAvatar(toDot, duration) {
   const small = `scale(${Math.min(0.32, 10 / (accountAvatar.offsetWidth || 30))})`;
   const opts = { duration, fill: 'forwards' };
@@ -914,6 +922,10 @@ function openAccountMenu() {
   const o = accountMenuOrigin();
   const full = Math.hypot(Math.max(o.x, o.w - o.x), Math.max(o.y, o.h - o.y)) + 4;
   const circle = (r) => `circle(${r}px at ${o.x}px ${o.y}px)`;
+  if (isStaticMotion()) {
+    morphAccountAvatar(true, 0);
+    return;
+  }
   morphAccountAvatar(true, 320);
   accountMenu.animate([{ clipPath: circle(o.r) }, { clipPath: circle(full) }], { duration: 460, easing: MENU_EASE });
   [...accountMenu.children].forEach((row, i) =>
@@ -936,6 +948,10 @@ function closeAccountMenu() {
     finishAccountMenuClose = null;
   };
   finishAccountMenuClose = finish;
+  if (isStaticMotion()) {
+    finish();
+    return;
+  }
   // Also on a timer: a window that isn't drawing frames never finishes the
   // animations.
   setTimeout(finish, 560);
@@ -1037,6 +1053,13 @@ function wireSettingsUI() {
   themeModeToggle.querySelectorAll('button').forEach((btn) => {
     btn.addEventListener('click', () => {
       updateSettings({ themeMode: btn.dataset.value });
+      refreshSettingsUI();
+    });
+  });
+
+  motionToggle.querySelectorAll('button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      updateSettings({ motion: btn.dataset.value });
       refreshSettingsUI();
     });
   });
@@ -2182,6 +2205,9 @@ function refreshSettingsUI() {
   uiStyleToggle.querySelectorAll('button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
   });
+  motionToggle.querySelectorAll('button').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.value === (s.motion === 'static' ? 'static' : 'dynamic'));
+  });
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
   });
@@ -2358,6 +2384,7 @@ function loadPinnedAlbumsSidebar() {
 // sidebar and in the phone's tab bar. Ported from MessageMe.
 const NAV_DOT = 6;
 function moveNavGliders({ instant = false } = {}) {
+  if (isStaticMotion()) instant = true;
   for (const nav of document.querySelectorAll('.sidebar-nav, .bottom-nav')) {
     const glider = nav.querySelector('.nav-glider');
     const dot = nav.querySelector('.nav-dot');
@@ -3601,10 +3628,10 @@ function buildCardRow(items, kind) {
   const scrollAmount = () => Math.max(300, row.clientWidth * 0.8);
   const prevBtn = el('button', 'card-row-nav card-row-nav-prev', '<i class="fi fi-br-angle-small-left"></i>');
   prevBtn.type = 'button';
-  prevBtn.addEventListener('click', () => row.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }));
+  prevBtn.addEventListener('click', () => row.scrollBy({ left: -scrollAmount(), behavior: isStaticMotion() ? 'auto' : 'smooth' }));
   const nextBtn = el('button', 'card-row-nav card-row-nav-next', '<i class="fi fi-br-angle-small-right"></i>');
   nextBtn.type = 'button';
-  nextBtn.addEventListener('click', () => row.scrollBy({ left: scrollAmount(), behavior: 'smooth' }));
+  nextBtn.addEventListener('click', () => row.scrollBy({ left: scrollAmount(), behavior: isStaticMotion() ? 'auto' : 'smooth' }));
   wrap.appendChild(prevBtn);
   wrap.appendChild(nextBtn);
 
@@ -4147,6 +4174,7 @@ function wireSwipeActions(rowEl, { onSwipeRight, onSwipeLeft, onLongPress } = {}
 
 // ---------- Player wiring ----------
 function bounceButtons(...buttons) {
+  if (isStaticMotion()) return;
   buttons.forEach((btn) => {
     btn.classList.remove('bounce');
     void btn.offsetWidth; // restart the animation on quick repeat taps
@@ -5406,7 +5434,7 @@ function centerLyricLine(line, smooth) {
   const max = lyricsBody.scrollHeight - lyricsBody.clientHeight;
   const target = Math.min(max, Math.max(0, line.offsetTop - (lyricsBody.clientHeight - line.offsetHeight) / 2));
   const from = lyricsBody.scrollTop;
-  if (!smooth || Math.abs(target - from) < 1 || Math.abs(target - from) > lyricsBody.clientHeight * 2) {
+  if (!smooth || isStaticMotion() || Math.abs(target - from) < 1 || Math.abs(target - from) > lyricsBody.clientHeight * 2) {
     lyricsBody.scrollTop = target;
     return;
   }
