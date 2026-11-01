@@ -449,5 +449,20 @@
   "duration": {
     "hoursMinutes": "{h} 時間 {m} 分",
     "minutes": "{m} 分"
+  },
+  "local": {
+    "or": "または",
+    "useOnDevice": "このデバイスの音楽を使う",
+    "scanningStart": "音楽を探しています…",
+    "scanning": "スキャン中… {done} / {total}",
+    "noMusic": "選択したフォルダーに音楽ファイルが見つかりません。",
+    "accountName": "このデバイス",
+    "settingsTitle": "このデバイスの音楽",
+    "folders": "音楽フォルダー",
+    "summary": "{songs} 曲 · {albums} 枚のアルバム",
+    "addFolder": "フォルダーを追加",
+    "rescan": "再スキャン",
+    "removeFolder": "フォルダーを削除",
+    "homeEmpty": "まだ音楽がありません。音楽ファイルのあるフォルダーを追加してください。"
   }
 }

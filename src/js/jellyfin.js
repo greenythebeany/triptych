@@ -700,6 +700,10 @@ export class JellyfinClient {
     return `${this.serverUrl}/Items/${id}/Images/${type}?${params.toString()}`;
   }
 
+  artistPhotoUrl(artistId, maxSize = 600) {
+    return `${this.serverUrl}/Items/${artistId}/Images/Primary?maxWidth=${maxSize}&quality=90`;
+  }
+
   // Backdrops live in their own BackdropImageTags array rather than in
   // ImageTags, so they need a separate lookup from imageUrl().
   backdropUrl(item, maxWidth = 1920) {

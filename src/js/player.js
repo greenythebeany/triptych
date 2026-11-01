@@ -447,7 +447,23 @@ export class Player {
       navigator.mediaSession.metadata = null;
       return;
     }
-    navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '', artwork });
+    const local = artwork.find((a) => a.src.startsWith('tlocal:'));
+    if (!local) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '', artwork });
+      return;
+    }
+    // MediaMetadata only takes http(s)/data/blob images, so a cover from a
+    // file on this device (tlocal://, see localLibrary.js) goes in as a blob.
+    navigator.mediaSession.metadata = new MediaMetadata({ title: track.Name || '', artist, album: track.Album || '' });
+    fetch(local.src).then((res) => res.blob()).then((blob) => {
+      if (this.currentTrack !== track) return;
+      if (this._mediaSessionBlobUrl) URL.revokeObjectURL(this._mediaSessionBlobUrl);
+      this._mediaSessionBlobUrl = URL.createObjectURL(blob);
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.Name || '', artist, album: track.Album || '',
+        artwork: [{ src: this._mediaSessionBlobUrl, sizes: '512x512', type: 'image/jpeg' }]
+      });
+    }).catch(() => {});
   }
 
   _setMediaSessionPlaybackState() {

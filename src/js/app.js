@@ -1,5 +1,6 @@
 import './migrate.js'; // must stay first: renames storage keys before other modules read them
 import { JellyfinClient, initClientVersion, getClientVersion } from './jellyfin.js';
+import { LocalLibraryClient, CombinedClient, isLocalLibrarySupported, isLocalItemId } from './localLibrary.js';
 import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
@@ -503,6 +504,11 @@ function withOfflineArtFallback(imgEl, track) {
   };
 }
 
+// Nothing to download when the music is already on this device.
+function canDownload(track) {
+  return downloadsSupported() && !jellyfin?.isLocal && !isLocalItemId(track?.Id);
+}
+
 function el(tag, className, html) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -582,6 +588,11 @@ async function init() {
 // banner explains why things might look empty.
 async function tryRestoreSession() {
   const saved = await sessionStore.load();
+  if (saved?.mode === 'local' && isLocalLibrarySupported()) {
+    jellyfin = await new LocalLibraryClient().load();
+    await enterApp(t('local.accountName'));
+    return;
+  }
   if (!saved || !saved.serverUrl || !saved.accessToken || !saved.userId) {
     showLogin();
     return;
@@ -638,12 +649,17 @@ async function enterApp(username) {
   // were, same as any other view that degrades without a server.
   // Fetched alongside the settings sync rather than after it -- one less
   // sequential round trip before home can start loading.
+  // Music on this device alongside the server (desktop): one merged library.
+  if (isLocalLibrarySupported() && !jellyfin.isLocal && !jellyfin.local) {
+    jellyfin = new CombinedClient(jellyfin, await new LocalLibraryClient().load());
+  }
   const libsPromise = jellyfin.getMusicLibraries();
   libsPromise.catch(() => {});
   await initRemoteSync(jellyfin);
 
   loginScreen.hidden = true;
   appRoot.hidden = false;
+  document.body.classList.toggle('local-mode', !!jellyfin.isLocal);
 
   player = new Player(jellyfin, currentBitrateKbps);
   const savedSettings = getSettings();
@@ -698,7 +714,7 @@ async function enterApp(username) {
   navigateTo({ view: libs ? 'home' : 'downloads' });
   restoreResumeState();
   if (libs) listeningLoad = loadListeningFromServer().catch(() => {}).finally(maybeAutoOpenWrapped);
-  if (libs) startConnectionProbing();
+  if (libs && !jellyfin.isLocal) startConnectionProbing();
   if (libs && getSettings().lyricsSearchEnabled) setTimeout(startLyricsIndexing, 15000);
   hideBootSplash();
   // After the splash has faded, so it doesn't pop up mid-transition.
@@ -743,6 +759,100 @@ loginForm.addEventListener('submit', async (evt) => {
     btnLogin.textContent = t('login.logIn');
   }
 });
+
+// ---------- Music on this device ----------
+const loginLocal = document.getElementById('login-local');
+const btnUseLocal = document.getElementById('btn-use-local');
+const loginLocalStatus = document.getElementById('login-local-status');
+setHidden(loginLocal, !isLocalLibrarySupported());
+setHidden(document.getElementById('local-library-section'), !isLocalLibrarySupported());
+
+function scanProgressText({ done, total }) {
+  return t('local.scanning', { done, total });
+}
+
+btnUseLocal.addEventListener('click', async () => {
+  const client = new LocalLibraryClient();
+  const folders = await client.pickFolders();
+  if (!folders.length) return;
+  btnUseLocal.disabled = true;
+  btnLogin.disabled = true;
+  loginLocalStatus.classList.remove('is-error');
+  loginLocalStatus.textContent = t('local.scanningStart');
+  loginLocalStatus.hidden = false;
+  try {
+    await client.setFolders(folders);
+    await client.scan((progress) => { loginLocalStatus.textContent = scanProgressText(progress); });
+    if (!client.trackCount) {
+      loginLocalStatus.textContent = t('local.noMusic');
+      loginLocalStatus.classList.add('is-error');
+      return;
+    }
+    jellyfin = client;
+    await sessionStore.save({ mode: 'local' });
+    loginLocalStatus.hidden = true;
+    await enterApp(t('local.accountName'));
+  } catch (err) {
+    loginLocalStatus.textContent = err?.message || t('login.errorGeneric');
+    loginLocalStatus.classList.add('is-error');
+  } finally {
+    btnUseLocal.disabled = false;
+    btnLogin.disabled = false;
+  }
+});
+
+const localFolderList = document.getElementById('local-folder-list');
+const localLibraryStatus = document.getElementById('local-library-status');
+const btnLocalAddFolder = document.getElementById('btn-local-add-folder');
+const btnLocalRescan = document.getElementById('btn-local-rescan');
+
+async function refreshLocalLibrarySettings() {
+  if (!jellyfin?.getFolders) return;
+  const folders = await jellyfin.getFolders();
+  localFolderList.innerHTML = '';
+  folders.forEach((folder) => {
+    const li = el('li');
+    const label = el('span');
+    label.textContent = folder;
+    label.title = folder;
+    const remove = el('button', 'btn-icon-plain', '<i class="fi fi-br-cross-small"></i>');
+    remove.type = 'button';
+    remove.title = t('local.removeFolder');
+    remove.setAttribute('aria-label', t('local.removeFolder'));
+    remove.addEventListener('click', () => rescanLocalLibrary(folders.filter((f) => f !== folder)));
+    li.append(label, remove);
+    localFolderList.appendChild(li);
+  });
+  localLibraryStatus.textContent = t('local.summary', { songs: jellyfin.trackCount, albums: jellyfin.albumCount });
+}
+
+// folders: the new folder list, or omitted to rescan the current ones.
+async function rescanLocalLibrary(folders) {
+  if (!jellyfin?.getFolders) return;
+  btnLocalAddFolder.disabled = true;
+  btnLocalRescan.disabled = true;
+  localLibraryStatus.textContent = t('local.scanningStart');
+  try {
+    if (folders) await jellyfin.setFolders(folders);
+    await jellyfin.scan((progress) => { localLibraryStatus.textContent = scanProgressText(progress); });
+    allSongsCachePromise = null;
+    await refreshCurrentView();
+  } finally {
+    btnLocalAddFolder.disabled = false;
+    btnLocalRescan.disabled = false;
+    await refreshLocalLibrarySettings();
+  }
+}
+
+async function addLocalFolders() {
+  const picked = await jellyfin.pickFolders();
+  if (!picked.length) return;
+  const current = await jellyfin.getFolders();
+  await rescanLocalLibrary([...current, ...picked]);
+}
+
+btnLocalAddFolder.addEventListener('click', () => addLocalFolders());
+btnLocalRescan.addEventListener('click', () => rescanLocalLibrary());
 
 function translateLoginError(err) {
   if (err?.code === 'wrong_credentials') return t('login.errorWrongCredentials');
@@ -1695,9 +1805,9 @@ function bitrateForThroughput(mbit) {
 }
 
 async function probeConnection() {
-  if (probeRunning || !jellyfin || getSettings().audioQuality !== 'auto' || navigator.onLine === false) return;
-  const track = player?.currentTrack || allSongsCache?.[0];
-  if (!track?.Id || isDownloaded(track.Id)) return;
+  if (probeRunning || !jellyfin || jellyfin.isLocal || getSettings().audioQuality !== 'auto' || navigator.onLine === false) return;
+  const track = player?.currentTrack || allSongsCache?.find((tr) => !isLocalItemId(tr.Id));
+  if (!track?.Id || isDownloaded(track.Id) || isLocalItemId(track.Id)) return;
   probeRunning = true;
   try {
     const res = await fetch(jellyfin.streamUrl(track, 0), { headers: { Range: 'bytes=0-786431' }, cache: 'no-store' });
@@ -2063,6 +2173,7 @@ function refreshSettingsUI() {
 let settingsTriggerEl = null;
 function openSettings() {
   refreshSettingsUI();
+  refreshLocalLibrarySettings().catch(() => {});
   settingsTriggerEl = document.activeElement;
   settingsOverlay.hidden = false;
   btnCloseSettings.focus();
@@ -2688,6 +2799,17 @@ async function renderHome() {
 
   viewRoot.innerHTML = '';
   viewRoot.appendChild(el('div', 'view-title', t('home.greeting')));
+  if (jellyfin.isLocal && !albums.length) {
+    const empty = el('div', 'empty-state', escapeHtml(t('local.homeEmpty')));
+    const actions = el('div', 'local-empty-actions');
+    const add = el('button', 'btn-secondary', escapeHtml(t('local.addFolder')));
+    add.type = 'button';
+    add.addEventListener('click', () => addLocalFolders());
+    actions.appendChild(add);
+    empty.appendChild(actions);
+    viewRoot.appendChild(empty);
+    return;
+  }
   // Around New Year, Wrapped gets the top spot on Home too.
   const wrappedBanner = buildWrappedBanner();
   if (wrappedBanner && recentSource?.length) viewRoot.appendChild(wrappedBanner);
@@ -3605,10 +3727,11 @@ function buildDetailHeader({ kind, title, sub, art, logo, backdrop, round, onPla
     });
     actions.appendChild(playBtn);
 
-    if (downloadTracks && downloadTracks.length && downloadsSupported()) {
+    const serverTracks = (downloadTracks || []).filter((tr) => canDownload(tr));
+    if (serverTracks.length) {
       const dlBtn = el('button', 'detail-download-btn');
       dlBtn.type = 'button';
-      wireAlbumDownloadButton(dlBtn, downloadTracks);
+      wireAlbumDownloadButton(dlBtn, serverTracks);
       actions.appendChild(dlBtn);
     }
 
@@ -3786,7 +3909,7 @@ function buildTrackTable(tracks, queueRef, opts = {}) {
     });
     addCellInner.appendChild(addBtn);
 
-    if (downloadsSupported()) {
+    if (canDownload(track)) {
       const downloadBtn = el('button', 'track-add-btn track-download-btn');
       downloadBtn.type = 'button';
       wireDownloadButton(downloadBtn, track, row);
@@ -4442,7 +4565,7 @@ function buildTrackContextMenuItems(track, queueCtx = {}) {
     icon: 'fi-br-add',
     onClick: (evt) => openAddToPlaylistMenu(track, queueCtx.anchorEl || document.body)
   });
-  if (downloadsSupported()) {
+  if (canDownload(track)) {
     const downloaded = isDownloaded(track.Id);
     items.push({
       label: downloaded ? t('track.removeDownload') : t('track.download'),
@@ -5223,7 +5346,7 @@ async function withArtistImages(data) {
   ta.albumArt = tr ? artUrl(tr, 'album', 220) : placeholderArt('artist');
   const ref = tr?.ArtistItems?.find((a) => formatDisplayName(a.Name) === ta.name) || tr?.ArtistItems?.[0];
   if (!ref?.Id) return data;
-  ta.photo = `${jellyfin.serverUrl}/Items/${ref.Id}/Images/Primary?maxWidth=600&quality=90`;
+  ta.photo = jellyfin.artistPhotoUrl(ref.Id, 600);
   const item = await jellyfin.getItem(ref.Id).catch(() => null);
   if (item) {
     ta.backdrop = jellyfin.backdropUrl(item, 1600);

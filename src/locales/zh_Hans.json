@@ -449,5 +449,20 @@
   "duration": {
     "hoursMinutes": "{h} 小时 {m} 分钟",
     "minutes": "{m} 分钟"
+  },
+  "local": {
+    "or": "或",
+    "useOnDevice": "使用此设备上的音乐",
+    "scanningStart": "正在查找音乐…",
+    "scanning": "正在扫描… {done} / {total}",
+    "noMusic": "所选文件夹中未找到音乐文件。",
+    "accountName": "此设备",
+    "settingsTitle": "此设备上的音乐",
+    "folders": "音乐文件夹",
+    "summary": "{songs} 首歌曲 · {albums} 张专辑",
+    "addFolder": "添加文件夹",
+    "rescan": "重新扫描",
+    "removeFolder": "移除文件夹",
+    "homeEmpty": "还没有音乐。请添加包含音乐文件的文件夹。"
   }
 }

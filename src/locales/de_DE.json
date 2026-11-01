@@ -451,5 +451,20 @@
   "duration": {
     "hoursMinutes": "{h} Std. {m} Min.",
     "minutes": "{m} Min."
+  },
+  "local": {
+    "or": "oder",
+    "useOnDevice": "Musik auf diesem Gerät verwenden",
+    "scanningStart": "Suche nach Musik…",
+    "scanning": "Durchsuche… {done} von {total}",
+    "noMusic": "In den gewählten Ordnern wurden keine Musikdateien gefunden.",
+    "accountName": "Dieses Gerät",
+    "settingsTitle": "Musik auf diesem Gerät",
+    "folders": "Musikordner",
+    "summary": "{songs} Titel · {albums} Alben",
+    "addFolder": "Ordner hinzufügen",
+    "rescan": "Neu durchsuchen",
+    "removeFolder": "Ordner entfernen",
+    "homeEmpty": "Noch keine Musik. Füge einen Ordner mit deinen Musikdateien hinzu."
   }
 }
