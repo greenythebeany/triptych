@@ -420,7 +420,9 @@
     "smoothLyricsTitle": "Plynulé synchronizované texty",
     "smoothLyricsDesc": "Aktuálny riadok sa plynulo rozsvieti a text k nemu skĺzne, namiesto toho, aby skákal.",
     "cjkLanguagesTitle": "Čínština, japončina a kórejčina",
-    "cjkLanguagesDesc": "Triptych teraz vie zjednodušenú aj tradičnú čínštinu, japončinu a kórejčinu a pri prvom spustení zvolí jazyk systému."
+    "cjkLanguagesDesc": "Triptych teraz vie zjednodušenú aj tradičnú čínštinu, japončinu a kórejčinu a pri prvom spustení zvolí jazyk systému.",
+    "wordLyricsTitle": "Text slovo po slove",
+    "wordLyricsDesc": "Zapni v Nastavenia → Vzhľad: každé slovo sa vyplní a zväčší, keď sa spieva. Spotrebuje viac batérie, preto je predvolene vypnuté."
   },
   "wrapped": {
     "bannerTitle": "Tvoj rok {year} v hudbe",

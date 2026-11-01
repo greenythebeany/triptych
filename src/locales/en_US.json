@@ -420,7 +420,9 @@
     "smoothLyricsTitle": "Smooth synced lyrics",
     "smoothLyricsDesc": "The current line fades in and the lyrics glide to it instead of jumping.",
     "cjkLanguagesTitle": "Chinese, Japanese and Korean",
-    "cjkLanguagesDesc": "Triptych now speaks Simplified and Traditional Chinese, Japanese and Korean, and picks your system language on first start."
+    "cjkLanguagesDesc": "Triptych now speaks Simplified and Traditional Chinese, Japanese and Korean, and picks your system language on first start.",
+    "wordLyricsTitle": "Word-by-word lyrics",
+    "wordLyricsDesc": "Turn it on in Settings → Appearance: each word fills in and grows as it's sung. It uses more battery, so it's off by default."
   },
   "wrapped": {
     "bannerTitle": "Your {year} Wrapped",

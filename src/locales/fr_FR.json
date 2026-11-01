@@ -422,7 +422,9 @@
     "smoothLyricsTitle": "Paroles synchronisées fluides",
     "smoothLyricsDesc": "La ligne en cours apparaît en fondu et les paroles glissent jusqu'à elle au lieu de sauter.",
     "cjkLanguagesTitle": "Chinois, japonais et coréen",
-    "cjkLanguagesDesc": "Triptych parle désormais chinois simplifié et traditionnel, japonais et coréen, et adopte la langue du système au premier lancement."
+    "cjkLanguagesDesc": "Triptych parle désormais chinois simplifié et traditionnel, japonais et coréen, et adopte la langue du système au premier lancement.",
+    "wordLyricsTitle": "Paroles mot à mot",
+    "wordLyricsDesc": "À activer dans Réglages → Apparence : chaque mot se remplit et grossit au moment où il est chanté. Consomme plus de batterie, donc désactivé par défaut."
   },
   "wrapped": {
     "bannerTitle": "Votre Wrapped {year}",

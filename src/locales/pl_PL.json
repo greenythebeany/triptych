@@ -422,7 +422,9 @@
     "smoothLyricsTitle": "Płynne teksty synchronizowane",
     "smoothLyricsDesc": "Bieżący wers płynnie się rozjaśnia, a tekst przesuwa się do niego zamiast skakać.",
     "cjkLanguagesTitle": "Chiński, japoński i koreański",
-    "cjkLanguagesDesc": "Triptych mówi teraz po chińsku (uproszczonym i tradycyjnym), japońsku i koreańsku, a przy pierwszym uruchomieniu wybiera język systemu."
+    "cjkLanguagesDesc": "Triptych mówi teraz po chińsku (uproszczonym i tradycyjnym), japońsku i koreańsku, a przy pierwszym uruchomieniu wybiera język systemu.",
+    "wordLyricsTitle": "Tekst słowo po słowie",
+    "wordLyricsDesc": "Włącz w Ustawienia → Wygląd: każde słowo wypełnia się i powiększa, gdy jest śpiewane. Zużywa więcej baterii, więc domyślnie jest wyłączone."
   },
   "wrapped": {
     "bannerTitle": "Twój Wrapped {year}",

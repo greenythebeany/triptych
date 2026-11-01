@@ -422,7 +422,9 @@
     "smoothLyricsTitle": "Flüssige synchronisierte Texte",
     "smoothLyricsDesc": "Die aktuelle Zeile blendet sanft ein und der Text gleitet zu ihr, statt zu springen.",
     "cjkLanguagesTitle": "Chinesisch, Japanisch und Koreanisch",
-    "cjkLanguagesDesc": "Triptych spricht jetzt vereinfachtes und traditionelles Chinesisch, Japanisch und Koreanisch und übernimmt beim ersten Start die Systemsprache."
+    "cjkLanguagesDesc": "Triptych spricht jetzt vereinfachtes und traditionelles Chinesisch, Japanisch und Koreanisch und übernimmt beim ersten Start die Systemsprache.",
+    "wordLyricsTitle": "Songtext Wort für Wort",
+    "wordLyricsDesc": "Unter Einstellungen → Darstellung einschalten: Jedes Wort füllt sich und wird größer, während es gesungen wird. Braucht mehr Akku, deshalb standardmäßig aus."
   },
   "wrapped": {
     "bannerTitle": "Dein Wrapped {year}",

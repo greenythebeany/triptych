@@ -99,6 +99,12 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.3.2
+
+- Word-by-word lyrics (Settings → Appearance, off by default): each word fills in and grows as it's sung. Real word timing comes from Kugou and lrclib where a song has it, with an estimate from the line timing otherwise. It redraws every frame, so it uses more battery
+- Lyrics priority with it on: word-by-word, then line-synced, then plain lyrics
+- Also new since 2.3.0 (from 2.3.1): lyrics from five sources at once (your Jellyfin server, lrclib.net, NetEase Cloud Music, Kugou, lyrics.ovh) with no more false "Couldn't load lyrics", smarter matching for "feat."/"Remastered"/"Live" and YouTube-style titles, lyrics cached and fetched ahead, a smooth highlight that glides between lines, Simplified and Traditional Chinese, Japanese and Korean, and Mac downloads (Apple silicon and Intel)
+
 ## What's new in 2.3.1
 
 - Lyrics that show up: your Jellyfin server, lrclib.net, NetEase Cloud Music and Kugou are asked at the same time for synced lyrics, with lyrics.ovh as a plain-text fallback, and the best synced match appears as soon as it arrives

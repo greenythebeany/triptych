@@ -420,7 +420,9 @@
     "smoothLyricsTitle": "流畅的同步歌词",
     "smoothLyricsDesc": "当前行会淡入高亮，歌词平滑滚动过去，不再跳动。",
     "cjkLanguagesTitle": "中文、日语和韩语",
-    "cjkLanguagesDesc": "Triptych 现已支持简体中文、繁體中文、日语和韩语，首次启动时会自动使用系统语言。"
+    "cjkLanguagesDesc": "Triptych 现已支持简体中文、繁體中文、日语和韩语，首次启动时会自动使用系统语言。",
+    "wordLyricsTitle": "逐字歌词",
+    "wordLyricsDesc": "在“设置 → 外观”中开启：每个字会随着演唱填充并放大。它更耗电，所以默认关闭。"
   },
   "wrapped": {
     "bannerTitle": "你的 {year} 年度总结",

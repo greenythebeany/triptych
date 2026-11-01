@@ -422,7 +422,9 @@
     "smoothLyricsTitle": "Myke synkroniserte tekster",
     "smoothLyricsDesc": "Den gjeldende linjen tones inn og teksten glir dit i stedet for å hoppe.",
     "cjkLanguagesTitle": "Kinesisk, japansk og koreansk",
-    "cjkLanguagesDesc": "Triptych snakker nå forenklet og tradisjonell kinesisk, japansk og koreansk, og velger systemspråket ved første oppstart."
+    "cjkLanguagesDesc": "Triptych snakker nå forenklet og tradisjonell kinesisk, japansk og koreansk, og velger systemspråket ved første oppstart.",
+    "wordLyricsTitle": "Sangtekst ord for ord",
+    "wordLyricsDesc": "Slå det på under Innstillinger → Utseende: hvert ord fylles ut og vokser mens det synges. Det bruker mer batteri, så det er av som standard."
   },
   "wrapped": {
     "bannerTitle": "Din Wrapped {year}",

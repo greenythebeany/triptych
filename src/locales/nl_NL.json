@@ -422,7 +422,9 @@
     "smoothLyricsTitle": "Vloeiende gesynchroniseerde teksten",
     "smoothLyricsDesc": "De huidige regel faadt in en de tekst glijdt ernaartoe in plaats van te springen.",
     "cjkLanguagesTitle": "Chinees, Japans en Koreaans",
-    "cjkLanguagesDesc": "Triptych spreekt nu vereenvoudigd en traditioneel Chinees, Japans en Koreaans, en kiest bij de eerste start je systeemtaal."
+    "cjkLanguagesDesc": "Triptych spreekt nu vereenvoudigd en traditioneel Chinees, Japans en Koreaans, en kiest bij de eerste start je systeemtaal.",
+    "wordLyricsTitle": "Songtekst woord voor woord",
+    "wordLyricsDesc": "Zet het aan via Instellingen → Weergave: elk woord vult zich en groeit terwijl het gezongen wordt. Kost meer batterij, dus het staat standaard uit."
   },
   "wrapped": {
     "bannerTitle": "Jouw Wrapped {year}",

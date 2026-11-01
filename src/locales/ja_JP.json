@@ -420,7 +420,9 @@
     "smoothLyricsTitle": "なめらかな同期歌詞",
     "smoothLyricsDesc": "現在の行がフェードインし、歌詞はジャンプせずになめらかにスクロールします。",
     "cjkLanguagesTitle": "中国語、日本語、韓国語",
-    "cjkLanguagesDesc": "Triptych が简体中文、繁體中文、日本語、韓国語に対応しました。初回起動時はシステムの言語を使います。"
+    "cjkLanguagesDesc": "Triptych が简体中文、繁體中文、日本語、韓国語に対応しました。初回起動時はシステムの言語を使います。",
+    "wordLyricsTitle": "単語ごとの歌詞",
+    "wordLyricsDesc": "「設定 → 外観」でオンにすると、歌われるのに合わせて単語が塗られ、少し大きくなります。バッテリーを多く使うため、初期設定ではオフです。"
   },
   "wrapped": {
     "bannerTitle": "あなたの {year} 年まとめ",

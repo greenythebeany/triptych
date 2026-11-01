@@ -420,7 +420,9 @@
     "smoothLyricsTitle": "부드러운 싱크 가사",
     "smoothLyricsDesc": "현재 줄이 서서히 강조되고 가사가 뛰지 않고 부드럽게 스크롤됩니다.",
     "cjkLanguagesTitle": "중국어, 일본어, 한국어",
-    "cjkLanguagesDesc": "이제 Triptych가 简体中文, 繁體中文, 일본어, 한국어를 지원하며 처음 실행할 때 시스템 언어를 사용합니다."
+    "cjkLanguagesDesc": "이제 Triptych가 简体中文, 繁體中文, 일본어, 한국어를 지원하며 처음 실행할 때 시스템 언어를 사용합니다.",
+    "wordLyricsTitle": "단어별 가사",
+    "wordLyricsDesc": "설정 → 모양에서 켜면 부르는 순간에 맞춰 단어가 채워지고 커집니다. 배터리를 더 사용하므로 기본값은 꺼짐입니다."
   },
   "wrapped": {
     "bannerTitle": "나의 {year} 연말 결산",
