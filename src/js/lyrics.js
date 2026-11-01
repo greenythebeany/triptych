@@ -519,7 +519,21 @@ const CYRILLIC_LOOKALIKES = {
   А: 'A', В: 'B', Е: 'E', К: 'K', М: 'M', Н: 'H', О: 'O', Р: 'P', С: 'C', Т: 'T', Х: 'X', У: 'Y', І: 'I', Ј: 'J', Ѕ: 'S'
 };
 const MIXED_WORD = /\S*\p{Script=Latin}\S*/gu;
-function fixLookalikes(text) {
+// Some sources send HTML-escaped text ("I&apos;m"), which showed up as is.
+const NAMED_ENTITIES = { amp: '&', apos: "'", quot: '"', lt: '<', gt: '>', nbsp: ' ' };
+function decodeEntities(text) {
+  if (!text || !text.includes('&')) return text;
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, code) => {
+    if (code[0] === '#') {
+      const n = code[1] === 'x' || code[1] === 'X' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+      return Number.isFinite(n) && n > 0 && n < 0x110000 ? String.fromCodePoint(n) : m;
+    }
+    return NAMED_ENTITIES[code.toLowerCase()] ?? m;
+  });
+}
+
+function fixLookalikes(raw) {
+  const text = decodeEntities(raw);
   if (!text || !/\p{Script=Cyrillic}/u.test(text)) return text;
   return text.replace(MIXED_WORD, (word) => (/\p{Script=Cyrillic}/u.test(word)
     ? word.replace(/\p{Script=Cyrillic}/gu, (c) => CYRILLIC_LOOKALIKES[c] || c)
@@ -620,7 +634,7 @@ function lookupLyrics(query, onLate) {
 
 const DB_NAME = 'triptych-lyrics-cache';
 const STORE = 'tracks';
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3; // 3: text fixes in strip() (entities, lookalikes) -- refetch older entries
 const FOUND_TTL_MS = 90 * 24 * 3600 * 1000;
 const NONE_TTL_MS = 3 * 24 * 3600 * 1000;
 

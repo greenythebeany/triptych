@@ -4,6 +4,13 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const { Client: DiscordRpcClient } = require('@xhayper/discord-rpc');
 const { checkForUpdates, downloadUpdate, installAndQuit } = require('./update-checker');
+
+// Animations stay on even when the OS asks for less motion (Windows
+// "Animation effects" off): Chromium would otherwise turn every smooth
+// scroll into a jump and report prefers-reduced-motion to the page. The
+// app's animations are part of how it looks, so they're always played.
+app.commandLine.appendSwitch('enable-smooth-scrolling');
+app.commandLine.appendSwitch('force-prefers-no-reduced-motion');
 const localLibrary = require('./local-library');
 
 // Up to 2.2 the data folder (login, settings, downloads, listening stats) was
