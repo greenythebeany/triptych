@@ -163,7 +163,7 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
-  '2.4.0': [
+  '2.3.1': [
     { icon: 'fi-br-quote-right', key: 'lyricsSources' },
     { icon: 'fi-br-magic-wand', key: 'smoothLyrics' },
     { icon: 'fi-br-language', key: 'cjkLanguages' }
