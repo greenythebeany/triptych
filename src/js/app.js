@@ -751,13 +751,85 @@ function translateLoginError(err) {
 }
 
 // ---------- Account menu ----------
+// Opens like a drop (as in MessageMe): the avatar shrinks into an accent
+// dot, the menu grows out of it in a circle and its rows slide in one after
+// another; closing sinks the menu back into the dot and the avatar springs
+// back out of it.
+const accountPmDot = btnAccount.querySelector('.pm-dot');
+const MENU_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
+let finishAccountMenuClose = null;
+
+function accountMenuOrigin() {
+  const a = accountAvatar.getBoundingClientRect();
+  const m = accountMenu.getBoundingClientRect();
+  return { x: a.left + a.width / 2 - m.left, y: a.top + a.height / 2 - m.top, r: a.width / 2, w: m.width, h: m.height, size: a.width };
+}
+
+function morphAccountAvatar(toDot, duration) {
+  const small = `scale(${Math.min(0.32, 10 / (accountAvatar.offsetWidth || 30))})`;
+  const opts = { duration, fill: 'forwards' };
+  if (toDot) {
+    accountAvatar.animate([{ transform: 'none', opacity: 1 }, { transform: small, opacity: 0 }], { ...opts, easing: MENU_EASE });
+    return accountPmDot.animate([{ transform: 'none', opacity: 0 }, { transform: small, opacity: 1 }], { ...opts, easing: MENU_EASE });
+  }
+  const grow = [
+    { transform: small, easing: 'cubic-bezier(0.3, 0, 0.2, 1)' },
+    { transform: 'scale(1.12)', offset: 0.55, easing: 'ease-in-out' },
+    { transform: 'scale(0.95)', offset: 0.78, easing: 'ease-in-out' },
+    { transform: 'none' }
+  ];
+  accountAvatar.animate(grow.map((k, i) => ({ ...k, opacity: i ? 1 : 0 })), opts);
+  return accountPmDot.animate(grow.map((k, i) => ({ ...k, opacity: i ? 0 : 1 })), opts);
+}
+
+function openAccountMenu() {
+  finishAccountMenuClose?.();
+  if (!accountMenu.hidden) return;
+  accountMenu.hidden = false;
+  accountMenu.getAnimations().forEach((an) => an.cancel());
+  const o = accountMenuOrigin();
+  const full = Math.hypot(Math.max(o.x, o.w - o.x), Math.max(o.y, o.h - o.y)) + 4;
+  const circle = (r) => `circle(${r}px at ${o.x}px ${o.y}px)`;
+  morphAccountAvatar(true, 320);
+  accountMenu.animate([{ clipPath: circle(o.r) }, { clipPath: circle(full) }], { duration: 460, easing: MENU_EASE });
+  [...accountMenu.children].forEach((row, i) =>
+    row.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 300, delay: 120 + i * 40, easing: MENU_EASE, fill: 'backwards' }));
+}
+
+function closeAccountMenu() {
+  if (accountMenu.hidden || finishAccountMenuClose) return;
+  const o = accountMenuOrigin();
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    accountMenu.hidden = true;
+    accountMenu.getAnimations().forEach((an) => an.cancel());
+    accountMenu.style.transformOrigin = '';
+    accountAvatar.getAnimations().forEach((an) => an.cancel());
+    accountPmDot.getAnimations().forEach((an) => an.cancel());
+    finishAccountMenuClose = null;
+  };
+  finishAccountMenuClose = finish;
+  // Also on a timer: a window that isn't drawing frames never finishes the
+  // animations.
+  setTimeout(finish, 560);
+  accountMenu.style.transformOrigin = `${o.x}px ${o.y}px`;
+  accountMenu.animate([{ transform: 'none', opacity: 1 }, { transform: 'scale(0.6)', opacity: 0 }],
+    { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' })
+    .finished.then(() => { accountMenu.hidden = true; }, () => {});
+  morphAccountAvatar(false, 460).finished.then(finish, finish);
+}
+
 btnAccount.addEventListener('click', (evt) => {
   evt.stopPropagation();
-  accountMenu.hidden = !accountMenu.hidden;
+  if (accountMenu.hidden || finishAccountMenuClose) openAccountMenu();
+  else closeAccountMenu();
 });
 document.addEventListener('click', (evt) => {
-  if (!accountMenu.hidden && !accountMenu.contains(evt.target) && evt.target !== btnAccount) {
-    accountMenu.hidden = true;
+  if (!accountMenu.hidden && !accountMenu.contains(evt.target) && !btnAccount.contains(evt.target)) {
+    closeAccountMenu();
   }
 });
 
@@ -771,7 +843,7 @@ document.addEventListener('keydown', (evt) => {
   if (!legalOverlay.hidden) { closeLegal(); return; }
   if (!settingsOverlay.hidden) { closeSettings(); return; }
   if (!createPlaylistOverlay.hidden) { closeCreatePlaylist(); return; }
-  if (!accountMenu.hidden) { accountMenu.hidden = true; btnAccount.focus(); return; }
+  if (!accountMenu.hidden) { closeAccountMenu(); btnAccount.focus(); return; }
   if (!sleepTimerMenu.hidden) { sleepTimerMenu.hidden = true; return; }
   if (!connectMenu.hidden) { connectMenu.hidden = true; }
 });
@@ -807,7 +879,7 @@ menuLogout.addEventListener('click', async () => {
   location.reload();
 });
 menuSettings.addEventListener('click', () => {
-  accountMenu.hidden = true;
+  closeAccountMenu();
   openSettings();
 });
 
@@ -850,6 +922,7 @@ function wireSettingsUI() {
       updateSettings({ uiStyle: btn.dataset.value });
       refreshSettingsUI();
       updateBgArt(); // Apple style always shows the blurred art behind the player
+      requestAnimationFrame(() => moveNavGliders({ instant: true }));
     });
   });
 
@@ -2088,7 +2161,7 @@ function wireBackButton() {
     if (!whatsNewOverlay.hidden) { closeWhatsNew(); return; }
     if (!settingsOverlay.hidden) { closeSettings(); return; }
     if (!createPlaylistOverlay.hidden) { closeCreatePlaylist(); return; }
-    if (!accountMenu.hidden) { accountMenu.hidden = true; return; }
+    if (!accountMenu.hidden) { closeAccountMenu(); return; }
     if (activeAddMenu) { closeAddToPlaylistMenu(); return; }
     if (queueSheetOpen || lyricsSheetOpen) { closeQueueSheet(); return; }
     if (!lyricsPanel.hidden) { closeNowPlaying(); return; }
@@ -2150,12 +2223,76 @@ function loadPinnedAlbumsSidebar() {
   });
 }
 
+// ---------- Nav glider + sticky dot ----------
+// The highlight behind the active sidebar item slides to the new item, and
+// (Nothing look) the accent dot moves like a drop of liquid -- in the
+// sidebar and in the phone's tab bar. Ported from MessageMe.
+const NAV_DOT = 6;
+function moveNavGliders({ instant = false } = {}) {
+  for (const nav of document.querySelectorAll('.sidebar-nav, .bottom-nav')) {
+    const glider = nav.querySelector('.nav-glider');
+    const dot = nav.querySelector('.nav-dot');
+    const active = nav.querySelector('[data-view].active');
+    if (!active || !active.offsetWidth) {
+      for (const node of [glider, dot]) if (node) node.style.opacity = '0';
+      continue;
+    }
+    const tab = nav.classList.contains('bottom-nav');
+    if (glider) {
+      glider.classList.toggle('instant', instant || !glider.dataset.placed);
+      glider.style.transform = `translate3d(${active.offsetLeft}px, ${active.offsetTop}px, 0)`;
+      glider.style.width = `${active.offsetWidth}px`;
+      glider.style.height = `${active.offsetHeight}px`;
+      glider.style.opacity = '1';
+      glider.dataset.placed = '1';
+    }
+    if (dot && getComputedStyle(dot).display !== 'none') {
+      const to = tab
+        ? { x: active.offsetLeft + active.offsetWidth / 2, y: active.offsetTop + active.offsetHeight - NAV_DOT / 2 }
+        : { x: active.offsetLeft + active.offsetWidth - 15, y: active.offsetTop + active.offsetHeight / 2 };
+      stickyNavDot(dot, to, { axis: tab ? 'x' : 'y', instant });
+    }
+  }
+}
+
+// It stretches toward the new item (leading edge first), then the trailing
+// edge lets go and catches up.
+function stickyNavDot(dot, to, { axis, instant }) {
+  const from = dot.dataset.x ? { x: Number(dot.dataset.x), y: Number(dot.dataset.y) } : null;
+  dot.dataset.x = String(to.x);
+  dot.dataset.y = String(to.y);
+  dot.style.opacity = '1';
+  const at = (p) => `translate3d(${p.x - NAV_DOT / 2}px, ${p.y - NAV_DOT / 2}px, 0)`;
+  dot.style.transform = at(to);
+  dot.style.width = dot.style.height = `${NAV_DOT}px`;
+  if (!from || instant) return;
+  const d = axis === 'x' ? to.x - from.x : to.y - from.y;
+  if (Math.abs(d) < 1) return;
+  const size = axis === 'x' ? 'width' : 'height';
+  const lead = d > 0 ? from : to;
+  dot.getAnimations().forEach((an) => an.cancel());
+  dot.animate([
+    { transform: at(from), [size]: `${NAV_DOT}px`, offset: 0 },
+    { transform: at(lead), [size]: `${Math.abs(d) + NAV_DOT}px`, offset: 0.45 },
+    { transform: at(to), [size]: `${NAV_DOT}px`, offset: 1 }
+  ], { duration: 460, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+}
+
+// Re-place them whenever the bars change size (window resize, the app
+// appearing, switching look) -- without animating.
+if (window.ResizeObserver) {
+  const navObserver = new ResizeObserver(() => moveNavGliders({ instant: true }));
+  document.querySelectorAll('.sidebar-nav, .bottom-nav').forEach((nav) => navObserver.observe(nav));
+}
+window.addEventListener('resize', () => moveNavGliders({ instant: true }));
+
 // ---------- View router with back/forward ----------
 function navigateTo(state, pushHistory = true) {
   if (pushHistory && viewHistory.length) viewFuture = [];
   if (pushHistory) viewHistory.push(state);
   renderView(state);
   document.querySelectorAll('.nav-item, .bottom-nav-item').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
+  moveNavGliders();
   globalSearchWrap.hidden = state.view !== 'search';
   if (state.view === 'search') globalSearchInput.focus();
 }
