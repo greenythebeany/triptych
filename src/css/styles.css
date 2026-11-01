@@ -444,6 +444,40 @@ body.platform-mac .titlebar-controls { display: none; }
 .account-menu button:hover { background: var(--bg-card-hover); }
 .account-menu button .fi { font-size: 16px; color: var(--text-secondary); }
 .account-menu button.danger { color: var(--danger); }
+
+/* ---------- Nav glider + sticky dot (app.js moveNavGliders) ----------
+   The active sidebar item's highlight slides to the new item instead of
+   jumping, and in the Nothing look the accent dot travels like a drop of
+   liquid: it stretches toward the new item, then its back end catches up
+   (sidebar: right end of the pill; phone tab bar: under the icon). */
+.sidebar-nav { position: relative; }
+.sidebar-nav > .nav-item { position: relative; z-index: 1; }
+:root[data-ui] .sidebar-nav .nav-item.active { background: transparent; }
+.nav-glider {
+  position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; opacity: 0;
+  border-radius: var(--radius-sm); background: var(--bg-highlight);
+  transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1), width 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+    height 0.42s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
+}
+.nav-glider.instant { transition: none; }
+:root[data-ui="nothing"] .nav-glider { border-radius: 999px; background: var(--bg-card); }
+:root[data-ui="apple"] .nav-glider { border-radius: 8px; }
+.nav-dot {
+  display: none; position: absolute; left: 0; top: 0; z-index: 2;
+  width: 6px; height: 6px; border-radius: 3px; background: var(--accent);
+  pointer-events: none; opacity: 0; transition: opacity 0.2s ease;
+}
+:root[data-ui="nothing"] .nav-dot { display: block; }
+:root[data-ui="nothing"] .nav-item.active::after,
+:root[data-ui="nothing"] .bottom-nav-item.active::after { visibility: hidden; }
+
+/* Account menu (app.js openAccountMenu): while it's open the avatar
+   shrinks into an accent dot and the menu opens out of it. */
+.user-badge { position: relative; }
+.pm-dot {
+  position: absolute; left: 4px; top: 4px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); pointer-events: none; opacity: 0;
+}
 .account-menu button.danger .fi { color: var(--danger); }
 
 .view-root { padding: 8px 24px 32px; flex: 1; }
@@ -1455,7 +1489,7 @@ body.platform-mobile .titlebar { display: none; }
   .mobile-now-playing-controls .ctrl-btn-play svg { width: 26px; height: 26px; }
 
   .bottom-nav {
-    grid-area: nav;
+    grid-area: nav; position: relative;
     display: flex; justify-content: space-around; align-items: center;
     height: auto; flex-shrink: 0;
     background: var(--bg-elevated); border-top: 1px solid var(--border-subtle);
