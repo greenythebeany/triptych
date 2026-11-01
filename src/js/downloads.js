@@ -215,6 +215,27 @@ export async function getLocalImageUri(trackId) {
   return null;
 }
 
+// The saved cover as something the OS media controls can load without the
+// server: a file:// URL for Windows SMTC / desktop, a data: URL on phones
+// (the native media-session plugin only fetches http(s) or data: URLs, and
+// can't reach the WebView's own localhost paths). null if there's none.
+export async function getLocalArtwork(trackId) {
+  const entry = index[trackId];
+  if (!entry || !entry.imagePath) return null;
+  if (isDesktop) return windowsPathToFileUrl(entry.imagePath);
+  const fs = isMobile ? androidFilesystem() : null;
+  if (!fs) return null;
+  try {
+    const { data } = await fs.readFile({ path: entry.imagePath, directory: 'DATA' });
+    if (!data || typeof data !== 'string') return null;
+    const ext = (entry.imagePath.split('.').pop() || '').toLowerCase();
+    const type = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+    return `data:${type};base64,${data}`;
+  } catch (err) {
+    return null;
+  }
+}
+
 // A URI the <audio> element can actually play from, or null if this track
 // isn't downloaded (or downloads aren't supported here).
 export async function getLocalUri(trackId) {

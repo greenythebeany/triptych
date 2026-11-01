@@ -509,10 +509,32 @@ function withTimeout(promise, ms) {
   return Promise.race([promise, sleep(ms).then(() => { throw new SourceError('timeout'); })]);
 }
 
+// Some lyrics are typed with a Cyrillic lookalike in the middle of a Latin
+// word (lrclib's "Prеsne" has a Cyrillic е): it reads the same, but the
+// dot-matrix font has no Cyrillic, so that one letter showed up in a
+// fallback font. Words that mix the two scripts get the lookalikes swapped
+// for Latin; all-Cyrillic words (Russian, Ukrainian lyrics) are left alone.
+const CYRILLIC_LOOKALIKES = {
+  а: 'a', е: 'e', о: 'o', р: 'p', с: 'c', у: 'y', х: 'x', і: 'i', ј: 'j', ѕ: 's', ԁ: 'd', ӏ: 'l', һ: 'h',
+  А: 'A', В: 'B', Е: 'E', К: 'K', М: 'M', Н: 'H', О: 'O', Р: 'P', С: 'C', Т: 'T', Х: 'X', У: 'Y', І: 'I', Ј: 'J', Ѕ: 'S'
+};
+const MIXED_WORD = /\S*\p{Script=Latin}\S*/gu;
+function fixLookalikes(text) {
+  if (!text || !/\p{Script=Cyrillic}/u.test(text)) return text;
+  return text.replace(MIXED_WORD, (word) => (/\p{Script=Cyrillic}/u.test(word)
+    ? word.replace(/\p{Script=Cyrillic}/gu, (c) => CYRILLIC_LOOKALIKES[c] || c)
+    : word));
+}
+const fixLine = (l) => ({
+  ...l,
+  text: fixLookalikes(l.text),
+  ...(l.words ? { words: l.words.map((w) => ({ ...w, text: fixLookalikes(w.text) })) } : {})
+});
+
 const hasWords = (r) => !!r?.synced?.some((l) => l.words?.length > 1);
 const strip = ({ synced, plain, instrumental, source }) => ({
-  synced: synced || null,
-  plain: plain || null,
+  synced: synced ? synced.map(fixLine) : null,
+  plain: plain ? fixLookalikes(plain) : null,
   instrumental: !!instrumental,
   wordSynced: !!synced?.some((l) => l.words?.length > 1),
   source
