@@ -425,7 +425,7 @@
     "cjkLanguagesDesc": "Triptych snakker nå forenklet og tradisjonell kinesisk, japansk og koreansk, og velger systemspråket ved første oppstart.",
     "wordLyricsTitle": "Sangtekst ord for ord",
     "localMusicTitle": "Musikk på denne enheten",
-    "localMusicDesc": "Spill musikkfiler fra enheten: alene, uten Jellyfin-server, eller sammen med Jellyfin-biblioteket ditt. Legg til mapper i Innstillinger.",
+    "localMusicDesc": "På datamaskinen kan du spille musikkfiler fra dine egne mapper: alene, uten Jellyfin-server, eller sammen med Jellyfin-biblioteket ditt. Legg til mapper i Innstillinger. Telefoner kommer snart.",
     "motion240Title": "Mykere overalt",
     "motion240Desc": "Markeringen i sidepanelet glir mellom sidene, den røde prikken beveger seg som en dråpe i Nothing-utseendet, og kontomenyen åpner seg fra avataren din.",
     "fixes240Title": "Rettelser",

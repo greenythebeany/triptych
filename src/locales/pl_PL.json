@@ -425,7 +425,7 @@
     "cjkLanguagesDesc": "Triptych mówi teraz po chińsku (uproszczonym i tradycyjnym), japońsku i koreańsku, a przy pierwszym uruchomieniu wybiera język systemu.",
     "wordLyricsTitle": "Tekst słowo po słowie",
     "localMusicTitle": "Muzyka na tym urządzeniu",
-    "localMusicDesc": "Odtwarzaj pliki muzyczne z urządzenia: osobno, bez serwera Jellyfin, albo razem z biblioteką Jellyfin. Foldery dodasz w Ustawieniach.",
+    "localMusicDesc": "Na komputerze odtwarzaj pliki muzyczne z własnych folderów: osobno, bez serwera Jellyfin, albo razem z biblioteką Jellyfin. Foldery dodasz w Ustawieniach. Telefony już wkrótce.",
     "motion240Title": "Płynniej wszędzie",
     "motion240Desc": "Podświetlenie w pasku bocznym przesuwa się między stronami, czerwona kropka w stylu Nothing płynie jak kropla, a menu konta otwiera się z awatara.",
     "fixes240Title": "Poprawki",

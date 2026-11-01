@@ -423,7 +423,7 @@
     "cjkLanguagesDesc": "이제 Triptych가 简体中文, 繁體中文, 일본어, 한국어를 지원하며 처음 실행할 때 시스템 언어를 사용합니다.",
     "wordLyricsTitle": "단어별 가사",
     "localMusicTitle": "이 기기의 음악",
-    "localMusicDesc": "기기의 음악 파일을 재생하세요. Jellyfin 서버 없이 단독으로, 또는 Jellyfin 보관함과 함께 사용할 수 있습니다. 폴더는 설정에서 추가합니다.",
+    "localMusicDesc": "컴퓨터에서 내 폴더의 음악 파일을 재생하세요. Jellyfin 서버 없이 단독으로, 또는 Jellyfin 보관함과 함께 사용할 수 있습니다. 폴더는 설정에서 추가합니다. 휴대폰 지원은 곧 제공됩니다.",
     "motion240Title": "어디서나 더 부드럽게",
     "motion240Desc": "사이드바 강조가 페이지 사이를 미끄러지듯 이동하고, Nothing 스타일의 빨간 점은 물방울처럼 움직이며, 계정 메뉴는 아바타에서 펼쳐집니다.",
     "fixes240Title": "수정 사항",

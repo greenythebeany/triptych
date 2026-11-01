@@ -423,7 +423,7 @@
     "cjkLanguagesDesc": "Triptych 现已支持简体中文、繁體中文、日语和韩语，首次启动时会自动使用系统语言。",
     "wordLyricsTitle": "逐字歌词",
     "localMusicTitle": "本机音乐",
-    "localMusicDesc": "播放设备上的音乐文件：可以不用 Jellyfin 服务器单独使用，也可以与 Jellyfin 音乐库混合。在设置中添加文件夹。",
+    "localMusicDesc": "在电脑上播放你自己文件夹中的音乐文件：可以不用 Jellyfin 服务器单独使用，也可以与 Jellyfin 音乐库混合。在设置中添加文件夹。手机版即将推出。",
     "motion240Title": "处处更流畅",
     "motion240Desc": "侧边栏的高亮会在页面间滑动，Nothing 风格中的红点像水滴一样移动，账户菜单从头像中展开。",
     "fixes240Title": "修复",

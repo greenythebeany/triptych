@@ -425,7 +425,7 @@
     "cjkLanguagesDesc": "Triptych spricht jetzt vereinfachtes und traditionelles Chinesisch, Japanisch und Koreanisch und übernimmt beim ersten Start die Systemsprache.",
     "wordLyricsTitle": "Songtext Wort für Wort",
     "localMusicTitle": "Musik auf diesem Gerät",
-    "localMusicDesc": "Spiele Musikdateien von deinem Gerät ab: allein, ohne Jellyfin-Server, oder gemischt mit deiner Jellyfin-Bibliothek. Ordner fügst du in den Einstellungen hinzu.",
+    "localMusicDesc": "Spiele am Computer Musikdateien aus deinen eigenen Ordnern ab: allein, ohne Jellyfin-Server, oder gemischt mit deiner Jellyfin-Bibliothek. Ordner fügst du in den Einstellungen hinzu. Smartphones folgen bald.",
     "motion240Title": "Überall flüssiger",
     "motion240Desc": "Die Markierung in der Seitenleiste gleitet zwischen den Seiten, der rote Punkt wandert im Nothing-Look wie ein Tropfen, und das Kontomenü öffnet sich aus deinem Avatar.",
     "fixes240Title": "Korrekturen",

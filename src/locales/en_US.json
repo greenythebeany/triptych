@@ -423,7 +423,7 @@
     "cjkLanguagesDesc": "Triptych now speaks Simplified and Traditional Chinese, Japanese and Korean, and picks your system language on first start.",
     "wordLyricsTitle": "Word-by-word lyrics",
     "localMusicTitle": "Music on this device",
-    "localMusicDesc": "Play music files from your device: on their own, without a Jellyfin server, or mixed into your Jellyfin library. Add folders in Settings.",
+    "localMusicDesc": "On your computer, play music files from your own folders: on their own, without a Jellyfin server, or mixed into your Jellyfin library. Add folders in Settings. Phones are coming next.",
     "motion240Title": "Smoother everywhere",
     "motion240Desc": "The sidebar highlight slides between pages, the red dot travels like a drop in the Nothing look, and the account menu opens out of your avatar.",
     "fixes240Title": "Fixes",

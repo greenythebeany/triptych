@@ -423,7 +423,7 @@
     "cjkLanguagesDesc": "Triptych teraz vie zjednodušenú aj tradičnú čínštinu, japončinu a kórejčinu a pri prvom spustení zvolí jazyk systému.",
     "wordLyricsTitle": "Text slovo po slove",
     "localMusicTitle": "Hudba v tomto zariadení",
-    "localMusicDesc": "Prehrávaj hudobné súbory zo zariadenia: samostatne, bez servera Jellyfin, alebo spolu s knižnicou Jellyfin. Priečinky pridáš v Nastaveniach.",
+    "localMusicDesc": "Na počítači prehrávaj hudobné súbory z vlastných priečinkov: samostatne, bez servera Jellyfin, alebo spolu s knižnicou Jellyfin. Priečinky pridáš v Nastaveniach. Telefóny prídu čoskoro.",
     "motion240Title": "Všade plynulejšie",
     "motion240Desc": "Zvýraznenie v bočnom paneli kĺže medzi stránkami, červená bodka vo vzhľade Nothing putuje ako kvapka a menu účtu sa otvára z tvojho avatara.",
     "fixes240Title": "Opravy",

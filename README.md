@@ -102,7 +102,7 @@ The Android project lives in `android/` and is a standard Capacitor project — 
 
 ## What's new in 2.4.0
 
-- Music on this device: play music files from folders on your device, on their own without a Jellyfin server, or mixed into your Jellyfin library (Settings → Music on this device)
+- Music on this device (Windows, Mac, Linux): play music files from folders on your computer, on their own without a Jellyfin server, or mixed into your Jellyfin library (Settings → Music on this device). Android and iPhone follow in 2.4.1
 - Smoother everywhere: the sidebar highlight slides between pages, the red dot travels like a drop in the Nothing look (sidebar and phone tab bar), and the account menu opens out of your avatar
 - Downloaded songs show their cover on the lock screen, in notifications and in the Windows media flyout, even when your server can't be reached
 - Lyrics catch up right away when you reopen the phone player or come back to the app
