@@ -180,6 +180,8 @@
     "accentColorDesc": "Välj appens färgschema",
     "blurBg": "Suddig bakgrund från omslagsbild",
     "blurBgDesc": "Fyller bakgrunden med en suddig version av den aktuella låtens omslagsbild",
+    "wordLyrics": "Låttext ord för ord",
+    "wordLyricsDesc": "Varje ord fylls i och växer när det sjungs. Drar mer batteri, eftersom texten ritas om i varje bildruta.",
     "dynamicAccentColor": "Dynamisk accentfärg",
     "dynamicAccentColorDesc": "Färgar appens accentfärg efter omslaget för aktuell låt",
     "language": "Språk",

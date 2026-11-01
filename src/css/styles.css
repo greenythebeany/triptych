@@ -906,6 +906,22 @@ body.platform-mac .titlebar-controls { display: none; }
 }
 .lyric-line.past { opacity: 0.75; }
 .lyric-line.active { color: var(--text-primary); font-size: 17px; opacity: 1; }
+/* Word-by-word lyrics (Settings -> Appearance): the active line's words
+   fill left to right as they're sung (--p, set every frame by app.js) and
+   the word being sung grows a little. text-fill-color, not color, goes
+   transparent so currentColor still means the line's own (per-look) color. */
+.word-mode .lyric-line .lw {
+  display: inline-block;
+  transform-origin: 50% 85%;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.word-mode .lyric-line.active .lw {
+  background-image: linear-gradient(90deg, currentColor calc(var(--p, 0) * 100%), color-mix(in srgb, currentColor 38%, transparent) calc(var(--p, 0) * 100%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.word-mode .lyric-line.active .lw.on { transform: scale(1.1); }
 /* Deliberately not turned off for prefers-reduced-motion: Windows reports it
    whenever "Animation effects" is off, and the lyrics then snapped. */
 .lyrics-empty { color: var(--text-tertiary); font-size: 13.5px; text-align: center; margin-top: 30px; }

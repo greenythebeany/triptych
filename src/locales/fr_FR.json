@@ -180,6 +180,8 @@
     "accentColorDesc": "Choisissez le thème de couleur de l'application",
     "blurBg": "Arrière-plan flouté de la pochette",
     "blurBgDesc": "Remplit l'arrière-plan avec une version floutée de la pochette du titre en cours",
+    "wordLyrics": "Paroles mot à mot",
+    "wordLyricsDesc": "Chaque mot se remplit et grossit au moment où il est chanté. Consomme plus de batterie, car les paroles sont redessinées à chaque image.",
     "dynamicAccentColor": "Couleur d'accent dynamique",
     "dynamicAccentColorDesc": "Teinte la couleur d'accent de l'application selon la pochette de la chanson en cours",
     "language": "Langue",

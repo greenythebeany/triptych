@@ -180,6 +180,8 @@
     "accentColorDesc": "Pick the app's color scheme",
     "blurBg": "Blurred cover art background",
     "blurBgDesc": "Fill the background with a blurred version of the current song's art",
+    "wordLyrics": "Word-by-word lyrics",
+    "wordLyricsDesc": "Each word fills in and grows as it's sung. Uses more battery, since the lyrics are redrawn every frame.",
     "dynamicAccentColor": "Dynamic accent color",
     "dynamicAccentColorDesc": "Tint the app's accent color to match the current song's cover art",
     "language": "Language",

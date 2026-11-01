@@ -180,6 +180,8 @@
     "accentColorDesc": "Vyberte farebnú schému aplikácie",
     "blurBg": "Rozmazané pozadie z obalu",
     "blurBgDesc": "Vyplní pozadie rozmazanou verziou obalu aktuálnej skladby",
+    "wordLyrics": "Text slovo po slove",
+    "wordLyricsDesc": "Každé slovo sa vyplní a zväčší, keď sa spieva. Spotrebuje viac batérie, pretože sa text prekresľuje v každej snímke.",
     "dynamicAccentColor": "Dynamická farba zvýraznenia",
     "dynamicAccentColorDesc": "Sfarbí farbu zvýraznenia aplikácie podľa obalu aktuálnej skladby",
     "language": "Jazyk",

@@ -180,6 +180,8 @@
     "accentColorDesc": "Valitse sovelluksen väriteema",
     "blurBg": "Sumea tausta kansikuvasta",
     "blurBgDesc": "Täyttää taustan nykyisen kappaleen kansikuvan sumealla versiolla",
+    "wordLyrics": "Sanoitukset sana sanalta",
+    "wordLyricsDesc": "Jokainen sana täyttyy ja kasvaa, kun se lauletaan. Kuluttaa enemmän akkua, koska sanoitukset piirretään joka ruudussa uudelleen.",
     "dynamicAccentColor": "Dynaaminen korostusväri",
     "dynamicAccentColorDesc": "Sävyttää sovelluksen korostusvärin nykyisen kappaleen kannen mukaan",
     "language": "Kieli",

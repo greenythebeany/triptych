@@ -180,6 +180,8 @@
     "accentColorDesc": "Elige el esquema de color de la aplicación",
     "blurBg": "Fondo difuminado de la portada",
     "blurBgDesc": "Rellena el fondo con una versión difuminada de la portada actual",
+    "wordLyrics": "Letra palabra por palabra",
+    "wordLyricsDesc": "Cada palabra se rellena y crece mientras se canta. Gasta más batería, porque la letra se redibuja en cada fotograma.",
     "dynamicAccentColor": "Color de acento dinámico",
     "dynamicAccentColorDesc": "Tiñe el color de acento de la app según la portada de la canción actual",
     "language": "Idioma",

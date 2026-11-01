@@ -180,6 +180,8 @@
     "accentColorDesc": "Scegli lo schema colori dell'app",
     "blurBg": "Sfondo sfocato dalla copertina",
     "blurBgDesc": "Riempie lo sfondo con una versione sfocata della copertina del brano corrente",
+    "wordLyrics": "Testo parola per parola",
+    "wordLyricsDesc": "Ogni parola si riempie e si ingrandisce mentre viene cantata. Consuma più batteria, perché il testo viene ridisegnato a ogni fotogramma.",
     "dynamicAccentColor": "Colore accento dinamico",
     "dynamicAccentColorDesc": "Colora l'accento dell'app in base alla copertina del brano in riproduzione",
     "language": "Lingua",

@@ -180,6 +180,8 @@
     "accentColorDesc": "Vælg appens farveskema",
     "blurBg": "Sløret baggrund fra coverbillede",
     "blurBgDesc": "Fylder baggrunden med en sløret version af den aktuelle sangs coverbillede",
+    "wordLyrics": "Sangtekst ord for ord",
+    "wordLyricsDesc": "Hvert ord fyldes ud og vokser, mens det synges. Bruger mere batteri, da teksten tegnes igen i hvert billede.",
     "dynamicAccentColor": "Dynamisk accentfarve",
     "dynamicAccentColorDesc": "Farver appens accentfarve efter coveret på den aktuelle sang",
     "language": "Sprog",

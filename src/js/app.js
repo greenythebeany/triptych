@@ -101,6 +101,7 @@ const paletteGrid = document.getElementById('palette-grid');
 const audioQualitySelect = document.getElementById('audio-quality-select');
 const languageSelect = document.getElementById('language-select');
 const toggleArtBackground = document.getElementById('toggle-art-background');
+const toggleWordLyrics = document.getElementById('toggle-word-lyrics');
 const toggleDynamicAccentColor = document.getElementById('toggle-dynamic-accent-color');
 const crossfadeSlider = document.getElementById('crossfade-slider');
 const crossfadeValue = document.getElementById('crossfade-value');
@@ -847,6 +848,14 @@ function wireSettingsUI() {
 
   audioQualitySelect.addEventListener('change', () => {
     updateSettings({ audioQuality: audioQualitySelect.value });
+  });
+
+  toggleWordLyrics.addEventListener('change', () => {
+    updateSettings({ wordSyncLyrics: toggleWordLyrics.checked });
+    // Word-timed lyrics are a separate lookup (see lyrics.js cacheKey).
+    currentLyrics = null;
+    lyricsTrackId = null;
+    if (!lyricsPanel.hidden || lyricsSheetOpen) loadLyricsForCurrentTrack();
   });
 
   toggleArtBackground.addEventListener('change', () => {
@@ -1919,6 +1928,7 @@ function refreshSettingsUI() {
   const s = getSettings();
   languageSelect.value = s.language;
   toggleArtBackground.checked = !!s.artBackground;
+  toggleWordLyrics.checked = !!s.wordSyncLyrics;
   toggleDynamicAccentColor.checked = !!s.dynamicAccentColor;
   crossfadeSlider.value = s.crossfadeSeconds || 0;
   crossfadeValue.textContent = s.crossfadeSeconds ? `${s.crossfadeSeconds}s` : t('settings.crossfadeOff');
@@ -4048,6 +4058,7 @@ function wirePlayer() {
   player.on('playstate', () => {
     const playing = !player.audio.paused;
     lyricsPanel.classList.toggle('is-paused', !playing);
+    if (playing) startWordLoop();
     setHidden(iconPlay, playing);
     setHidden(iconPause, !playing);
     setHidden(mobileIconPlay, playing);
@@ -4075,6 +4086,7 @@ function wirePlayer() {
     mobileTimeCurrent.textContent = formatTime(current);
     if (duration) { timeTotal.textContent = formatTime(duration); mobileTimeTotal.textContent = formatTime(duration); }
     updateActiveLyricLine(current);
+    fillLyricWords(current);
 
     // "End of track" sleep timer: pause just short of the natural end so it
     // never lets the next track start, rather than pausing after the fact.
@@ -4773,6 +4785,7 @@ function lyricsQueryFor(track) {
     artist: artistNames(track),
     album: track.Album,
     durationSeconds: ticksToSeconds(track.RunTimeTicks),
+    wordSync: !!getSettings().wordSyncLyrics,
     // The server's own lyrics for this track (.lrc / embedded), one source
     // among several -- see lyrics.js.
     fromServer: jellyfin ? () => jellyfin.getLyrics(track.Id) : null
@@ -4822,9 +4835,57 @@ async function loadLyricsForCurrentTrack() {
   renderLyrics(result);
 }
 
+// Word-by-word lyrics for a line that only has line timing: the line's
+// time is shared out by word length (per character for CJK, which has no
+// spaces), over roughly how long it takes to sing, never past the next line.
+const CJK_CHAR = /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/;
+function estimateWords(line, next) {
+  const text = (line.text || '').trim();
+  if (!text) return null;
+  // Each token keeps the spaces after it, so Korean (CJK with spaces)
+  // still wraps and reads as words.
+  const tokens = text.match(new RegExp(`(?:${CJK_CHAR.source}|[^\\s\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]+)\\s*`, 'g')) || [text];
+  const weights = tokens.map((tk) => (CJK_CHAR.test(tk) ? 3 : tk.trim().length + 1));
+  const total = weights.reduce((a, b) => a + b, 0);
+  const gap = next ? next.time - line.time : 5;
+  const span = Math.max(0.3, Math.min(gap * 0.92, Math.max(1.2, total * 0.085)));
+  let at = line.time;
+  return tokens.map((tk, i) => {
+    const d = (span * weights[i]) / total;
+    const word = { time: at, end: at + d, text: tk };
+    at += d;
+    return word;
+  });
+}
+
+// One span per word; the space after it stays outside, so lines still wrap
+// between words.
+function buildWordLine(p, words) {
+  p.textContent = '';
+  p._words = [];
+  words.forEach((w) => {
+    const lead = w.text.match(/^\s*/)[0];
+    const trail = w.text.match(/\s*$/)[0];
+    const core = w.text.trim();
+    if (lead) p.appendChild(document.createTextNode(lead));
+    if (!core) return;
+    const span = document.createElement('span');
+    span.className = 'lw';
+    span.textContent = core;
+    p.appendChild(span);
+    if (trail) p.appendChild(document.createTextNode(trail));
+    p._words.push({ el: span, time: w.time, end: Math.max(w.end ?? w.time + 0.3, w.time + 0.05), p: -1, on: false });
+  });
+  if (!p._words.length) p.textContent = ' ';
+}
+
 function renderLyrics(result) {
   currentLyrics = result;
   activeLyricIdx = -1;
+  lyricLineEls = [];
+  filledLine = null;
+  const wordMode = !!(getSettings().wordSyncLyrics && result?.synced?.length);
+  lyricsBody.classList.toggle('word-mode', wordMode);
   if (!result || (!result.synced && !result.plain)) {
     lyricsBody.innerHTML = `<div class="lyrics-empty">${escapeHtml(t('nowPlaying.noLyrics'))}</div>`;
     return;
@@ -4832,12 +4893,18 @@ function renderLyrics(result) {
 
   lyricsBody.innerHTML = '';
   if (result.synced && result.synced.length) {
-    result.synced.forEach((line) => {
+    result.synced.forEach((line, i) => {
       const p = el('p', 'lyric-line', escapeHtml(line.text || ' '));
       p.dataset.time = line.time;
       p.addEventListener('click', () => player.seekTo(line.time));
+      if (wordMode) {
+        const words = line.words?.length > 1 ? line.words : estimateWords(line, result.synced[i + 1]);
+        if (words) buildWordLine(p, words);
+      }
       lyricsBody.appendChild(p);
     });
+    lyricLineEls = [...lyricsBody.querySelectorAll('.lyric-line')];
+    if (wordMode) startWordLoop();
   } else if (result.plain) {
     result.plain.split('\n').forEach((line) => {
       lyricsBody.appendChild(el('p', 'lyric-line', escapeHtml(line || ' ')));
@@ -4855,9 +4922,10 @@ onLyricsUpgraded((trackId, result) => {
 // scroll transitions (styles.css .lyric-line) run to the end instead of
 // being restarted on every timeupdate.
 let activeLyricIdx = -1;
+let lyricLineEls = [];
 function updateActiveLyricLine(currentTime) {
   if (lyricsPanel.hidden || !currentLyrics || !currentLyrics.synced) return;
-  const lines = lyricsBody.querySelectorAll('.lyric-line');
+  const lines = lyricLineEls;
   if (!lines.length) return;
   let idx = -1;
   lines.forEach((line, i) => {
@@ -4872,6 +4940,46 @@ function updateActiveLyricLine(currentTime) {
     lines[idx].classList.add('active');
     centerLyricLine(lines[idx], true);
   }
+}
+
+// Word-by-word: fills the active line's words up to `currentTime` (--p,
+// 0..1, drawn by styles.css .word-mode .lw) and marks the word being sung.
+let filledLine = null;
+function fillLyricWords(currentTime) {
+  if (!lyricsBody.classList.contains('word-mode')) return;
+  const line = lyricLineEls[activeLyricIdx];
+  if (filledLine && filledLine !== line) {
+    filledLine._words?.forEach((w) => {
+      if (w.on) { w.el.classList.remove('on'); w.on = false; }
+      w.p = -1;
+    });
+  }
+  filledLine = line || null;
+  if (!line?._words) return;
+  for (const w of line._words) {
+    const p = Math.min(1, Math.max(0, (currentTime - w.time) / (w.end - w.time)));
+    const rounded = Math.round(p * 200) / 200;
+    if (rounded !== w.p) { w.el.style.setProperty('--p', rounded); w.p = rounded; }
+    const on = currentTime >= w.time && currentTime < w.end;
+    if (on !== w.on) { w.el.classList.toggle('on', on); w.on = on; }
+  }
+}
+
+// timeupdate only fires ~4 times a second -- too coarse for a fill that
+// follows the voice, so word mode reads the position every frame while
+// playing and the lyrics are on screen (the battery cost the setting warns
+// about). Stops itself when paused, hidden or switched off.
+let wordFrame = 0;
+function wordLoop() {
+  wordFrame = 0;
+  if (!lyricsBody.classList.contains('word-mode') || lyricsPanel.hidden || player.audio.paused) return;
+  const now = player.audio.currentTime || 0;
+  updateActiveLyricLine(now);
+  fillLyricWords(now);
+  wordFrame = requestAnimationFrame(wordLoop);
+}
+function startWordLoop() {
+  if (!wordFrame) wordFrame = requestAnimationFrame(wordLoop);
 }
 
 // Scrolls only the lyrics list itself. scrollIntoView() would also scroll

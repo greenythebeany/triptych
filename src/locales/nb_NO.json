@@ -180,6 +180,8 @@
     "accentColorDesc": "Velg fargeskjemaet til appen",
     "blurBg": "Uskarp bakgrunn fra coverbilde",
     "blurBgDesc": "Fyller bakgrunnen med en uskarp versjon av coverbildet til gjeldende sang",
+    "wordLyrics": "Sangtekst ord for ord",
+    "wordLyricsDesc": "Hvert ord fylles ut og vokser mens det synges. Bruker mer batteri, siden teksten tegnes på nytt i hvert bilde.",
     "dynamicAccentColor": "Dynamisk aksentfarge",
     "dynamicAccentColorDesc": "Fargelegger appens aksentfarge etter omslaget til gjeldende sang",
     "language": "Språk",

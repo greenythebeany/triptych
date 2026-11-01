@@ -180,6 +180,8 @@
     "accentColorDesc": "Wybierz schemat kolorów aplikacji",
     "blurBg": "Rozmyte tło okładki",
     "blurBgDesc": "Wypełnia tło rozmytą wersją okładki aktualnego utworu",
+    "wordLyrics": "Tekst słowo po słowie",
+    "wordLyricsDesc": "Każde słowo wypełnia się i powiększa, gdy jest śpiewane. Zużywa więcej baterii, bo tekst jest rysowany od nowa w każdej klatce.",
     "dynamicAccentColor": "Dynamiczny kolor akcentu",
     "dynamicAccentColorDesc": "Barwi kolor akcentu aplikacji zgodnie z okładką aktualnej piosenki",
     "language": "Język",

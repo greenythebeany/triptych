@@ -180,6 +180,8 @@
     "accentColorDesc": "選擇應用程式的配色",
     "blurBg": "模糊封面背景",
     "blurBgDesc": "以目前歌曲封面的模糊版本填滿背景",
+    "wordLyrics": "逐字歌詞",
+    "wordLyricsDesc": "每個字會隨著演唱填滿並放大。由於歌詞每一格都會重新繪製，會更耗電。",
     "dynamicAccentColor": "動態強調色",
     "dynamicAccentColorDesc": "讓應用程式的強調色配合目前歌曲的封面",
     "language": "語言",

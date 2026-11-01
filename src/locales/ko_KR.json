@@ -180,6 +180,8 @@
     "accentColorDesc": "앱의 색 구성표 선택",
     "blurBg": "흐린 커버 아트 배경",
     "blurBgDesc": "현재 곡의 아트워크를 흐리게 해서 배경을 채움",
+    "wordLyrics": "단어별 가사",
+    "wordLyricsDesc": "부르는 순간에 맞춰 단어가 채워지고 커집니다. 가사를 매 프레임 다시 그리므로 배터리를 더 많이 사용합니다.",
     "dynamicAccentColor": "다이내믹 강조 색상",
     "dynamicAccentColorDesc": "앱의 강조 색상을 현재 곡의 커버 아트에 맞춤",
     "language": "언어",
