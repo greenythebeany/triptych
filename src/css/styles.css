@@ -1074,22 +1074,20 @@ body.platform-mobile .lyrics-header-actions #btn-lyrics-mobile { display: flex; 
 }
 .ctrl-btn:hover { color: var(--text-primary); }
 .ctrl-btn.active { color: var(--accent); }
-/* Smart shuffle: a small star at the shuffle icon's top left. */
-.ctrl-btn .shuffle-sparkle {
-  display: none; top: -0.25em; left: -0.4em; transform: none;
-  font-size: 0.5em; color: var(--accent);
+/* Smart shuffle: the shuffle arrows spin away into the stars icon, in the
+   same spot and size. */
+.ctrl-btn .fi-br-shuffle, .ctrl-btn .shuffle-sparkle {
+  transition: transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.25s ease;
 }
-.ctrl-btn.smart .shuffle-sparkle { display: block; animation: sparkle-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.ctrl-btn .shuffle-sparkle { opacity: 0; transform: translate(-50%, -50%) rotate(-180deg) scale(0.3); }
+.ctrl-btn.smart .shuffle-sparkle { opacity: 1; transform: translate(-50%, -50%); }
+.ctrl-btn.smart .fi-br-shuffle { opacity: 0; transform: translate(-50%, -50%) rotate(180deg) scale(0.3); }
 /* The player buttons give a little bounce when tapped. */
 .ctrl-btn.bounce { animation: ctrl-bounce 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
 @keyframes ctrl-bounce {
   0% { transform: scale(1); }
   35% { transform: scale(0.82); }
   100% { transform: scale(1); }
-}
-@keyframes sparkle-pop {
-  from { transform: scale(0); }
-  to { transform: scale(1); }
 }
 .ctrl-btn-play {
   width: 48px; height: 48px;
