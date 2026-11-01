@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "alkuperäinen laatu",
     "lyricsSearch": "Haku sanoituksista",
-    "lyricsSearchDesc": "Löydä kappaleita sanoitusten rivin perusteella. Hakee kirjastosi sanoitukset taustalla (kappaleiden nimet ja artistit lähetetään palveluihin lrclib.net ja lyrics.ovh) ja tallentaa ne tälle laitteelle.",
+    "lyricsSearchDesc": "Löydä kappaleita sanoitusten rivin perusteella. Hakee kirjastosi sanoitukset taustalla (kappaleiden nimet ja artistit lähetetään palveluihin lrclib.net, NetEase, Kugou ja lyrics.ovh) ja tallentaa ne tälle laitteelle.",
     "lyricsSearchStatus": "{done}/{total} kappaletta käsitelty ({found} sanoitusten kanssa)."
   },
   "privacyNotice": {

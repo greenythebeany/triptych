@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "original quality",
     "lyricsSearch": "Search by lyrics",
-    "lyricsSearchDesc": "Lets you find songs by a line of their lyrics. Fetches your library's lyrics in the background (song titles and artists go to lrclib.net and lyrics.ovh) and keeps them on this device.",
+    "lyricsSearchDesc": "Lets you find songs by a line of their lyrics. Fetches your library's lyrics in the background (song titles and artists go to lrclib.net, NetEase, Kugou and lyrics.ovh) and keeps them on this device.",
     "lyricsSearchStatus": "Indexed {done} of {total} songs ({found} with lyrics)."
   },
   "privacyNotice": {

@@ -15,7 +15,7 @@ export const FEATURES = [
   ['Themes & custom CSS', 'Light and dark, a dozen accent colors, community color schemes, or your own CSS.'],
   ['Discord status', 'On desktop, show what you are listening to, cover art included.'],
   ['Cast & sleep timer', 'Send playback to other Jellyfin devices, or stop the music after a set time.'],
-  ['15 languages', 'English, Slovak, Czech, German, French, Spanish, Polish and more.']
+  ['19 languages', 'English, Chinese, Japanese, Korean, German, French, Spanish and more.']
 ];
 
 export const FAQ = [

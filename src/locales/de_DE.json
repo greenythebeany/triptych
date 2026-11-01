@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbit/s",
     "qualityOriginal": "Originalqualität",
     "lyricsSearch": "Suche nach Songtext",
-    "lyricsSearchDesc": "Finde Songs über eine Zeile ihres Textes. Lädt die Songtexte deiner Bibliothek im Hintergrund (Songtitel und Künstler gehen an lrclib.net und lyrics.ovh) und speichert sie auf diesem Gerät.",
+    "lyricsSearchDesc": "Finde Songs über eine Zeile ihres Textes. Lädt die Songtexte deiner Bibliothek im Hintergrund (Songtitel und Künstler gehen an lrclib.net, NetEase, Kugou und lyrics.ovh) und speichert sie auf diesem Gerät.",
     "lyricsSearchStatus": "{done} von {total} Songs verarbeitet ({found} mit Text)."
   },
   "privacyNotice": {

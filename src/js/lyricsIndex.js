@@ -10,7 +10,7 @@
 const DB_NAME = 'triptych-lyrics';
 const STORE = 'lyrics';
 const NONE_RETRY_MS = 30 * 24 * 3600 * 1000; // re-check "no lyrics" monthly
-const GAP_MS = 1100; // one lookup a second or so -- gentle on the services
+const GAP_MS = 2500; // a lookup every few seconds -- leaves lrclib's rate limit to the lyrics view
 
 let dbPromise = null;
 let entries = null; // Map trackId -> { text, norm, none, at }
@@ -116,7 +116,7 @@ export async function startIndexing(tracks, queryFor, fetchLyrics) {
     if (stopRequested) break;
     if (typeof navigator !== 'undefined' && navigator.onLine === false) break;
     try {
-      const result = await fetchLyrics(queryFor(track));
+      const result = await fetchLyrics({ ...queryFor(track), background: true });
       const text = lyricsText(result);
       await put(track.Id, text ? { text, at: Date.now() } : { none: true, at: Date.now() });
     } catch (err) {

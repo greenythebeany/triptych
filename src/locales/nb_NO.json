@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "original kvalitet",
     "lyricsSearch": "Søk etter sangtekst",
-    "lyricsSearchDesc": "Finn sanger ut fra en linje i teksten. Henter sangtekstene i biblioteket ditt i bakgrunnen (titler og artister sendes til lrclib.net og lyrics.ovh) og lagrer dem på denne enheten.",
+    "lyricsSearchDesc": "Finn sanger ut fra en linje i teksten. Henter sangtekstene i biblioteket ditt i bakgrunnen (titler og artister sendes til lrclib.net, NetEase, Kugou og lyrics.ovh) og lagrer dem på denne enheten.",
     "lyricsSearchStatus": "{done} av {total} sanger behandlet ({found} med tekst)."
   },
   "privacyNotice": {

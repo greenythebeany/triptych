@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "originele kwaliteit",
     "lyricsSearch": "Zoeken op songtekst",
-    "lyricsSearchDesc": "Vind nummers aan de hand van een regel uit de tekst. Haalt de songteksten van je bibliotheek op de achtergrond op (titels en artiesten gaan naar lrclib.net en lyrics.ovh) en bewaart ze op dit apparaat.",
+    "lyricsSearchDesc": "Vind nummers aan de hand van een regel uit de tekst. Haalt de songteksten van je bibliotheek op de achtergrond op (titels en artiesten gaan naar lrclib.net, NetEase, Kugou en lyrics.ovh) en bewaart ze op dit apparaat.",
     "lyricsSearchStatus": "{done} van {total} nummers verwerkt ({found} met tekst)."
   },
   "privacyNotice": {

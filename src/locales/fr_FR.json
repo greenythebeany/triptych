@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbit/s",
     "qualityOriginal": "qualité d'origine",
     "lyricsSearch": "Recherche par paroles",
-    "lyricsSearchDesc": "Trouvez des titres grâce à une ligne de leurs paroles. Récupère les paroles de votre bibliothèque en arrière-plan (titres et artistes envoyés à lrclib.net et lyrics.ovh) et les garde sur cet appareil.",
+    "lyricsSearchDesc": "Trouvez des titres grâce à une ligne de leurs paroles. Récupère les paroles de votre bibliothèque en arrière-plan (titres et artistes envoyés à lrclib.net, NetEase, Kugou et lyrics.ovh) et les garde sur cet appareil.",
     "lyricsSearchStatus": "{done} titres sur {total} indexés ({found} avec paroles)."
   },
   "privacyNotice": {

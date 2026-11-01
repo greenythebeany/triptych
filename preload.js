@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld('api', {
   deezer: {
     searchAlbumArt: (artist, album, trackName) => ipcRenderer.invoke('deezer:searchAlbumArt', artist, album, trackName)
   },
+  lyrics: {
+    get: (url, timeoutMs) => ipcRenderer.invoke('lyrics:get', url, timeoutMs)
+  },
   updates: {
     check: () => ipcRenderer.invoke('update:check'),
     onAvailable: (callback) => {

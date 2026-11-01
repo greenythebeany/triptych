@@ -33,7 +33,8 @@ https://github.com/user-attachments/assets/4d5fa0a4-d05b-4bf4-8921-1810018c48fb
 - Full library browsing: Home, Search, All Songs, Liked Songs, Genres, Albums, Artists, and Playlists
 - Gapless playback with optional crossfade (0-12 seconds) between tracks
 - ReplayGain-based volume normalization, using loudness data from your server
-- Lyrics for the currently playing track, from lrclib.net, your own Jellyfin server, or lyrics.ovh
+- Synced lyrics for the currently playing track, with the current line easing into focus as it's sung. Your own Jellyfin server, lrclib.net, NetEase Cloud Music and Kugou are all asked at once and the best synced match is taken as soon as it arrives; plain lyrics (also from lyrics.ovh) only when nobody has synced ones. Titles are matched loosely ("feat.", "Remastered 2011", "- Live", brackets, accents and Chinese/Japanese/Korean titles) and checked against the song's length, and lyrics are cached per song and fetched ahead for the next song
+- 19 languages, including Simplified Chinese, Traditional Chinese, Japanese and Korean; the first start follows your system language
 - Queue view with shuffle and repeat modes
 - Native lock-screen and notification media controls on Android, including playback that survives the app going to the background
 - Discord Rich Presence on desktop: shows what you're currently listening to, with cover art

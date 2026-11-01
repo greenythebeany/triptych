@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbit/s",
     "qualityOriginal": "originalkvalitet",
     "lyricsSearch": "Sök på låttext",
-    "lyricsSearchDesc": "Hitta låtar utifrån en rad i texten. Hämtar låttexterna i ditt bibliotek i bakgrunden (låttitlar och artister skickas till lrclib.net och lyrics.ovh) och sparar dem på den här enheten.",
+    "lyricsSearchDesc": "Hitta låtar utifrån en rad i texten. Hämtar låttexterna i ditt bibliotek i bakgrunden (låttitlar och artister skickas till lrclib.net, NetEase, Kugou och lyrics.ovh) och sparar dem på den här enheten.",
     "lyricsSearchStatus": "{done} av {total} låtar behandlade ({found} med text)."
   },
   "privacyNotice": {

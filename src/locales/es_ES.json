@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "calidad original",
     "lyricsSearch": "Buscar por letra",
-    "lyricsSearchDesc": "Encuentra canciones por una línea de su letra. Descarga las letras de tu biblioteca en segundo plano (los títulos y artistas se envían a lrclib.net y lyrics.ovh) y las guarda en este dispositivo.",
+    "lyricsSearchDesc": "Encuentra canciones por una línea de su letra. Descarga las letras de tu biblioteca en segundo plano (los títulos y artistas se envían a lrclib.net, NetEase, Kugou y lyrics.ovh) y las guarda en este dispositivo.",
     "lyricsSearchStatus": "{done} de {total} canciones indexadas ({found} con letra)."
   },
   "privacyNotice": {

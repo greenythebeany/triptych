@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kb/s",
     "qualityOriginal": "původní kvalita",
     "lyricsSearch": "Hledání podle textu",
-    "lyricsSearchDesc": "Najdi skladby podle řádku z textu. Na pozadí stahuje texty tvé knihovny (názvy skladeb a interpreti jdou na lrclib.net a lyrics.ovh) a ukládá je v tomto zařízení.",
+    "lyricsSearchDesc": "Najdi skladby podle řádku z textu. Na pozadí stahuje texty tvé knihovny (názvy skladeb a interpreti jdou na lrclib.net, NetEase, Kugou a lyrics.ovh) a ukládá je v tomto zařízení.",
     "lyricsSearchStatus": "Zpracováno {done} z {total} skladeb ({found} s textem)."
   },
   "privacyNotice": {

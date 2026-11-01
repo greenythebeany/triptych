@@ -6,8 +6,27 @@
   --player-h: 104px;
   --accent-contrast: #0a0a0a;
   --accent-bg: var(--accent, #00a4dc);
+  /* Chinese, Japanese and Korean text (UI strings, song titles, lyrics):
+     none of the bundled fonts (Poppins, Doto, Space Mono) have CJK glyphs,
+     so every font stack ends in these system fonts, ordered so each script
+     gets its own glyph forms. Simplified Chinese first by default; the UI
+     language (<html lang>, see i18n.js) reorders it. */
+  --font-cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", "WenQuanYi Micro Hei",
+    "Hiragino Sans", "Yu Gothic UI", "Meiryo", "Noto Sans CJK JP", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR";
   /* The current style's own accent, for the Default swatch in Settings. */
   --style-accent: #1ed760;
+}
+:root:lang(zh-Hant) {
+  --font-cjk: "PingFang TC", "Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans CJK TC", "Source Han Sans TC",
+    "PingFang SC", "Microsoft YaHei UI", "Noto Sans CJK SC", "Hiragino Sans", "Yu Gothic UI", "Noto Sans CJK JP", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR";
+}
+:root:lang(ja) {
+  --font-cjk: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", "Noto Sans CJK JP", "Source Han Sans JP",
+    "PingFang SC", "Microsoft YaHei UI", "Noto Sans CJK SC", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR";
+}
+:root:lang(ko) {
+  --font-cjk: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Source Han Sans KR",
+    "PingFang SC", "Microsoft YaHei UI", "Noto Sans CJK SC", "Hiragino Sans", "Yu Gothic UI", "Noto Sans CJK JP";
 }
 
 /* ---------- Theme modes ---------- */
@@ -78,7 +97,7 @@ html, body {
   height: 100%;
   background: var(--bg-void);
   color: var(--text-primary);
-  font-family: "Poppins", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Poppins", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, var(--font-cjk), sans-serif;
   overflow: hidden;
   user-select: none;
 }
@@ -876,8 +895,21 @@ svg { fill: currentColor; width: 100%; height: 100%; }
   font-size: 15.5px; line-height: 1.5;
   position: relative; z-index: 1;
 }
-.lyric-line { color: var(--text-tertiary); font-weight: 600; transition: color 0.2s ease; cursor: pointer; }
-.lyric-line.active { color: var(--text-primary); font-size: 17px; }
+/* The active line eases in (brighter, a little bigger) and the previous one
+   eases out, instead of snapping; app.js only swaps the class when the line
+   changes, so each transition runs to the end. */
+.lyric-line {
+  color: var(--text-tertiary); font-weight: 600; cursor: pointer;
+  transition: color 0.45s ease, opacity 0.45s ease, font-size 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lyric-line.past { opacity: 0.75; }
+.lyric-line.active { color: var(--text-primary); font-size: 17px; opacity: 1; }
+/* Reduced motion (e.g. Windows "Animation effects" off): no growing text,
+   but the highlight still fades from line to line instead of snapping. */
+@media (prefers-reduced-motion: reduce) {
+  .lyric-line { transition: color 0.45s ease, opacity 0.45s ease; }
+  .lyric-line.active { font-size: inherit; }
+}
 .lyrics-empty { color: var(--text-tertiary); font-size: 13.5px; text-align: center; margin-top: 30px; }
 .lyrics-retry-btn {
   display: block; margin: 14px auto 0; padding: 8px 18px; border-radius: 999px;

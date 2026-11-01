@@ -231,7 +231,7 @@
     "qualityKbps": "{kbps} kbps",
     "qualityOriginal": "qualità originale",
     "lyricsSearch": "Cerca per testo",
-    "lyricsSearchDesc": "Trova i brani da una riga del testo. Scarica i testi della tua libreria in background (titoli e artisti vengono inviati a lrclib.net e lyrics.ovh) e li conserva su questo dispositivo.",
+    "lyricsSearchDesc": "Trova i brani da una riga del testo. Scarica i testi della tua libreria in background (titoli e artisti vengono inviati a lrclib.net, NetEase, Kugou e lyrics.ovh) e li conserva su questo dispositivo.",
     "lyricsSearchStatus": "{done} brani su {total} indicizzati ({found} con testo)."
   },
   "privacyNotice": {
