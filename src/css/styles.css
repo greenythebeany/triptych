@@ -341,7 +341,11 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
 .sidebar-section-title-row .sidebar-section-title { flex: 1; }
 .sidebar-section-title-row .btn-icon-plain { font-size: 14px; }
 .playlist-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 0 4px; }
+/* Reordering by drag (app.js wireSidebarReorder). */
+.playlist-list.sidebar-reordering .playlist-item:not(.sidebar-dragging) { transition: none; }
+.playlist-item.sidebar-dragging { position: relative; z-index: 5; background: var(--bg-card-hover); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); cursor: grabbing; }
 .playlist-item {
+  touch-action: pan-y;
   display: flex; align-items: center; gap: 12px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);

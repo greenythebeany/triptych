@@ -2711,11 +2711,94 @@ async function loadPlaylistSidebar() {
     const span = document.createElement('span');
     span.textContent = pl.Name;
     item.appendChild(span);
+    item.dataset.sid = pl.Id;
     item.addEventListener('click', () => navigateTo({ view: 'playlist', id: pl.Id, name: pl.Name }));
     wirePlaylistDropTarget(item, pl.Id);
+    wireSidebarReorder(item);
     playlistListEl.appendChild(item);
   });
   loadPinnedAlbumsSidebar();
+}
+
+// The order you drag them into, kept on this device (Jellyfin has no order
+// for a user's playlists). Ids not in it (new playlists/pins) go last.
+const SIDEBAR_ORDER_KEY = 'triptych:sidebarOrder';
+function savedSidebarOrder() {
+  try { return JSON.parse(localStorage.getItem(SIDEBAR_ORDER_KEY) || '[]'); } catch (err) { return []; }
+}
+function applySidebarOrder() {
+  const order = savedSidebarOrder();
+  const items = [...playlistListEl.querySelectorAll('.playlist-item')];
+  const rank = (item) => { const i = order.indexOf(item.dataset.sid); return i < 0 ? order.length + items.indexOf(item) : i; };
+  items.sort((a, b) => rank(a) - rank(b)).forEach((item) => playlistListEl.appendChild(item));
+  const title = document.getElementById('sidebar-list-title');
+  // data-i18n too, so switching language keeps the right one.
+  title.dataset.i18n = playlistListEl.querySelector('.pinned-album-item') ? 'nav.playlistsAndAlbums' : 'nav.playlists';
+  title.textContent = t(title.dataset.i18n);
+}
+
+// Drag a sidebar item to reorder (mouse or touch). The other items move
+// around it -- the dragged one stays in place in the DOM so it keeps the
+// pointer (see wireQueueDragHandle). A plain click still opens it.
+function wireSidebarReorder(item) {
+  item.addEventListener('pointerdown', (evt) => {
+    if (evt.button !== 0) return;
+    let startY = evt.clientY;
+    const originY = evt.clientY;
+    let dragging = false;
+    const onMove = (moveEvt) => {
+      if (moveEvt.pointerId !== evt.pointerId) return;
+      if (!dragging) {
+        if (Math.abs(moveEvt.clientY - originY) < 6) return;
+        dragging = true;
+        try { item.setPointerCapture(evt.pointerId); } catch (err) { /* moves still reach the window */ }
+        item.classList.add('sidebar-dragging');
+        playlistListEl.classList.add('sidebar-reordering');
+      }
+      moveEvt.preventDefault();
+      let dy = moveEvt.clientY - startY;
+      item.style.transform = `translateY(${dy}px)`;
+      for (let guard = 0; guard < 200; guard++) {
+        const r = item.getBoundingClientRect();
+        const center = r.top + r.height / 2;
+        const prev = item.previousElementSibling?.matches('.playlist-item') ? item.previousElementSibling : null;
+        const next = item.nextElementSibling?.matches('.playlist-item') ? item.nextElementSibling : null;
+        const mid = (node) => { const b = node.getBoundingClientRect(); return b.top + b.height / 2; };
+        let swap = null;
+        if (next && center > mid(next)) swap = () => playlistListEl.insertBefore(next, item);
+        else if (prev && center < mid(prev)) swap = () => playlistListEl.insertBefore(prev, item.nextSibling);
+        if (!swap) break;
+        const before = item.offsetTop;
+        swap();
+        startY += item.offsetTop - before;
+        dy = moveEvt.clientY - startY;
+        item.style.transform = `translateY(${dy}px)`;
+      }
+    };
+    const onUp = (upEvt) => {
+      if (upEvt.pointerId !== evt.pointerId) return;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      if (!dragging) return;
+      try { item.releasePointerCapture(evt.pointerId); } catch (err) { /* already gone */ }
+      item.classList.remove('sidebar-dragging');
+      playlistListEl.classList.remove('sidebar-reordering');
+      item.style.transform = '';
+      try {
+        localStorage.setItem(SIDEBAR_ORDER_KEY, JSON.stringify([...playlistListEl.querySelectorAll('.playlist-item')].map((node) => node.dataset.sid)));
+      } catch (err) { /* storage unavailable: order lasts this session */ }
+      hapticImpact('light');
+      item.dataset.draggedAt = String(Date.now());
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  });
+  // The click that ends a drag shouldn't also open the item.
+  item.addEventListener('click', (clickEvt) => {
+    if (Date.now() - Number(item.dataset.draggedAt || 0) < 400) { clickEvt.stopImmediatePropagation(); clickEvt.preventDefault(); }
+  }, { capture: true });
 }
 
 function loadPinnedAlbumsSidebar() {
@@ -2723,6 +2806,8 @@ function loadPinnedAlbumsSidebar() {
   playlistListEl.querySelectorAll('.pinned-album-item, .playlist-empty').forEach((node) => node.remove());
   albums.forEach((album) => {
     const item = el('button', 'playlist-item pinned-album-item');
+    item.dataset.sid = `album:${album.Id}`;
+    wireSidebarReorder(item);
     const img = document.createElement('img');
     img.className = 'pl-thumb';
     img.src = artUrl(album, 'album', 48);
@@ -2736,6 +2821,7 @@ function loadPinnedAlbumsSidebar() {
   if (!playlistListEl.querySelector('.playlist-item')) {
     playlistListEl.appendChild(el('div', 'playlist-empty', t('playlist.sidebarEmpty')));
   }
+  applySidebarOrder();
 }
 
 // ---------- Nav glider + sticky dot ----------
