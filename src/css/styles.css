@@ -870,6 +870,14 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
   overflow: hidden;
   position: relative;
 }
+/* Desktop: the panel comes in from the right, so its close arrow points
+   right (phones keep the down arrow: there it slides up from the bottom). */
+@media (min-width: 821px) {
+  body:not(.platform-mobile) .np-collapse-btn .fi { display: inline-block; transform: rotate(-90deg); }
+}
+/* While it slides open/closed (app.js): its content keeps full width and
+   moves with the panel's left edge instead of squeezing. */
+.lyrics-panel.np-sliding > * { min-width: 339px; }
 .now-playing-bg-art {
   position: absolute; inset: 0; z-index: 0;
   background-size: cover; background-position: center;

@@ -4659,7 +4659,8 @@ function wirePlayer() {
   npVolumeBar.style.setProperty('--pct', rangeFillPercent(Number(volumeBar.value), npVolumeBar, 14));
 
   btnLyrics.addEventListener('click', () => {
-    if (!lyricsPanel.hidden) { closeNowPlaying(); return; }
+    // Mid slide-out counts as closed: a click brings it straight back.
+    if (!lyricsPanel.hidden && !lyricsPanel.dataset.closing) { closeNowPlaying(); return; }
     openNowPlaying();
   });
   btnCloseLyrics.addEventListener('click', () => closeNowPlaying());
@@ -5212,12 +5213,39 @@ function wireQueueSheet() {
 // ---------- Full-screen player open/close + gestures ----------
 let nowPlayingCloseTimer = null;
 
+// Desktop: the side panel slides in from the right and back out, its
+// width animating so the page makes room smoothly instead of jumping.
+let panelSlideToken = null;
+function slideSidePanel(opening) {
+  const token = {};
+  panelSlideToken = token;
+  lyricsPanel.getAnimations().forEach((a) => a.cancel());
+  lyricsPanel.classList.add('np-sliding');
+  if (opening) delete lyricsPanel.dataset.closing;
+  else lyricsPanel.dataset.closing = '1';
+  const width = 340;
+  const anim = lyricsPanel.animate(
+    opening ? [{ width: '0px', opacity: 0.4 }, { width: `${width}px`, opacity: 1 }] : [{ width: `${width}px`, opacity: 1 }, { width: '0px', opacity: 0.4 }],
+    { duration: opening ? 380 : 300, easing: opening ? 'cubic-bezier(0.32, 0.72, 0, 1)' : 'cubic-bezier(0.4, 0, 1, 1)' }
+  );
+  const done = () => {
+    if (panelSlideToken !== token) return;
+    panelSlideToken = null;
+    lyricsPanel.classList.remove('np-sliding');
+    if (!opening) { lyricsPanel.hidden = true; delete lyricsPanel.dataset.closing; }
+    moveNavGliders({ instant: true });
+  };
+  anim.finished.then(done, () => {});
+}
+
 function openNowPlaying() {
   // Reopened mid-close: drop the slide-out so it doesn't hide afterwards.
   clearTimeout(nowPlayingCloseTimer);
+  const desktopSlide = !isPhoneLayout() && !isStaticMotion() && (lyricsPanel.hidden || panelSlideToken);
   lyricsPanel.style.transition = '';
   lyricsPanel.style.transform = '';
   lyricsPanel.hidden = false;
+  if (desktopSlide) slideSidePanel(true);
   lyricsPanel.scrollTop = 0; // undo any shift an older build's scrollIntoView left behind
   showPanelTab(activePanelTab);
   refreshNowPlayingMarquees();
@@ -5251,7 +5279,12 @@ function syncLyricsToPlayback() {
 function closeNowPlaying() {
   closeQueueSheet();
   if (lyricsPanel.hidden) return;
-  if (!isPhoneLayout()) { lyricsPanel.hidden = true; return; }
+  if (!isPhoneLayout()) {
+    if (lyricsPanel.dataset.closing) return;
+    if (isStaticMotion()) lyricsPanel.hidden = true;
+    else slideSidePanel(false);
+    return;
+  }
   clearTimeout(nowPlayingCloseTimer);
   lyricsPanel.style.transition = 'transform 0.26s cubic-bezier(0.4, 0, 1, 1)';
   // Force the current position to be committed before animating away.
