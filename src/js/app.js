@@ -167,6 +167,11 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  '2.4.1': [
+    { icon: 'fi-br-magic-wand', key: 'smartShuffle' },
+    { icon: 'fi-br-settings-sliders', key: 'animations241' },
+    { icon: 'fi-br-mobile', key: 'phoneMusic241' }
+  ],
   // Everything since 2.3.0 (2.3.1 and 2.3.2 included): only the newest
   // version's list is shown, and many people will come straight from 2.3.0.
   '2.4.0': [
@@ -2246,6 +2251,9 @@ function refreshSettingsUI() {
 let settingsTriggerEl = null;
 function openSettings() {
   refreshSettingsUI();
+  // The running app's own version (Electron / native app info), so it's
+  // never out of date.
+  document.getElementById('settings-version').textContent = `Triptych ${getClientVersion()}`;
   refreshLocalLibrarySettings().catch(() => {});
   settingsTriggerEl = document.activeElement;
   settingsOverlay.hidden = false;

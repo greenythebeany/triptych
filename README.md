@@ -101,6 +101,14 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.1
+
+- Smart shuffle: tap shuffle twice and, after the song you pick, the queue fills with recommended songs from your own library (related artists from Deezer, artists featured together on your songs, what you play in the same sittings). Removing one means "not this one again"; Settings → Privacy → "Online related artists lookup" turns the Deezer part off
+- "Because you listened to …" on Home uses the same, better recommendations
+- Animations: Static or Dynamic (Settings → Appearance). Static turns every animation off; battery saver / Low Power Mode switches to Static on its own
+- Music on this device on Android: the phone's own music library, on its own or mixed into your Jellyfin library
+- The app version is shown at the bottom of Settings
+
 ## What's new in 2.4.0
 
 - Music on this device (Windows, Mac, Linux): play music files from folders on your computer, on their own without a Jellyfin server, or mixed into your Jellyfin library (Settings → Music on this device). Android and iPhone follow in 2.4.1
