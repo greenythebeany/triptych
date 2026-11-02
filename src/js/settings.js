@@ -32,11 +32,10 @@ const DEFAULTS = {
   themeMode: 'dark', // 'dark' | 'light' | 'system'
   palette: 'default', // a PALETTES key; 'default' = the interface style's own accent
   uiStyle: 'nothing', // 'spotify' | 'apple' | 'nothing' -- see css/apple.css, css/nothing.css; new installs start in Nothing (red accent via palette 'default')
-  motion: 'dynamic', // 'dynamic' | 'static' -- static turns every animation off (data-motion, see styles.css and isStaticMotion in app.js)
+  motion: 'dynamic', // 'dynamic' (with word-by-word lyrics) | 'static' -- every animation off (data-motion, see styles.css and isStaticMotion)
   nothingDottedSliders: true, // Nothing style only: dot-matrix seek/volume bars, off = plain lines
   audioQuality: 'auto',
   artBackground: false,
-  wordSyncLyrics: false, // on = word-by-word lyrics that fill as they're sung (see lyrics.js / app.js renderLyrics)
   dynamicAccentColor: false,
   language: detectLocale(), // first run follows the system language; saved choices win
   customCss: '',

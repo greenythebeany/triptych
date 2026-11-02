@@ -1049,12 +1049,10 @@ function wireSettingsUI() {
     });
   });
 
-  // Static / Dynamic / Word by word: the last is Dynamic plus word-by-word
-  // lyrics (settings.wordSyncLyrics).
   motionToggle.querySelectorAll('button').forEach((btn) => {
     btn.addEventListener('click', () => {
       const wordsBefore = wordSyncActive();
-      updateSettings({ motion: btn.dataset.value === 'static' ? 'static' : 'dynamic', wordSyncLyrics: btn.dataset.value === 'words' });
+      updateSettings({ motion: btn.dataset.value === 'static' ? 'static' : 'dynamic' });
       refreshSettingsUI();
       if (wordSyncActive() !== wordsBefore) reloadLyricsForWordMode();
     });
@@ -2194,8 +2192,7 @@ function refreshSettingsUI() {
     btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
   });
   motionToggle.querySelectorAll('button').forEach((btn) => {
-    const value = s.motion === 'static' ? 'static' : s.wordSyncLyrics ? 'words' : 'dynamic';
-    btn.classList.toggle('active', btn.dataset.value === value);
+    btn.classList.toggle('active', btn.dataset.value === (s.motion === 'static' ? 'static' : 'dynamic'));
   });
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
@@ -5212,10 +5209,10 @@ function highlightPlayingRow(trackId) {
   });
 }
 
-// Word-by-word lyrics: the "Word by word" animations option, unless
-// animations are Static right now (battery saver).
+// Word-by-word lyrics come with Dynamic animations (Static, or battery
+// saver, shows whole lines).
 function wordSyncActive() {
-  return !!getSettings().wordSyncLyrics && !isStaticMotion();
+  return !isStaticMotion();
 }
 
 // Word-timed lyrics are a separate lookup (see lyrics.js cacheKey), so a
