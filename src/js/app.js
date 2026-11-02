@@ -4742,7 +4742,10 @@ function wirePlayer() {
   // right, the way it leaves).
   const btnOpenPanel = document.getElementById('btn-open-panel');
   const syncPanelOpenButton = () => {
-    btnOpenPanel.hidden = isPhoneLayout() || !player.currentTrack || !(lyricsPanel.hidden || lyricsPanel.dataset.closing);
+    btnOpenPanel.hidden = isPhoneLayout() || !player.currentTrack;
+    // Room for it in the header while the panel's closed; when open, the
+    // panel just covers it.
+    appRoot.classList.toggle('np-closed', !btnOpenPanel.hidden && lyricsPanel.hidden);
   };
   btnOpenPanel.addEventListener('click', () => { bounceButtons(btnOpenPanel); openNowPlaying(); });
   btnOpenPanel.addEventListener('animationend', () => btnOpenPanel.classList.remove('bounce'));

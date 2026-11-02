@@ -165,6 +165,8 @@
       <div id="pinned-albums-list" class="playlist-list"></div>
     </aside>
 
+    <!-- Desktop: reopens the Now Playing panel while it's closed (app.js syncPanelOpenButton). -->
+    <button id="btn-open-panel" class="nav-arrow panel-open-btn" type="button" data-i18n-title="nowPlaying.title" title="Now Playing" hidden><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <main class="main">
       <div id="main-bg-art" class="main-bg-art"></div>
       <header class="main-header">
@@ -193,8 +195,6 @@
             </button>
           </div>
         </div>
-        <!-- Desktop: reopens the Now Playing panel while it's closed (app.js syncPanelOpenButton). -->
-        <button id="btn-open-panel" class="nav-arrow panel-open-btn" type="button" data-i18n-title="nowPlaying.title" title="Now Playing" hidden><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </header>
 
       <div id="pull-refresh" class="pull-refresh" aria-hidden="true"><div class="loading-spinner"></div></div>
