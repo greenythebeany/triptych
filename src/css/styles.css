@@ -422,13 +422,14 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
    the panel slides in over it and uncovers it again when it closes. */
 @media (min-width: 821px) {
   body:not(.platform-mobile) .panel-open-btn {
-    position: fixed; right: 20px; top: calc(var(--titlebar-h) + 17px); margin: 0; z-index: 25;
+    position: fixed; right: 14px; top: calc(var(--titlebar-h) + 20px); margin: 0; z-index: 25;
+    width: 28px; height: 28px; background: transparent; border: none; color: var(--text-secondary);
   }
   body:not(.platform-mobile) .lyrics-panel { z-index: 30; }
   /* It's outside .main now, so the looks' header-arrow styles don't reach it. */
-  :root[data-ui="nothing"] .panel-open-btn { background: var(--bg-card); border: 1px solid var(--border-subtle); }
-  :root[data-ui="apple"] .panel-open-btn { background: var(--bg-highlight); }
-  body:not(.platform-mobile) .app.np-closed .main-header { padding-right: 70px; }
+  :root[data-ui] .panel-open-btn { background: transparent; border: none; }
+  body:not(.platform-mobile) .app.np-closed .main-header { padding-right: 40px; }
+  body:not(.platform-mobile) .panel-open-btn:hover { color: var(--text-primary); filter: none; }
 }
 #btn-forward svg { transform: translateX(1px); }
 /* Icon-font glyphs carry their own internal metrics (ascent/descent, side

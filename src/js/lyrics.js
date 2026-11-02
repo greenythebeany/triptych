@@ -301,11 +301,22 @@ function parseJson(res) {
 // Each returns { synced, plain, instrumental, score } or null for "none",
 // and throws SourceError when it couldn't be reached.
 
+// Gentle on lrclib (a free, community-run service): requests go out one at
+// a time with a short pause between them, and when it says it's busy (503
+// on /search, common under load) searching is left alone for a while
+// instead of retried -- the other sources answer meanwhile, and a song
+// that missed out isn't cached as "no lyrics", so it's tried again later.
 let lrclibBlockedUntil = 0;
+let lrclibSearchBusyUntil = 0;
+let lrclibQueue = Promise.resolve();
+const LRCLIB_GAP_MS = 350;
+const LRCLIB_BUSY_PAUSE_MS = 30000;
 
-async function lrclibGet(path) {
-  if (Date.now() < lrclibBlockedUntil) throw new SourceError('lrclib rate limit');
-  for (let attempt = 0; ; attempt++) {
+function lrclibGet(path) {
+  const run = async () => {
+    const isSearch = path.startsWith('/search');
+    if (Date.now() < lrclibBlockedUntil) throw new SourceError('lrclib rate limit');
+    if (isSearch && Date.now() < lrclibSearchBusyUntil) throw new SourceError('lrclib busy');
     const res = await webGet(`${LRCLIB_BASE}${path}`, { 'Lrclib-Client': LRCLIB_CLIENT }, REQUEST_TIMEOUT_MS);
     if (res.status === 404) return null;
     if (res.status === 429) {
@@ -314,11 +325,16 @@ async function lrclibGet(path) {
       lrclibBlockedUntil = Date.now() + (Number.isFinite(retryAfter) ? retryAfter : 60) * 1000 * (1 + Math.random() * 0.3);
       throw new SourceError('lrclib rate limit');
     }
-    // lrclib's edge answers 503 a lot under load; it usually clears quickly.
-    if (res.status >= 500 && attempt < 2) { await sleep(attempt ? 1000 : 400); continue; }
+    if (res.status >= 500) {
+      if (isSearch) lrclibSearchBusyUntil = Date.now() + LRCLIB_BUSY_PAUSE_MS;
+      throw new SourceError(`lrclib responded ${res.status}`);
+    }
     if (res.status !== 200) throw new SourceError(`lrclib responded ${res.status}`);
     return parseJson(res);
-  }
+  };
+  const result = lrclibQueue.then(run);
+  lrclibQueue = result.catch(() => {}).then(() => sleep(LRCLIB_GAP_MS));
+  return result;
 }
 
 function fromLrclib(data, score) {
@@ -346,17 +362,15 @@ async function lookupLrclib(q) {
 
   const toCand = (r) => ({ ...r, title: r.trackName, artist: r.artistName });
   const synced = (c) => !!c.syncedLyrics;
+  // One search per song: the tags as they are, or for uploads with
+  // "Artist - Title" in the title, free text from the likeliest reading.
   const first = q.pairs[0];
-  const searches = [
-    ...q.pairs.slice(0, 2).filter((p) => p.title && p.firstArtist).map((p) => ({ track_name: p.title, artist_name: p.firstArtist })),
-    { q: `${first.bare} ${first.firstArtist}`.trim() }
-  ];
-  for (const search of searches) {
-    const results = await lrclibGet(`/search?${new URLSearchParams(search)}`);
-    const best = pickBest(q, (results || []).map(toCand), synced);
-    if (best) return fromLrclib(best, best.score);
-  }
-  return null;
+  const search = q.pairs.length > 1
+    ? { q: `${first.bare} ${first.firstArtist}`.trim() }
+    : { track_name: first.title, artist_name: first.firstArtist };
+  const results = await lrclibGet(`/search?${new URLSearchParams(search)}`);
+  const best = pickBest(q, (results || []).map(toCand), synced);
+  return best ? fromLrclib(best, best.score) : null;
 }
 
 // Jellyfin's /Audio/{id}/Lyrics shape: Lyrics[{ Text, Start }], Start in
