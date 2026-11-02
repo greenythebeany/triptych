@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animationer",
     "motionDesc": "Dynamisk animerer sangtekster ord for ord, menuer og knapper (bruger mere strøm); Statisk slår alle animationer fra",
+    "motionSaverNote": "Statisk, mens strømbesparelse er slået til. Dit valg kommer tilbage, når den slås fra.",
     "motionDynamic": "Dynamisk",
     "motionStatic": "Statisk",
     "nothingDots": "Prikkede skydere",

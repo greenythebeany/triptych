@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "애니메이션",
     "motionDesc": "다이내믹은 가사를 단어별로, 메뉴와 버튼도 움직입니다(배터리를 더 씁니다). 스태틱은 모든 애니메이션을 끕니다",
+    "motionSaverNote": "절전 모드가 켜져 있는 동안은 정적입니다. 끄면 선택이 돌아옵니다.",
     "motionDynamic": "다이내믹",
     "motionStatic": "스태틱",
     "nothingDots": "점선 슬라이더",

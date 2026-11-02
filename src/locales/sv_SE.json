@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animationer",
     "motionDesc": "Dynamisk animerar låttexter ord för ord, menyer och knappar (drar mer batteri); Statisk stänger av alla animationer",
+    "motionSaverNote": "Statiskt medan batterisparläget är på. Ditt val kommer tillbaka när det är av.",
     "motionDynamic": "Dynamisk",
     "motionStatic": "Statisk",
     "nothingDots": "Prickade reglage",

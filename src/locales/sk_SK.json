@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animácie",
     "motionDesc": "Dynamické rozpohybujú texty slovo po slove, ponuky a tlačidlá (viac batérie); Statické vypnú všetky animácie",
+    "motionSaverNote": "Statické, kým je zapnutý šetrič batérie. Tvoja voľba sa vráti, keď ho vypneš.",
     "motionDynamic": "Dynamické",
     "motionStatic": "Statické",
     "nothingDots": "Bodkované posuvníky",

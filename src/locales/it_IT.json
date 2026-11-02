@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animazioni",
     "motionDesc": "Dinamico anima i testi parola per parola, i menu e i pulsanti (più batteria); Statico disattiva tutte le animazioni",
+    "motionSaverNote": "Statico finché il risparmio batteria è attivo. La tua scelta torna quando lo disattivi.",
     "motionDynamic": "Dinamico",
     "motionStatic": "Statico",
     "nothingDots": "Cursori a puntini",

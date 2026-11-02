@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "アニメーション",
     "motionDesc": "ダイナミックは歌詞をワードごとに、メニューやボタンも動かします（バッテリー消費が増えます）。スタティックはすべてのアニメーションをオフにします",
+    "motionSaverNote": "省電力モード中はスタティックになります。オフにすると選択が戻ります。",
     "motionDynamic": "ダイナミック",
     "motionStatic": "スタティック",
     "nothingDots": "ドットのスライダー",

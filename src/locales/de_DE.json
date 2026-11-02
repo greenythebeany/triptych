@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animationen",
     "motionDesc": "Dynamisch animiert Songtexte Wort für Wort, Menüs und Tasten (mehr Akku); Statisch schaltet alle Animationen aus",
+    "motionSaverNote": "Statisch, solange der Energiesparmodus an ist. Deine Auswahl gilt wieder, sobald er aus ist.",
     "motionDynamic": "Dynamisch",
     "motionStatic": "Statisch",
     "nothingDots": "Gepunktete Regler",

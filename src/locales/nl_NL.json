@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animaties",
     "motionDesc": "Dynamisch animeert songteksten woord voor woord, menu’s en knoppen (kost meer batterij); Statisch zet alle animaties uit",
+    "motionSaverNote": "Statisch zolang batterijbesparing aan staat. Je keuze komt terug als die uit is.",
     "motionDynamic": "Dynamisch",
     "motionStatic": "Statisch",
     "nothingDots": "Gestippelde schuifbalken",

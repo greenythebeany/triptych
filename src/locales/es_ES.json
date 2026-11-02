@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animaciones",
     "motionDesc": "Dinámico anima las letras palabra a palabra, los menús y los botones (más batería); Estático desactiva todas las animaciones",
+    "motionSaverNote": "Estático mientras el ahorro de batería está activado. Tu elección vuelve cuando se desactive.",
     "motionDynamic": "Dinámico",
     "motionStatic": "Estático",
     "nothingDots": "Controles punteados",

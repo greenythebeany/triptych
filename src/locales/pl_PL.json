@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animacje",
     "motionDesc": "Dynamiczne animują tekst słowo po słowie, menu i przyciski (więcej baterii); Statyczne wyłączają wszystkie animacje",
+    "motionSaverNote": "Statyczne, dopóki oszczędzanie baterii jest włączone. Twój wybór wróci po jego wyłączeniu.",
     "motionDynamic": "Dynamiczne",
     "motionStatic": "Statyczne",
     "nothingDots": "Kropkowane suwaki",

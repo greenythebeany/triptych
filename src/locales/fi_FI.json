@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animaatiot",
     "motionDesc": "Dynaaminen animoi sanoitukset sana kerrallaan, valikot ja painikkeet (kuluttaa enemmän akkua); Staattinen poistaa kaikki animaatiot",
+    "motionSaverNote": "Staattinen, kun virransäästö on päällä. Valintasi palaa, kun se on pois päältä.",
     "motionDynamic": "Dynaaminen",
     "motionStatic": "Staattinen",
     "nothingDots": "Pisteliukusäätimet",

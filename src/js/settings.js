@@ -155,6 +155,10 @@ export function setPowerSaver(on) {
   listeners.forEach((cb) => cb(current));
 }
 
+export function isPowerSaver() {
+  return powerSaver;
+}
+
 // What's actually in effect: the setting, or Static while saving power.
 export function isStaticMotion() {
   return powerSaver || current.motion === 'static';

@@ -158,11 +158,13 @@ export class Player {
       if (el !== this.audio) return;
       this._emit('playstate');
       this._setMediaSessionPlaybackState();
+      this._updateMediaSessionPosition(true);
     });
     el.addEventListener('pause', () => {
       if (el !== this.audio) return;
       this._emit('playstate');
       this._setMediaSessionPlaybackState();
+      this._updateMediaSessionPosition(true);
     });
     el.addEventListener('ended', () => {
       if (el !== this.audio) return;
@@ -176,6 +178,7 @@ export class Player {
     el.addEventListener('seeked', () => {
       if (el !== this.audio) return;
       this._emit('playstate');
+      this._updateMediaSessionPosition(true);
     });
   }
 
@@ -403,6 +406,43 @@ export class Player {
     getLocalArtwork(track.Id).then(apply, () => apply(null));
   }
 
+  // Phones show artwork as-is, so a non-square cover came out stretched or
+  // letterboxed in the notification / lock screen (the app crops covers with
+  // object-fit). Crops the cover to a centred square JPEG, as a data: URL
+  // the native media-session plugin accepts. Jellyfin images are fetched
+  // natively (CapacitorHttp) since the server's missing CORS headers would
+  // taint the canvas. Resolves null if anything fails.
+  async _squareArtwork(src, size = 512) {
+    if (!src) return null;
+    let dataUrl = src;
+    if (!src.startsWith('data:')) {
+      if (isLocalMediaUrl(src) || src.startsWith('blob:')) {
+        const blob = await (await fetch(src)).blob();
+        dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } else {
+        const http = window.Capacitor?.Plugins?.CapacitorHttp;
+        if (!http) return null;
+        const res = await http.request({ url: src, method: 'GET', responseType: 'blob', connectTimeout: 8000, readTimeout: 8000 });
+        if (res.status !== 200 || typeof res.data !== 'string') return null;
+        const type = res.headers?.['Content-Type'] || res.headers?.['content-type'] || 'image/jpeg';
+        dataUrl = `data:${type.split(';')[0]};base64,${res.data}`;
+      }
+    }
+    const img = new Image();
+    await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = dataUrl; });
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    if (!side) return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = Math.min(size, side);
+    canvas.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.9);
+  }
+
   _applyMediaSessionMetadata(track, localArtwork) {
     const artist = track ? ((track.Artists && track.Artists.length ? track.Artists.join(', ') : track.AlbumArtist) || '') : '';
     // Each declared size needs to actually BE that size — every entry
@@ -447,20 +487,20 @@ export class Player {
     const native = this._nativeMediaSession();
     if (native) {
       const meta = { title: track?.Name || '', artist, album: track?.Album || '' };
-      if (!local) {
-        native.setMetadata({ ...meta, artwork }).catch(() => {});
-        return;
-      }
+      // Text and length right away (new song = position 0), then the
+      // square cover once it's cropped; the uncropped one if cropping fails.
       native.setMetadata({ ...meta, artwork: [] }).catch(() => {});
-      fetch(local.src).then((res) => res.blob()).then((blob) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      })).then((dataUrl) => {
+      this._updateMediaSessionPosition(true);
+      const source = (local || artwork[0])?.src;
+      if (!source) return;
+      this._squareArtwork(source).catch(() => null).then((square) => {
         if (this.currentTrack !== track) return;
-        native.setMetadata({ ...meta, artwork: [{ src: dataUrl, sizes: '512x512', type: 'image/jpeg' }] }).catch(() => {});
-      }).catch(() => {});
+        if (square) {
+          native.setMetadata({ ...meta, artwork: [{ src: square, sizes: '512x512', type: 'image/jpeg' }] }).catch(() => {});
+        } else if (!local) {
+          native.setMetadata({ ...meta, artwork }).catch(() => {});
+        }
+      });
       return;
     }
     if (!('mediaSession' in navigator)) return;
@@ -497,10 +537,28 @@ export class Player {
     navigator.mediaSession.playbackState = state;
   }
 
-  _updateMediaSessionPosition() {
-    const duration = this.audio.duration;
-    if (!isFinite(duration) || duration <= 0) return;
-    const position = Math.min(this.audio.currentTime, duration);
+  // The song's real length comes from Jellyfin (RunTimeTicks), like the
+  // in-app seek bar. audio.duration is only an estimate while a transcoded
+  // stream is still downloading (lower "automatic" quality), small at first
+  // and growing -- phones' media controls (notification, lock screen,
+  // dynamic island-style capsules) showed the song as already finished and
+  // the countdown wrong. The OS advances the position by itself between
+  // updates, so it only needs one on play/pause/seek/track change plus an
+  // occasional drift correction -- not on every timeupdate.
+  _mediaDuration() {
+    const ticks = this.currentTrack?.RunTimeTicks;
+    if (ticks > 0) return ticks / 1e7;
+    const d = this.audio.duration;
+    return isFinite(d) && d > 0 ? d : 0;
+  }
+
+  _updateMediaSessionPosition(force = false) {
+    const now = Date.now();
+    if (!force && now - (this._lastPositionPush || 0) < 5000) return;
+    const duration = this._mediaDuration();
+    if (!duration) return;
+    this._lastPositionPush = now;
+    const position = Math.max(0, Math.min(this.audio.currentTime || 0, duration));
     const playbackRate = this.audio.playbackRate || 1;
 
     const native = this._nativeMediaSession();

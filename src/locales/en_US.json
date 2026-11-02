@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animations",
     "motionDesc": "Dynamic animates the lyrics word by word, menus and buttons (uses more battery); Static turns every animation off",
+    "motionSaverNote": "Static while battery saver is on. Your choice comes back when it's off.",
     "motionDynamic": "Dynamic",
     "motionStatic": "Static",
     "nothingDots": "Dotted sliders",

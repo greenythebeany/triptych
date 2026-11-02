@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "动画",
     "motionDesc": "动态会逐字显示歌词，并让菜单和按钮动起来（更耗电）；静态会关闭所有动画",
+    "motionSaverNote": "省电模式开启期间为静态。关闭后会恢复你的选择。",
     "motionDynamic": "动态",
     "motionStatic": "静态",
     "nothingDots": "点阵滑块",

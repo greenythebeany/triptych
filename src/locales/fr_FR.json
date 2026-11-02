@@ -175,6 +175,7 @@
     "uiNothing": "Nothing",
     "motion": "Animations",
     "motionDesc": "Dynamique anime les paroles mot à mot, les menus et les boutons (plus de batterie) ; Statique désactive toutes les animations",
+    "motionSaverNote": "Statique tant que l'économiseur de batterie est activé. Votre choix revient quand il est désactivé.",
     "motionDynamic": "Dynamique",
     "motionStatic": "Statique",
     "nothingDots": "Curseurs en pointillés",

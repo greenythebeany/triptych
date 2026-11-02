@@ -5,7 +5,7 @@ import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
 import { addListening, persistLocal as persistListening, getOwnLog, isDirty as listeningDirty, markSynced as listeningSynced, adoptIfLarger, combineLogs, dayKey } from './listening.js';
-import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
+import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, isPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
 import { LOCALES, loadLocale, applyTranslations, t } from './i18n.js';
 import { setHapticsEnabled, platform, isDesktop, isMobile, isAndroid, sessionStore, windowControls, wireHardwareBackButton, exitApp, requestNotificationPermission, setDiscordActivity, clearDiscordActivity, searchDeezerAlbumArt, hapticImpact, watchPowerSaver } from './platform.js';
 import { createConnect } from './connect.js';
@@ -509,17 +509,21 @@ function artUrl(item, kind = 'album', cssPx = 200) {
   return jellyfin.imageUrl(item, 'Primary', imagePx(cssPx)) || placeholderArt(kind);
 }
 
-// Server art requests fail outright when offline — for a downloaded track,
-// fall back to the copy of the cover saved alongside its audio at download
-// time instead of leaving a broken image. Only kicks in on actual load
-// failure, so the normal online path (server art) is untouched.
+// A downloaded track shows the cover saved with it, straight away. Waiting
+// for the server image to fail first could take a long time when the server
+// can't be reached (when downloads get played), so the cover stayed blank
+// or showed the previous song while the phone's media controls already had
+// the right one. Falls back to the server image if there's no saved copy.
 function withOfflineArtFallback(imgEl, track) {
   if (!track?.Id || !isDownloaded(track.Id)) return;
+  const serverSrc = imgEl.src;
+  imgEl.dataset.artFor = track.Id;
+  getLocalImageUri(track.Id).then((uri) => {
+    if (uri && imgEl.dataset.artFor === track.Id) imgEl.src = uri;
+  });
   imgEl.onerror = () => {
     imgEl.onerror = null;
-    getLocalImageUri(track.Id).then((uri) => {
-      if (uri) imgEl.src = uri;
-    });
+    if (imgEl.src !== serverSrc && imgEl.dataset.artFor === track.Id) imgEl.src = serverSrc;
   };
 }
 
@@ -2239,9 +2243,12 @@ function refreshSettingsUI() {
   uiStyleToggle.querySelectorAll('button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
   });
+  // Battery saver forces Static: show what's actually in effect, and why,
+  // instead of a "Dynamic" that isn't animating anything.
   motionToggle.querySelectorAll('button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.value === (s.motion === 'static' ? 'static' : 'dynamic'));
+    btn.classList.toggle('active', btn.dataset.value === (isStaticMotion() ? 'static' : 'dynamic'));
   });
+  document.getElementById('motion-saver-note').hidden = !(isPowerSaver() && s.motion !== 'static');
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
   });
@@ -4353,6 +4360,7 @@ function wirePlayer() {
   watchPowerSaver((on) => {
     const wordsBefore = wordSyncActive();
     setPowerSaver(on);
+    refreshSettingsUI();
     if (wordSyncActive() !== wordsBefore) reloadLyricsForWordMode();
   });
   // Crossing the phone-layout breakpoint moves the cat between its spots.
