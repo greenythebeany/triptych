@@ -5,7 +5,7 @@ import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
 import { addListening, persistLocal as persistListening, getOwnLog, isDirty as listeningDirty, markSynced as listeningSynced, adoptIfLarger, combineLogs, dayKey } from './listening.js';
-import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
+import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, isPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
 import { LOCALES, loadLocale, applyTranslations, t } from './i18n.js';
 import { setHapticsEnabled, platform, isDesktop, isMobile, isAndroid, sessionStore, windowControls, wireHardwareBackButton, exitApp, requestNotificationPermission, setDiscordActivity, clearDiscordActivity, searchDeezerAlbumArt, hapticImpact, watchPowerSaver } from './platform.js';
 import { createConnect } from './connect.js';
@@ -31,8 +31,6 @@ const btnRetryConnection = document.getElementById('btn-retry-connection');
 
 const viewRoot = document.getElementById('view-root');
 const playlistListEl = document.getElementById('playlist-list');
-const pinnedAlbumsListEl = document.getElementById('pinned-albums-list');
-const pinnedAlbumsSectionEl = document.getElementById('pinned-albums-section');
 const globalSearchWrap = document.getElementById('global-search-wrap');
 const globalSearchInput = document.getElementById('global-search');
 
@@ -167,6 +165,11 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  '2.4.2': [
+    { icon: 'fi-br-mobile', key: 'controls242' },
+    { icon: 'fi-br-magic-wand', key: 'motion242' },
+    { icon: 'fi-br-list-music', key: 'sidebar242' }
+  ],
   '2.4.1': [
     { icon: 'fi-br-magic-wand', key: 'smartShuffle' },
     { icon: 'fi-br-settings-sliders', key: 'animations241' },
@@ -253,8 +256,40 @@ const IS_RETURNING_USER = (() => {
   }
 })();
 
+// Modal windows close the way they open, in reverse: the backdrop fades
+// and the card sinks a little. Reopening mid-close cancels it.
+function hideOverlay(overlay) {
+  if (overlay.hidden || overlay._closing) return;
+  if (isStaticMotion()) { overlay.hidden = true; return; }
+  const token = {};
+  overlay._closing = token;
+  const card = overlay.querySelector('.modal-card');
+  const ease = 'cubic-bezier(0.4, 0, 1, 1)';
+  const anims = [overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: ease, fill: 'forwards' })];
+  if (card) anims.push(card.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(12px) scale(0.97)' }], { duration: 180, easing: ease, fill: 'forwards' }));
+  overlay.style.pointerEvents = 'none';
+  const finish = () => {
+    if (overlay._closing !== token) return;
+    overlay._closing = null;
+    overlay.hidden = true;
+    overlay.style.pointerEvents = '';
+    anims.forEach((a) => a.cancel());
+  };
+  Promise.all(anims.map((a) => a.finished)).then(finish, finish);
+  setTimeout(finish, 400);
+}
+function showOverlay(overlay) {
+  if (overlay._closing) {
+    overlay._closing = null;
+    overlay.style.pointerEvents = '';
+    overlay.getAnimations().forEach((a) => a.cancel());
+    overlay.querySelector('.modal-card')?.getAnimations().forEach((a) => a.cancel());
+  }
+  overlay.hidden = false;
+}
+
 function closeWhatsNew() {
-  whatsNewOverlay.hidden = true;
+  hideOverlay(whatsNewOverlay);
 }
 
 function maybeShowWhatsNew() {
@@ -287,7 +322,7 @@ function maybeShowWhatsNew() {
       <div class="whats-new-item-desc">${escapeHtml(t(`whatsNew.${key}Desc`))}</div></div>`;
     whatsNewList.appendChild(li);
   });
-  whatsNewOverlay.hidden = false;
+  showOverlay(whatsNewOverlay);
   // Keyboard users land on Continue; no focus ring drawn for a popup that
   // simply opened on its own.
   whatsNewClose.focus({ focusVisible: false });
@@ -509,23 +544,308 @@ function artUrl(item, kind = 'album', cssPx = 200) {
   return jellyfin.imageUrl(item, 'Primary', imagePx(cssPx)) || placeholderArt(kind);
 }
 
-// Server art requests fail outright when offline — for a downloaded track,
-// fall back to the copy of the cover saved alongside its audio at download
-// time instead of leaving a broken image. Only kicks in on actual load
-// failure, so the normal online path (server art) is untouched.
+// A downloaded track shows the cover saved with it, straight away. Waiting
+// for the server image to fail first could take a long time when the server
+// can't be reached (when downloads get played), so the cover stayed blank
+// or showed the previous song while the phone's media controls already had
+// the right one. Falls back to the server image if there's no saved copy.
 function withOfflineArtFallback(imgEl, track) {
   if (!track?.Id || !isDownloaded(track.Id)) return;
+  const serverSrc = imgEl.src;
+  imgEl.dataset.artFor = track.Id;
+  getLocalImageUri(track.Id).then((uri) => {
+    if (uri && imgEl.dataset.artFor === track.Id) imgEl.src = uri;
+  });
   imgEl.onerror = () => {
     imgEl.onerror = null;
-    getLocalImageUri(track.Id).then((uri) => {
-      if (uri) imgEl.src = uri;
-    });
+    if (imgEl.src !== serverSrc && imgEl.dataset.artFor === track.Id) imgEl.src = serverSrc;
   };
 }
 
 // Nothing to download when the music is already on this device.
 function canDownload(track) {
   return downloadsSupported() && !jellyfin?.isLocal && !isLocalItemId(track?.Id);
+}
+
+// ---------- Dropdowns ----------
+// Settings dropdowns keep their real <select> (value, change events, the
+// arrow) but open an in-app list instead of the operating system's popup,
+// which ignores the app's fonts and colors (system font, light-blue
+// highlight). Styled like the app's other menus, in every look.
+let openSelectMenu = null;
+
+function closeSelectMenu() {
+  if (!openSelectMenu) return;
+  const { menu, select, onOutside, onKey, onMove } = openSelectMenu;
+  openSelectMenu = null;
+  document.removeEventListener('pointerdown', onOutside, true);
+  document.removeEventListener('keydown', onKey, true);
+  window.removeEventListener('resize', onMove);
+  document.removeEventListener('scroll', onMove, true);
+  select.setAttribute('aria-expanded', 'false');
+  select.parentElement?.classList.remove('open');
+  if (isStaticMotion()) { menu.remove(); return; }
+  // Rolls back up into the dropdown it came out of.
+  menu.classList.add('closing');
+  const up = menu.dataset.up === '1';
+  menu.animate([
+    { clipPath: 'inset(0 0 0 0 round var(--menu-r))', opacity: 1 },
+    { clipPath: up ? 'inset(100% 0 0 0 round var(--menu-r))' : 'inset(0 0 100% 0 round var(--menu-r))', opacity: 0.6 }
+  ], { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }).finished.catch(() => {}).then(() => menu.remove());
+  setTimeout(() => menu.remove(), 400);
+}
+
+function showSelectMenu(select) {
+  if (openSelectMenu?.select === select) { closeSelectMenu(); return; }
+  closeSelectMenu();
+  const menu = el('div', 'select-menu');
+  menu.setAttribute('role', 'listbox');
+  const items = [...select.options].map((option) => {
+    const item = el('button', 'select-menu-item');
+    item.type = 'button';
+    item.setAttribute('role', 'option');
+    item.textContent = option.textContent;
+    item.dataset.value = option.value;
+    item.disabled = option.disabled;
+    const chosen = option.value === select.value;
+    item.classList.toggle('selected', chosen);
+    item.setAttribute('aria-selected', String(chosen));
+    item.addEventListener('click', () => {
+      closeSelectMenu();
+      if (select.value !== option.value) {
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      select.focus({ preventScroll: true });
+    });
+    menu.appendChild(item);
+    return item;
+  });
+  // One highlight pill that moves between the items like the nav's sticky
+  // dot (stretches toward the next one, then catches up) instead of each
+  // row lighting up on its own.
+  const glider = el('span', 'select-glider');
+  glider.setAttribute('aria-hidden', 'true');
+  menu.prepend(glider);
+  let gliderAt = null;
+  const moveGlider = (item, instant) => {
+    const to = { top: item.offsetTop, height: item.offsetHeight };
+    glider.style.top = `${to.top}px`;
+    glider.style.height = `${to.height}px`;
+    glider.style.opacity = '1';
+    const from = gliderAt;
+    gliderAt = to;
+    if (instant || !from || from.top === to.top || isStaticMotion()) return;
+    const lead = Math.min(from.top, to.top);
+    const span = Math.max(from.top + from.height, to.top + to.height) - lead;
+    glider.getAnimations().forEach((an) => an.cancel());
+    glider.animate([
+      { top: `${from.top}px`, height: `${from.height}px`, offset: 0 },
+      { top: `${lead}px`, height: `${span}px`, offset: 0.45 },
+      { top: `${to.top}px`, height: `${to.height}px`, offset: 1 }
+    ], { duration: 300, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+  };
+  items.forEach((item) => {
+    item.addEventListener('pointerenter', () => { if (!item.disabled) moveGlider(item); });
+    item.addEventListener('focus', () => moveGlider(item));
+  });
+  document.body.appendChild(menu);
+
+  // Below the dropdown, or above it when there's more room there; as wide
+  // as the dropdown at least, never off screen.
+  const r = select.getBoundingClientRect();
+  const gap = 6;
+  const below = innerHeight - r.bottom - gap - 12;
+  const above = r.top - gap - 12;
+  const up = below < Math.min(menu.scrollHeight, 260) && above > below;
+  menu.style.maxHeight = `${Math.max(160, Math.min(up ? above : below, 420))}px`;
+  menu.style.minWidth = `${r.width}px`;
+  const left = Math.max(12, Math.min(innerWidth - menu.offsetWidth - 12, r.right - menu.offsetWidth));
+  menu.style.left = `${left}px`;
+  if (up) menu.style.bottom = `${innerHeight - r.top + gap}px`;
+  else menu.style.top = `${r.bottom + gap}px`;
+  menu.style.transformOrigin = up ? 'bottom right' : 'top right';
+  menu.dataset.up = up ? '1' : '0';
+  const current = items.find((item) => item.classList.contains('selected'));
+  // Scroll only the list itself (scrollIntoView would also scroll the page,
+  // which closes the menu).
+  if (current) menu.scrollTop = Math.max(0, current.offsetTop - (menu.clientHeight - current.offsetHeight) / 2);
+  if (current || items[0]) moveGlider(current || items[0], true);
+  (current || items[0])?.focus({ preventScroll: true });
+  // Opens like the account menu: unrolls out of the dropdown (down, or up
+  // when it opens above it) and the options slide in one after another.
+  if (!isStaticMotion()) {
+    const ease = 'cubic-bezier(0.32, 0.72, 0, 1)';
+    menu.animate([
+      { clipPath: up ? 'inset(100% 0 0 0 round var(--menu-r))' : 'inset(0 0 100% 0 round var(--menu-r))', transform: `translateY(${up ? 6 : -6}px)` },
+      { clipPath: 'inset(0 0 0 0 round var(--menu-r))', transform: 'none' }
+    ], { duration: 420, easing: ease });
+    const firstVisible = Math.floor(menu.scrollTop / ((items[0]?.offsetHeight) || 36));
+    items.slice(firstVisible, firstVisible + 12).forEach((item, i) => item.animate(
+      [{ opacity: 0, transform: `translateY(${up ? 6 : -6}px)` }, { opacity: 1, transform: 'none' }],
+      { duration: 260, delay: 60 + i * 22, easing: ease, fill: 'backwards' }
+    ));
+  }
+
+  const onOutside = (evt) => { if (!menu.contains(evt.target) && evt.target !== select) closeSelectMenu(); };
+  const onKey = (evt) => {
+    if (evt.key === 'Escape') { evt.preventDefault(); evt.stopPropagation(); closeSelectMenu(); select.focus(); return; }
+    if (evt.key === 'ArrowDown' || evt.key === 'ArrowUp') {
+      evt.preventDefault();
+      const enabled = items.filter((item) => !item.disabled);
+      const at = enabled.indexOf(document.activeElement);
+      const next = enabled[Math.max(0, Math.min(enabled.length - 1, at + (evt.key === 'ArrowDown' ? 1 : -1)))];
+      next?.focus();
+    }
+    if (evt.key === 'Tab') closeSelectMenu();
+  };
+  const onMove = (evt) => { if (!evt || !menu.contains(evt.target)) closeSelectMenu(); };
+  document.addEventListener('pointerdown', onOutside, true);
+  document.addEventListener('keydown', onKey, true);
+  window.addEventListener('resize', onMove);
+  document.addEventListener('scroll', onMove, true);
+  select.setAttribute('aria-expanded', 'true');
+  select.parentElement?.classList.add('open');
+  openSelectMenu = { menu, select, onOutside, onKey, onMove };
+}
+
+// Segmented toggles (theme, interface style, animations): the highlight is
+// one pill that moves between options like the nav's sticky dot -- it
+// stretches toward the new option, then its back end lets go and catches
+// up -- instead of jumping. Follows the buttons' .active class, so every
+// place that sets it gets the motion for free.
+function enhanceSegmented(seg) {
+  const glider = el('span', 'seg-glider');
+  glider.setAttribute('aria-hidden', 'true');
+  seg.prepend(glider);
+  seg.classList.add('has-glider');
+  let at = null;
+  const place = (instant) => {
+    const active = seg.querySelector('button.active');
+    if (!active || !active.offsetWidth) { glider.style.opacity = '0'; return; }
+    const to = { left: active.offsetLeft, width: active.offsetWidth };
+    glider.style.opacity = '1';
+    glider.style.top = `${active.offsetTop}px`;
+    glider.style.height = `${active.offsetHeight}px`;
+    glider.style.left = `${to.left}px`;
+    glider.style.width = `${to.width}px`;
+    const from = at;
+    at = to;
+    if (instant || !from || isStaticMotion() || from.left === to.left) return;
+    const lead = Math.min(from.left, to.left);
+    const span = Math.max(from.left + from.width, to.left + to.width) - lead;
+    glider.getAnimations().forEach((an) => an.cancel());
+    glider.animate([
+      { left: `${from.left}px`, width: `${from.width}px`, offset: 0 },
+      { left: `${lead}px`, width: `${span}px`, offset: 0.45 },
+      { left: `${to.left}px`, width: `${to.width}px`, offset: 1 }
+    ], { duration: 460, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+  };
+  new MutationObserver(() => place(false)).observe(seg, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  if (window.ResizeObserver) new ResizeObserver(() => place(true)).observe(seg);
+  place(true);
+}
+
+// Switches: the knob's drop animation (styles.css .switch.tapped) plays on
+// a real tap only, and is cleared afterwards so it doesn't replay when
+// Settings is shown again.
+document.addEventListener('change', (evt) => {
+  const sw = evt.target.closest?.('.switch');
+  if (!sw || isStaticMotion()) return;
+  sw.classList.remove('tapped');
+  void sw.offsetWidth;
+  sw.classList.add('tapped');
+}, true);
+document.addEventListener('animationend', (evt) => {
+  if (evt.animationName === 'switch-on' || evt.animationName === 'switch-off') evt.target.closest('.switch')?.classList.remove('tapped');
+}, true);
+
+// Accent colors: the selection box slides between swatches the sticky way
+// too -- across rows, it stretches over both and then lets go of the old one.
+function enhancePaletteGrid(grid) {
+  grid.classList.add('has-glider');
+  const glider = el('span', 'swatch-glider');
+  glider.setAttribute('aria-hidden', 'true');
+  let at = null;
+  const place = (instant) => {
+    if (glider.parentElement !== grid) grid.prepend(glider); // the grid is rebuilt on language change
+    const active = grid.querySelector('.palette-swatch.active');
+    if (!active || !active.offsetWidth) { glider.style.opacity = '0'; return; }
+    const to = { left: active.offsetLeft, top: active.offsetTop, width: active.offsetWidth, height: active.offsetHeight };
+    Object.assign(glider.style, { opacity: '1', left: `${to.left}px`, top: `${to.top}px`, width: `${to.width}px`, height: `${to.height}px` });
+    const from = at;
+    at = to;
+    if (instant || !from || isStaticMotion() || (from.left === to.left && from.top === to.top)) return;
+    const box = {
+      left: Math.min(from.left, to.left), top: Math.min(from.top, to.top),
+      right: Math.max(from.left + from.width, to.left + to.width), bottom: Math.max(from.top + from.height, to.top + to.height)
+    };
+    const px = (r) => ({ left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+    glider.getAnimations().forEach((an) => an.cancel());
+    glider.animate([
+      { ...px(from), offset: 0 },
+      { ...px({ left: box.left, top: box.top, width: box.right - box.left, height: box.bottom - box.top }), offset: 0.45 },
+      { ...px(to), offset: 1 }
+    ], { duration: 480, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+  };
+  new MutationObserver((records) => {
+    if (records.some((r) => r.type === 'attributes' && r.target !== glider)) place(false);
+    else if (records.some((r) => r.type === 'childList')) { at = null; place(true); }
+  }).observe(grid, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  if (window.ResizeObserver) new ResizeObserver(() => place(true)).observe(grid);
+  place(true);
+}
+
+// Nothing look: a page's big title types itself in, the red dot riding
+// along at the end like a cursor, then the dot blinks slowly
+// (nothing.css .view-title.typed). Any view that adds a .view-title gets it.
+function typeInTitle(title) {
+  const text = title.textContent;
+  if (!text || document.documentElement.dataset.ui !== 'nothing' || isStaticMotion()) {
+    title.classList.add('typed');
+    return;
+  }
+  title.setAttribute('aria-label', text);
+  const chars = [...text];
+  const step = Math.max(22, Math.min(60, 650 / chars.length));
+  title.textContent = '';
+  let shown = 0;
+  const tick = () => {
+    if (!title.isConnected) return;
+    shown += 1;
+    title.textContent = chars.slice(0, shown).join('');
+    if (shown < chars.length) setTimeout(tick, step);
+    else { title.removeAttribute('aria-label'); title.classList.add('typed'); }
+  };
+  setTimeout(tick, 80);
+}
+new MutationObserver((records) => {
+  for (const r of records) {
+    for (const node of r.addedNodes) {
+      if (node.nodeType !== 1) continue;
+      const title = node.classList.contains('view-title') ? node : node.querySelector?.('.view-title');
+      if (title && !title.dataset.typing) { title.dataset.typing = '1'; typeInTitle(title); }
+    }
+  }
+}).observe(viewRoot, { childList: true, subtree: true });
+
+function enhanceSelect(select) {
+  const wrap = el('span', 'select-wrap');
+  select.before(wrap);
+  wrap.appendChild(select);
+  select.setAttribute('aria-haspopup', 'listbox');
+  select.setAttribute('aria-expanded', 'false');
+  // Stop the native popup (mouse, touch and keyboard all open it) and open
+  // ours instead.
+  const open = (evt) => {
+    evt.preventDefault();
+    if (!select.disabled) showSelectMenu(select);
+  };
+  select.addEventListener('mousedown', open);
+  select.addEventListener('touchend', open);
+  select.addEventListener('keydown', (evt) => {
+    if ([' ', 'Enter', 'ArrowDown', 'ArrowUp'].includes(evt.key) && !evt.altKey) open(evt);
+  });
 }
 
 function el(tag, className, html) {
@@ -580,6 +900,9 @@ async function init() {
   applyTranslations();
   customCssStyle.textContent = getSettings().customCss || '';
   wireSettingsUI();
+  document.querySelectorAll('select.settings-select').forEach(enhanceSelect);
+  document.querySelectorAll('.segmented').forEach(enhanceSegmented);
+  enhancePaletteGrid(paletteGrid);
   wireCreatePlaylistUI();
   wireLegalOverlay();
   wirePrivacyNotice();
@@ -2239,9 +2562,12 @@ function refreshSettingsUI() {
   uiStyleToggle.querySelectorAll('button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
   });
+  // Battery saver forces Static: show what's actually in effect, and why,
+  // instead of a "Dynamic" that isn't animating anything.
   motionToggle.querySelectorAll('button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.value === (s.motion === 'static' ? 'static' : 'dynamic'));
+    btn.classList.toggle('active', btn.dataset.value === (isStaticMotion() ? 'static' : 'dynamic'));
   });
+  document.getElementById('motion-saver-note').hidden = !(isPowerSaver() && s.motion !== 'static');
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
   });
@@ -2256,11 +2582,11 @@ function openSettings() {
   document.getElementById('settings-version').textContent = `Triptych ${getClientVersion()}`;
   refreshLocalLibrarySettings().catch(() => {});
   settingsTriggerEl = document.activeElement;
-  settingsOverlay.hidden = false;
+  showOverlay(settingsOverlay);
   btnCloseSettings.focus();
 }
 function closeSettings() {
-  settingsOverlay.hidden = true;
+  hideOverlay(settingsOverlay);
   settingsTriggerEl?.focus();
 }
 
@@ -2268,14 +2594,14 @@ function closeSettings() {
 let legalTriggerEl = null;
 function openLegal(anchor) {
   legalTriggerEl = document.activeElement;
-  legalOverlay.hidden = false;
+  showOverlay(legalOverlay);
   const target = anchor && document.getElementById(anchor);
   if (target) target.scrollIntoView({ block: 'start' });
   else legalBody.scrollTop = 0;
   btnCloseLegal.focus();
 }
 function closeLegal() {
-  legalOverlay.hidden = true;
+  hideOverlay(legalOverlay);
   legalTriggerEl?.focus();
 }
 function wireLegalOverlay() {
@@ -2314,7 +2640,7 @@ function wireCreatePlaylistUI() {
   btnNewPlaylist.addEventListener('click', () => {
     inputPlaylistName.value = '';
     createPlaylistTriggerEl = document.activeElement;
-    createPlaylistOverlay.hidden = false;
+    showOverlay(createPlaylistOverlay);
     inputPlaylistName.focus();
   });
   btnCloseCreatePlaylist.addEventListener('click', closeCreatePlaylist);
@@ -2340,7 +2666,7 @@ function wireCreatePlaylistUI() {
   });
 }
 function closeCreatePlaylist() {
-  createPlaylistOverlay.hidden = true;
+  hideOverlay(createPlaylistOverlay);
   createPlaylistTriggerEl?.focus();
 }
 
@@ -2375,13 +2701,12 @@ document.querySelectorAll('.nav-item, .bottom-nav-item').forEach((btn) => {
   btn.addEventListener('click', () => navigateTo({ view: btn.dataset.view }));
 });
 
+// The sidebar's one list: playlists, then pinned albums after them (no
+// separate section taking room of its own).
 async function loadPlaylistSidebar() {
   playlistListEl.innerHTML = '';
   const playlists = await jellyfin.getPlaylists();
-  if (!playlists.length) {
-    playlistListEl.appendChild(el('div', 'playlist-empty', t('playlist.sidebarEmpty')));
-    return;
-  }
+  playlistListEl.querySelectorAll('.playlist-item, .playlist-empty').forEach((node) => node.remove());
   playlists.forEach((pl) => {
     const item = el('button', 'playlist-item');
     const img = document.createElement('img');
@@ -2391,18 +2716,103 @@ async function loadPlaylistSidebar() {
     const span = document.createElement('span');
     span.textContent = pl.Name;
     item.appendChild(span);
+    item.dataset.sid = pl.Id;
     item.addEventListener('click', () => navigateTo({ view: 'playlist', id: pl.Id, name: pl.Name }));
     wirePlaylistDropTarget(item, pl.Id);
+    wireSidebarReorder(item);
     playlistListEl.appendChild(item);
   });
+  loadPinnedAlbumsSidebar();
+}
+
+// The order you drag them into, kept on this device (Jellyfin has no order
+// for a user's playlists). Ids not in it (new playlists/pins) go last.
+const SIDEBAR_ORDER_KEY = 'triptych:sidebarOrder';
+function savedSidebarOrder() {
+  try { return JSON.parse(localStorage.getItem(SIDEBAR_ORDER_KEY) || '[]'); } catch (err) { return []; }
+}
+function applySidebarOrder() {
+  const order = savedSidebarOrder();
+  const items = [...playlistListEl.querySelectorAll('.playlist-item')];
+  const rank = (item) => { const i = order.indexOf(item.dataset.sid); return i < 0 ? order.length + items.indexOf(item) : i; };
+  items.sort((a, b) => rank(a) - rank(b)).forEach((item) => playlistListEl.appendChild(item));
+  const title = document.getElementById('sidebar-list-title');
+  // data-i18n too, so switching language keeps the right one.
+  title.dataset.i18n = playlistListEl.querySelector('.pinned-album-item') ? 'nav.playlistsAndAlbums' : 'nav.playlists';
+  title.textContent = t(title.dataset.i18n);
+}
+
+// Drag a sidebar item to reorder (mouse or touch). The other items move
+// around it -- the dragged one stays in place in the DOM so it keeps the
+// pointer (see wireQueueDragHandle). A plain click still opens it.
+function wireSidebarReorder(item) {
+  item.addEventListener('pointerdown', (evt) => {
+    if (evt.button !== 0) return;
+    let startY = evt.clientY;
+    const originY = evt.clientY;
+    let dragging = false;
+    const onMove = (moveEvt) => {
+      if (moveEvt.pointerId !== evt.pointerId) return;
+      if (!dragging) {
+        if (Math.abs(moveEvt.clientY - originY) < 6) return;
+        dragging = true;
+        try { item.setPointerCapture(evt.pointerId); } catch (err) { /* moves still reach the window */ }
+        item.classList.add('sidebar-dragging');
+        playlistListEl.classList.add('sidebar-reordering');
+      }
+      moveEvt.preventDefault();
+      let dy = moveEvt.clientY - startY;
+      item.style.transform = `translateY(${dy}px)`;
+      for (let guard = 0; guard < 200; guard++) {
+        const r = item.getBoundingClientRect();
+        const center = r.top + r.height / 2;
+        const prev = item.previousElementSibling?.matches('.playlist-item') ? item.previousElementSibling : null;
+        const next = item.nextElementSibling?.matches('.playlist-item') ? item.nextElementSibling : null;
+        const mid = (node) => { const b = node.getBoundingClientRect(); return b.top + b.height / 2; };
+        let swap = null;
+        if (next && center > mid(next)) swap = () => playlistListEl.insertBefore(next, item);
+        else if (prev && center < mid(prev)) swap = () => playlistListEl.insertBefore(prev, item.nextSibling);
+        if (!swap) break;
+        const before = item.offsetTop;
+        swap();
+        startY += item.offsetTop - before;
+        dy = moveEvt.clientY - startY;
+        item.style.transform = `translateY(${dy}px)`;
+      }
+    };
+    const onUp = (upEvt) => {
+      if (upEvt.pointerId !== evt.pointerId) return;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      if (!dragging) return;
+      try { item.releasePointerCapture(evt.pointerId); } catch (err) { /* already gone */ }
+      item.classList.remove('sidebar-dragging');
+      playlistListEl.classList.remove('sidebar-reordering');
+      item.style.transform = '';
+      try {
+        localStorage.setItem(SIDEBAR_ORDER_KEY, JSON.stringify([...playlistListEl.querySelectorAll('.playlist-item')].map((node) => node.dataset.sid)));
+      } catch (err) { /* storage unavailable: order lasts this session */ }
+      hapticImpact('light');
+      item.dataset.draggedAt = String(Date.now());
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  });
+  // The click that ends a drag shouldn't also open the item.
+  item.addEventListener('click', (clickEvt) => {
+    if (Date.now() - Number(item.dataset.draggedAt || 0) < 400) { clickEvt.stopImmediatePropagation(); clickEvt.preventDefault(); }
+  }, { capture: true });
 }
 
 function loadPinnedAlbumsSidebar() {
   const albums = getPinnedAlbums();
-  pinnedAlbumsSectionEl.hidden = !albums.length;
-  pinnedAlbumsListEl.innerHTML = '';
+  playlistListEl.querySelectorAll('.pinned-album-item, .playlist-empty').forEach((node) => node.remove());
   albums.forEach((album) => {
-    const item = el('button', 'playlist-item');
+    const item = el('button', 'playlist-item pinned-album-item');
+    item.dataset.sid = `album:${album.Id}`;
+    wireSidebarReorder(item);
     const img = document.createElement('img');
     img.className = 'pl-thumb';
     img.src = artUrl(album, 'album', 48);
@@ -2411,8 +2821,12 @@ function loadPinnedAlbumsSidebar() {
     span.textContent = album.Name;
     item.appendChild(span);
     item.addEventListener('click', () => navigateTo({ view: 'album', id: album.Id }));
-    pinnedAlbumsListEl.appendChild(item);
+    playlistListEl.appendChild(item);
   });
+  if (!playlistListEl.querySelector('.playlist-item')) {
+    playlistListEl.appendChild(el('div', 'playlist-empty', t('playlist.sidebarEmpty')));
+  }
+  applySidebarOrder();
 }
 
 // ---------- Nav glider + sticky dot ----------
@@ -2480,10 +2894,48 @@ if (window.ResizeObserver) {
 window.addEventListener('resize', () => moveNavGliders({ instant: true }));
 
 // ---------- View router with back/forward ----------
+// Phones: switching between the tab bar's tabs slides the page sideways
+// like MessageMe -- the old page out one way, the new one in from the
+// other, in tab-bar order (Home, Search, Library). A frozen copy of the old
+// page is laid over it for the slide-out.
+const TAB_ORDER = ['home', 'search', 'library'];
+function tabSlideDirection(fromView, toView) {
+  if (!isPhoneLayout() || isStaticMotion() || fromView === toView) return 0;
+  const from = TAB_ORDER.indexOf(fromView);
+  const to = TAB_ORDER.indexOf(toView);
+  return from < 0 || to < 0 ? 0 : Math.sign(to - from);
+}
+
+function snapshotMain() {
+  const r = mainEl.getBoundingClientRect();
+  const ghost = mainEl.cloneNode(true);
+  ghost.removeAttribute('id');
+  ghost.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+  ghost.querySelectorAll('video, audio').forEach((node) => node.remove());
+  Object.assign(ghost.style, {
+    position: 'fixed', left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`,
+    margin: '0', pointerEvents: 'none', overflow: 'hidden'
+  });
+  ghost.setAttribute('aria-hidden', 'true');
+  mainEl.after(ghost);
+  ghost.scrollTop = mainEl.scrollTop;
+  return ghost;
+}
+
+function slideMain(ghost, dir) {
+  const ease = 'cubic-bezier(0.32, 0.72, 0, 1)';
+  ghost.animate([{ transform: 'none', opacity: 1 }, { transform: `translate3d(${-dir * 28}%, 0, 0)`, opacity: 0 }], { duration: 380, easing: ease, fill: 'forwards' })
+    .finished.catch(() => {}).then(() => ghost.remove());
+  mainEl.animate([{ transform: `translate3d(${dir * 22}%, 0, 0)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
+}
+
 function navigateTo(state, pushHistory = true) {
+  const dir = tabSlideDirection(viewHistory[viewHistory.length - 1]?.view, state.view);
+  const ghost = dir ? snapshotMain() : null;
   if (pushHistory && viewHistory.length) viewFuture = [];
   if (pushHistory) viewHistory.push(state);
   renderView(state);
+  if (ghost) slideMain(ghost, dir);
   document.querySelectorAll('.nav-item, .bottom-nav-item').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
   moveNavGliders();
   globalSearchWrap.hidden = state.view !== 'search';
@@ -4231,6 +4683,12 @@ function wirePlayer() {
   [btnShuffle, mobileBtnShuffle, btnRepeat, mobileBtnRepeat, btnPlay, btnPrev, btnNext, mobileBtnPlay, mobileBtnPrev, mobileBtnNext]
     .forEach((btn) => btn.addEventListener('animationend', () => btn.classList.remove('bounce')));
   [btnPlay, btnPrev, btnNext, mobileBtnPlay, mobileBtnPrev, mobileBtnNext].forEach((btn) => btn.addEventListener('click', () => bounceButtons(btn)));
+  // The full-screen player's other buttons bounce the same way.
+  [nowPlayingLikeBtn, nowPlayingDownloadBtn, btnLyrics, btnLyricsMobile, btnQueueMobile,
+    btnConnect, btnConnectMobile, btnSleepTimer, btnSleepTimerMobile].filter(Boolean).forEach((btn) => {
+    btn.addEventListener('click', () => bounceButtons(btn));
+    btn.addEventListener('animationend', (evt) => { if (evt.animationName === 'ctrl-bounce') btn.classList.remove('bounce'); });
+  });
   btnRepeat.addEventListener('click', () => {
     const mode = player.cycleRepeat();
     btnRepeat.classList.toggle('active', mode !== RepeatMode.OFF);
@@ -4291,8 +4749,38 @@ function wirePlayer() {
   npVolumeBar.value = volumeBar.value;
   npVolumeBar.style.setProperty('--pct', rangeFillPercent(Number(volumeBar.value), npVolumeBar, 14));
 
+  // The speaker mutes, and a second click brings back the volume from
+  // before. Goes through the slider so everything else follows.
+  let volumeBeforeMute = 50;
+  const toggleMute = () => {
+    const now = Number(volumeBar.value);
+    if (now > 0) volumeBeforeMute = now;
+    volumeBar.value = now > 0 ? 0 : (volumeBeforeMute || 50);
+    volumeBar.dispatchEvent(new Event('input'));
+    bounceButtons(volumeIcon);
+  };
+  volumeIcon.addEventListener('click', toggleMute);
+  volumeIcon.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Enter' || evt.key === ' ') { evt.preventDefault(); toggleMute(); }
+  });
+  volumeIcon.addEventListener('animationend', () => volumeIcon.classList.remove('bounce'));
+
+  // Player bar's queue button: opens the queue (bringing the Now Playing
+  // panel out first if it's closed), or closes it; lit while it's open.
+  const btnQueue = document.getElementById('btn-queue');
+  btnQueue.addEventListener('click', () => {
+    bounceButtons(btnQueue);
+    if (queueSheetOpen) { closeQueueSheet(); return; }
+    if (lyricsPanel.hidden || lyricsPanel.dataset.closing) openNowPlaying();
+    openQueueSheet();
+  });
+  btnQueue.addEventListener('animationend', () => btnQueue.classList.remove('bounce'));
+  new MutationObserver(() => btnQueue.classList.toggle('active', queueSheet.classList.contains('open') && queueSheetOpen))
+    .observe(queueSheet, { attributes: true, attributeFilter: ['class'] });
+
   btnLyrics.addEventListener('click', () => {
-    if (!lyricsPanel.hidden) { closeNowPlaying(); return; }
+    // Mid slide-out counts as closed: a click brings it straight back.
+    if (!lyricsPanel.hidden && !lyricsPanel.dataset.closing) { closeNowPlaying(); return; }
     openNowPlaying();
   });
   btnCloseLyrics.addEventListener('click', () => closeNowPlaying());
@@ -4353,10 +4841,41 @@ function wirePlayer() {
   watchPowerSaver((on) => {
     const wordsBefore = wordSyncActive();
     setPowerSaver(on);
+    refreshSettingsUI();
     if (wordSyncActive() !== wordsBefore) reloadLyricsForWordMode();
   });
   // Crossing the phone-layout breakpoint moves the cat between its spots.
   window.matchMedia('(max-width: 820px)').addEventListener('change', syncCatJamVisibility);
+  // The player's close arrow points the way it leaves: right for the
+  // desktop side panel, down for the phone's full-screen player. A real
+  // right-chevron icon rather than a rotated one, which sat off-center.
+  const syncCollapseIcon = () => {
+    const icon = btnCloseLyrics.querySelector('.fi');
+    if (!icon) return;
+    icon.classList.toggle('fi-br-angle-small-right', !isPhoneLayout());
+    icon.classList.toggle('fi-br-angle-small-down', isPhoneLayout());
+  };
+  syncCollapseIcon();
+  window.matchMedia('(max-width: 820px)').addEventListener('change', syncCollapseIcon);
+  // Desktop: with the Now Playing panel closed, a left arrow at the right
+  // edge of the header brings it back (the panel's own close arrow points
+  // right, the way it leaves).
+  const btnOpenPanel = document.getElementById('btn-open-panel');
+  const syncPanelOpenButton = () => {
+    btnOpenPanel.hidden = isPhoneLayout() || !player.currentTrack;
+    // Only there once the panel is fully closed: it fades out as the panel
+    // starts opening and back in after it has slid away.
+    btnOpenPanel.classList.toggle('concealed', !lyricsPanel.hidden);
+    // Room for it in the header while the panel's closed; when open, the
+    // panel just covers it.
+    appRoot.classList.toggle('np-closed', !btnOpenPanel.hidden && lyricsPanel.hidden);
+  };
+  btnOpenPanel.addEventListener('click', () => { bounceButtons(btnOpenPanel); openNowPlaying(); });
+  btnOpenPanel.addEventListener('animationend', () => btnOpenPanel.classList.remove('bounce'));
+  new MutationObserver(syncPanelOpenButton).observe(lyricsPanel, { attributes: true, attributeFilter: ['hidden', 'data-closing'] });
+  window.matchMedia('(max-width: 820px)').addEventListener('change', syncPanelOpenButton);
+  player.on('trackchange', syncPanelOpenButton);
+  syncPanelOpenButton();
   wireQueueSheet();
 
   player.on('queuechange', () => {
@@ -4844,12 +5363,39 @@ function wireQueueSheet() {
 // ---------- Full-screen player open/close + gestures ----------
 let nowPlayingCloseTimer = null;
 
+// Desktop: the side panel slides in from the right and back out, its
+// width animating so the page makes room smoothly instead of jumping.
+let panelSlideToken = null;
+function slideSidePanel(opening) {
+  const token = {};
+  panelSlideToken = token;
+  lyricsPanel.getAnimations().forEach((a) => a.cancel());
+  lyricsPanel.classList.add('np-sliding');
+  if (opening) delete lyricsPanel.dataset.closing;
+  else lyricsPanel.dataset.closing = '1';
+  const width = 340;
+  const anim = lyricsPanel.animate(
+    opening ? [{ width: '0px' }, { width: `${width}px` }] : [{ width: `${width}px` }, { width: '0px' }],
+    { duration: opening ? 380 : 300, easing: opening ? 'cubic-bezier(0.32, 0.72, 0, 1)' : 'cubic-bezier(0.4, 0, 1, 1)' }
+  );
+  const done = () => {
+    if (panelSlideToken !== token) return;
+    panelSlideToken = null;
+    lyricsPanel.classList.remove('np-sliding');
+    if (!opening) { lyricsPanel.hidden = true; delete lyricsPanel.dataset.closing; }
+    moveNavGliders({ instant: true });
+  };
+  anim.finished.then(done, () => {});
+}
+
 function openNowPlaying() {
   // Reopened mid-close: drop the slide-out so it doesn't hide afterwards.
   clearTimeout(nowPlayingCloseTimer);
+  const desktopSlide = !isPhoneLayout() && !isStaticMotion() && (lyricsPanel.hidden || panelSlideToken);
   lyricsPanel.style.transition = '';
   lyricsPanel.style.transform = '';
   lyricsPanel.hidden = false;
+  if (desktopSlide) slideSidePanel(true);
   lyricsPanel.scrollTop = 0; // undo any shift an older build's scrollIntoView left behind
   showPanelTab(activePanelTab);
   refreshNowPlayingMarquees();
@@ -4883,7 +5429,12 @@ function syncLyricsToPlayback() {
 function closeNowPlaying() {
   closeQueueSheet();
   if (lyricsPanel.hidden) return;
-  if (!isPhoneLayout()) { lyricsPanel.hidden = true; return; }
+  if (!isPhoneLayout()) {
+    if (lyricsPanel.dataset.closing) return;
+    if (isStaticMotion()) lyricsPanel.hidden = true;
+    else slideSidePanel(false);
+    return;
+  }
   clearTimeout(nowPlayingCloseTimer);
   lyricsPanel.style.transition = 'transform 0.26s cubic-bezier(0.4, 0, 1, 1)';
   // Force the current position to be committed before animating away.
@@ -5137,6 +5688,7 @@ function wireQueueDragHandle(handle, row) {
     try { handle.setPointerCapture(evt.pointerId); } catch (err) { /* moves still reach the handle */ }
 
     const onMove = (moveEvt) => {
+      if (moveEvt.pointerId !== evt.pointerId) return;
       let dy = moveEvt.clientY - startY;
       row.style.transform = `translateY(${dy}px)`;
       row.style.zIndex = '10';
@@ -5157,9 +5709,12 @@ function wireQueueDragHandle(handle, row) {
         const prev = row.previousElementSibling?.matches('.queue-row:not(.playing)') ? row.previousElementSibling : null;
         const next = row.nextElementSibling?.matches('.queue-row:not(.playing)') ? row.nextElementSibling : null;
         const centerOf = (r) => { const b = r.getBoundingClientRect(); return b.top + b.height / 2; };
+        // The neighbour moves, not the grabbed row: taking the row out of
+        // the page (even to put it straight back) drops its pointer
+        // capture, so a fast drag lost the finger and froze mid-list.
         let target = null;
-        if (next && rowCenter > centerOf(next)) target = () => row.parentElement.insertBefore(row, next.nextSibling);
-        else if (prev && rowCenter < centerOf(prev)) target = () => row.parentElement.insertBefore(row, prev);
+        if (next && rowCenter > centerOf(next)) target = () => row.parentElement.insertBefore(next, row);
+        else if (prev && rowCenter < centerOf(prev)) target = () => row.parentElement.insertBefore(prev, row.nextSibling);
         if (!target) break;
         // The DOM move shifts the row's untransformed position; compensate
         // startY by exactly that (offsetTop ignores transforms, and this
@@ -5173,12 +5728,13 @@ function wireQueueDragHandle(handle, row) {
       }
     };
 
-    const onUp = () => {
+    const onUp = (upEvt) => {
+      if (upEvt && upEvt.pointerId !== evt.pointerId) return;
       // Never let a failed release leave the row grabbed or the list dimmed.
       try { handle.releasePointerCapture(evt.pointerId); } catch (err) { /* capture already gone */ }
-      handle.removeEventListener('pointermove', onMove);
-      handle.removeEventListener('pointerup', onUp);
-      handle.removeEventListener('pointercancel', onUp);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
       row.classList.remove('dragging');
       row.parentElement?.classList.remove('queue-dragging');
       row.style.transform = '';
@@ -5200,9 +5756,11 @@ function wireQueueDragHandle(handle, row) {
       if (queueRenderPending) renderQueue();
     };
 
-    handle.addEventListener('pointermove', onMove);
-    handle.addEventListener('pointerup', onUp);
-    handle.addEventListener('pointercancel', onUp);
+    // On the window, not the handle: a fast drag outruns the handle, and
+    // the move/up events then go to whatever is under the pointer.
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
   });
 }
 

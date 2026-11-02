@@ -244,6 +244,22 @@ body.platform-mac .titlebar-controls { display: none; }
 /* Monochrome's track is the text color (white in dark mode), so a white
    knob vanished on it -- use the background color for the knob instead. */
 :root[data-palette="mono"] .switch input:checked + .switch-track::before { background: var(--bg-base); }
+/* Tapped (app.js marks it .tapped): the knob moves like a drop, stretching
+   across to the other side and then letting go of where it was. Only on a
+   tap, so opening Settings doesn't replay it on every switch. */
+.switch-track::before { border-radius: 999px; }
+.switch.tapped input:checked + .switch-track::before { animation: switch-on 0.42s cubic-bezier(0.65, 0, 0.35, 1); }
+.switch.tapped input:not(:checked) + .switch-track::before { animation: switch-off 0.42s cubic-bezier(0.65, 0, 0.35, 1); }
+@keyframes switch-on {
+  0% { transform: translateX(0); width: 16px; }
+  45% { transform: translateX(0); width: 34px; }
+  100% { transform: translateX(18px); width: 16px; }
+}
+@keyframes switch-off {
+  0% { transform: translateX(18px); width: 16px; }
+  45% { transform: translateX(0); width: 34px; }
+  100% { transform: translateX(0); width: 16px; }
+}
 .btn-primary {
   margin-top: 6px;
   background: var(--accent);
@@ -325,7 +341,11 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
 .sidebar-section-title-row .sidebar-section-title { flex: 1; }
 .sidebar-section-title-row .btn-icon-plain { font-size: 14px; }
 .playlist-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 0 4px; }
+/* Reordering by drag (app.js wireSidebarReorder). */
+.playlist-list.sidebar-reordering .playlist-item:not(.sidebar-dragging) { transition: none; }
+.playlist-item.sidebar-dragging { position: relative; z-index: 5; background: var(--bg-card-hover); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); cursor: grabbing; }
 .playlist-item {
+  touch-action: pan-y;
   display: flex; align-items: center; gap: 12px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
@@ -397,6 +417,32 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
   display: flex; align-items: center; justify-content: center;
 }
 .nav-arrow svg { width: 16px; height: 16px; }
+/* Optical centering: a chevron's point looks lighter than its open side,
+   so a mathematically centered one reads as off toward the open side --
+   nudge each toward its point. */
+#btn-back svg, #btn-open-panel svg { transform: translateX(-1px); }
+/* Back / forward: bare chevrons, no circle behind them (every look); over
+   artwork (hero headers) a soft shadow keeps them readable. */
+html:root[data-ui] .main .header-nav-arrows .nav-arrow { background: transparent; border: none; box-shadow: none; color: var(--text-secondary); transition: color 0.15s ease; }
+html:root[data-ui] .main .header-nav-arrows .nav-arrow:hover { color: var(--text-primary); filter: none; }
+html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
+.panel-open-btn { flex-shrink: 0; margin-left: -6px; }
+/* Desktop: the open-panel arrow stays put at the right edge of the header;
+   the panel slides in over it and uncovers it again when it closes. */
+@media (min-width: 821px) {
+  body:not(.platform-mobile) .panel-open-btn {
+    position: fixed; right: 14px; top: calc(var(--titlebar-h) + 22px); margin: 0; z-index: 25;
+    width: 28px; height: 28px; background: transparent; border: none; color: var(--text-secondary);
+  }
+  body:not(.platform-mobile) .lyrics-panel { z-index: 30; }
+  /* It's outside .main now, so the looks' header-arrow styles don't reach it. */
+  :root[data-ui] .panel-open-btn { background: transparent; border: none; }
+  body:not(.platform-mobile) .app.np-closed .main-header { padding-right: 40px; }
+  body:not(.platform-mobile) .panel-open-btn:hover { color: var(--text-primary); filter: none; }
+  body:not(.platform-mobile) .panel-open-btn { transition: opacity 0.2s ease, color 0.15s ease; }
+  body:not(.platform-mobile) .panel-open-btn.concealed { opacity: 0; pointer-events: none; transition-duration: 0.1s; }
+}
+#btn-forward svg { transform: translateX(1px); }
 /* Icon-font glyphs carry their own internal metrics (ascent/descent, side
    bearing) that throw off simple flex/line-height centering — position the
    glyph by its own box instead of relying on font baseline alignment. */
@@ -849,6 +895,9 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
   overflow: hidden;
   position: relative;
 }
+/* While it slides open/closed (app.js): its content keeps full width and
+   moves with the panel's left edge instead of squeezing. */
+.lyrics-panel.np-sliding > * { min-width: 339px; }
 .now-playing-bg-art {
   position: absolute; inset: 0; z-index: 0;
   background-size: cover; background-position: center;
@@ -869,8 +918,21 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
   flex-shrink: 0;
   position: relative; z-index: 1;
 }
+/* Desktop: the side panel's header row is as tall as the page header, so
+   its icons line up with the account pill next to it. */
+@media (min-width: 821px) {
+  body:not(.platform-mobile) .lyrics-header { min-height: 68px; padding-top: 4px; padding-bottom: 0; box-sizing: border-box; }
+  /* The header row (arrows, account pill, the panel's icons) sits on the
+     same line as the sidebar's first item (Home). */
+  body:not(.platform-mobile) .main-header { padding-top: 4px; box-sizing: border-box; }
+  /* Cast, sleep timer and queue are in the player bar on desktop, so the
+     side panel's own copies go (phones keep them: their player covers the bar). */
+  body:not(.platform-mobile) .lyrics-header #btn-connect-mobile,
+  body:not(.platform-mobile) .lyrics-header #btn-sleep-timer-mobile,
+  body:not(.platform-mobile) .lyrics-header #btn-queue-mobile { display: none; }
+}
 .btn-icon-plain { color: var(--text-secondary); font-size: 17px; padding: 6px; border-radius: 6px; }
-.btn-icon-plain:hover { color: var(--text-primary); background: var(--bg-highlight); }
+.btn-icon-plain:hover { color: var(--text-primary); }
 .lyrics-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .lyrics-header-actions .btn-icon-plain { width: 29px; height: 29px; display: flex; align-items: center; justify-content: center; }
 
@@ -1100,8 +1162,10 @@ body.platform-mobile .lyrics-header-actions #btn-lyrics-mobile { display: flex; 
   scroll-behavior: auto !important;
 }
 
-/* The player buttons give a little bounce when tapped. */
-.ctrl-btn.bounce { animation: ctrl-bounce 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
+/* The player buttons -- and the heart, download, lyrics, queue, cast and
+   sleep-timer buttons -- give a little bounce when tapped. */
+button.bounce, .volume-icon.bounce { animation: ctrl-bounce 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
+.volume-icon { cursor: pointer; }
 @keyframes ctrl-bounce {
   0% { transform: scale(1); }
   35% { transform: scale(0.82); }
@@ -1337,6 +1401,7 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
 
 .settings-version { text-align: center; font-size: 11.5px; color: var(--text-tertiary); padding: 18px 0 6px; user-select: text; }
 :root[data-ui="nothing"] .settings-version { font-family: var(--nd-mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
+.settings-row-note { color: var(--accent); margin-top: 4px; }
 .legal-links { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .legal-links button { background: none; border: none; padding: 0; text-align: left; cursor: pointer; font-size: 11px; font-family: inherit; }
 
@@ -1409,6 +1474,14 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
   color: var(--text-secondary);
 }
 .segmented button.active { background: var(--accent); color: var(--accent-contrast); }
+/* The moving highlight (app.js enhanceSegmented) replaces the active
+   button's own background. */
+.segmented.has-glider { position: relative; }
+.segmented.has-glider > button { position: relative; z-index: 1; transition: color 0.25s ease; }
+:root[data-ui] .segmented.has-glider > button.active { background: transparent; box-shadow: none; }
+.seg-glider { position: absolute; z-index: 0; border-radius: 999px; background: var(--accent); pointer-events: none; }
+:root[data-ui="nothing"] .seg-glider { background: var(--text-primary); }
+:root[data-ui="apple"] .seg-glider { background: var(--bg-elevated); border-radius: 7px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25); }
 
 .palette-grid { display: flex; gap: 12px; flex-wrap: wrap; }
 .palette-swatch {
@@ -1416,6 +1489,10 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
   padding: 8px; border-radius: var(--radius-sm); border: 2px solid transparent;
 }
 .palette-swatch.active { border-color: var(--text-primary); }
+/* The moving selection box (app.js enhancePaletteGrid). */
+.palette-grid.has-glider { position: relative; }
+.palette-grid.has-glider .palette-swatch.active { border-color: transparent; }
+.swatch-glider { position: absolute; border: 2px solid var(--text-primary); border-radius: var(--radius-sm); pointer-events: none; box-sizing: border-box; }
 .palette-swatch .dot { width: 28px; height: 28px; border-radius: 50%; }
 .palette-swatch span { font-size: 11.5px; color: var(--text-secondary); }
 
@@ -1423,7 +1500,7 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
 select option { background: var(--bg-elevated); color: var(--text-primary); }
 /* The label side gets the room; a long option (e.g. "Automatic (adapts to
    your connection)") truncates instead of squeezing the label to a sliver. */
-.settings-row:has(> select) > div:first-child { flex: 1; min-width: 0; }
+.settings-row:has(> select, > .select-wrap) > div:first-child { flex: 1; min-width: 0; }
 /* About rows (label + credit link): the label keeps its width, the long
    credit wraps instead. */
 .settings-row > .settings-row-label { flex-shrink: 0; }
@@ -1434,7 +1511,57 @@ select.settings-select {
   color: var(--text-primary); padding: 8px 10px; border-radius: var(--radius-sm);
   font-size: 13px; font-weight: 600;
 }
+/* The native arrow sat right against the (rounded, in Nothing a pill)
+   edge and can't be moved, so the same solid down-triangle is drawn on a
+   wrapper (app.js enhanceSelect), inset from the edge; it turns to point
+   up while the list is open. */
+select.settings-select { -webkit-appearance: none; appearance: none; }
+html:root[data-ui] select.settings-select { padding-right: 38px; }
+.select-wrap { position: relative; display: inline-flex; min-width: 0; max-width: 52%; color: var(--text-primary); }
+.select-wrap > select.settings-select { max-width: 100%; min-width: 0; }
+.select-wrap:has(> .eq-preset-select) { display: flex; width: 100%; max-width: none; }
+.select-wrap:has(> .eq-preset-select) > select { width: 100%; }
+.select-wrap::after {
+  content: ''; position: absolute; right: 16px; top: 50%; width: 10px; height: 5px; pointer-events: none;
+  background: conic-gradient(from -45deg at 50% 100%, currentColor 90deg, transparent 0);
+  transform: translateY(-50%); transition: transform 0.28s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.select-wrap.open::after { transform: translateY(-50%) rotate(180deg); }
+.select-wrap:has(> .eq-preset-select)::after { top: calc(50% - 4px); }
 .eq-preset-select { width: 100%; margin-bottom: 8px; }
+
+/* In-app list for settings dropdowns (app.js enhanceSelect), in place of
+   the operating system's popup. */
+.select-menu {
+  --menu-r: var(--radius-md);
+  position: fixed; z-index: 400; overflow-y: auto; overscroll-behavior: contain;
+  padding: 6px; max-width: min(320px, calc(100vw - 24px));
+  background: var(--bg-highlight); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+.select-menu.closing { pointer-events: none; }
+:root[data-ui="apple"] .select-menu { --menu-r: 12px; }
+/* Same as .modal-card: the scrollbar stays on the straight part of the
+   edge instead of running out past the rounded corners. */
+.select-menu::-webkit-scrollbar-track { margin-block: var(--radius-md); }
+:root[data-ui="apple"] .select-menu::-webkit-scrollbar-track { margin-block: 12px; }
+.select-menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 12px; border-radius: var(--radius-sm); text-align: left; white-space: nowrap;
+  font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-primary);
+}
+.select-menu-item { position: relative; z-index: 1; }
+.select-menu-item:hover, .select-menu-item:focus-visible { outline: none; }
+.select-glider { position: absolute; left: 6px; right: 6px; z-index: 0; border-radius: var(--radius-sm); background: var(--bg-card-hover); pointer-events: none; opacity: 0; }
+:root[data-ui="nothing"] .select-glider { border-radius: 999px; }
+:root[data-ui="apple"] .select-glider { border-radius: 8px; }
+.select-menu-item.selected { color: var(--accent); }
+.select-menu-item.selected::after { content: ''; margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.select-menu-item:disabled { opacity: 0.4; }
+:root[data-ui="nothing"] .select-menu { background: var(--bg-elevated); border-radius: var(--radius-md); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); }
+:root[data-ui="nothing"] .select-menu-item { border-radius: 999px; font-weight: 500; }
+:root[data-ui="apple"] .select-menu { background: color-mix(in srgb, var(--bg-elevated) 94%, transparent); backdrop-filter: var(--apple-blur); border-radius: 12px; }
+:root[data-ui="apple"] .select-menu-item { border-radius: 8px; font-weight: 500; }
 
 [hidden] { display: none !important; }
 

@@ -101,6 +101,16 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.2
+
+- Phone lock screen and notification: the real song length and progress (they showed the song as finished when streaming at lower quality), square covers, covers for downloaded songs, and no more "playing" notification when Triptych is closed
+- Smoother everywhere (Dynamic): toggles, switches, the accent-color picker and dropdown menus move like a drop; dropdowns are in-app lists that unroll; page titles type themselves in (Nothing look); buttons bounce; phone tabs slide; windows close the way they open
+- Desktop: the Now Playing panel slides in and out, a small arrow brings it back, a queue button and click-to-mute in the player bar, and no duplicate buttons in the panel
+- Sidebar: playlists and pinned albums in one list, in any order you drag them into
+- Queue dragging keeps up with fast drags; the lyrics catch up when you reopen the phone player
+- Lyrics: odd lookalike letters and codes like "&apos;" fixed, and lrclib is asked more gently
+- Settings shows Static while battery saver forces it
+
 ## What's new in 2.4.1
 
 - Smart shuffle: tap shuffle twice and, after the song you pick, the queue fills with recommended songs from your own library (related artists from Deezer, artists featured together on your songs, what you play in the same sittings). Removing one means "not this one again"; Settings → Privacy → "Online related artists lookup" turns the Deezer part off

@@ -155,16 +155,15 @@
       </nav>
       <div class="sidebar-divider"></div>
       <div class="sidebar-section-title-row">
-        <div class="sidebar-section-title" data-i18n="nav.playlists">Playlists</div>
+        <div class="sidebar-section-title" id="sidebar-list-title" data-i18n="nav.playlists">Playlists</div>
         <button id="btn-new-playlist" class="btn-icon-plain" data-i18n-title="nav.createPlaylist" title="Create playlist"><i class="fi fi-br-add"></i></button>
       </div>
+      <!-- Playlists, then pinned albums: one list, one scroll. -->
       <div id="playlist-list" class="playlist-list"></div>
-      <div id="pinned-albums-section" class="sidebar-section-title-row" hidden>
-        <div class="sidebar-section-title" data-i18n="nav.pinnedAlbums">Pinned Albums</div>
-      </div>
-      <div id="pinned-albums-list" class="playlist-list"></div>
     </aside>
 
+    <!-- Desktop: reopens the Now Playing panel while it's closed (app.js syncPanelOpenButton). -->
+    <button id="btn-open-panel" class="nav-arrow panel-open-btn" type="button" data-i18n-title="nowPlaying.title" title="Now Playing" hidden><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <main class="main">
       <div id="main-bg-art" class="main-bg-art"></div>
       <header class="main-header">
@@ -316,10 +315,13 @@
         <button id="btn-connect" class="ctrl-btn server-only" data-i18n-title="connect.title" title="Connect">
           <i class="fi fi-br-screencast"></i>
         </button>
+        <button id="btn-queue" class="ctrl-btn" data-i18n-title="nowPlaying.queueTab" title="Queue">
+          <i class="fi fi-br-list-music"></i>
+        </button>
         <button id="btn-lyrics" class="ctrl-btn" data-i18n-title="nowPlaying.title" title="Now Playing">
           <i class="fi fi-br-sidebar-flip"></i>
         </button>
-        <i id="volume-icon" class="fi fi-br-volume volume-icon"></i>
+        <i id="volume-icon" class="fi fi-br-volume volume-icon" role="button" tabindex="0" data-i18n-title="player.volume" title="Volume"></i>
         <input type="range" id="volume-bar" class="volume-bar" min="0" max="100" value="50" />
       </div>
     </footer>
@@ -401,6 +403,7 @@
             <div>
               <div class="settings-row-label" data-i18n="settings.motion">Animations</div>
               <div class="settings-row-desc" data-i18n="settings.motionDesc">Dynamic animates the lyrics word by word, menus and buttons (uses more battery); Static turns every animation off</div>
+              <div class="settings-row-desc settings-row-note" id="motion-saver-note" data-i18n="settings.motionSaverNote" hidden>Static while battery saver is on. Your choice comes back when it's off.</div>
             </div>
             <div class="segmented" id="motion-toggle">
               <button data-value="static" type="button" data-i18n="settings.motionStatic">Static</button>

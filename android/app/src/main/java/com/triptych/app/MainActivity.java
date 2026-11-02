@@ -1,14 +1,24 @@
 package com.triptych.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    // Whether the app (its WebView, and so the player) is alive -- media
+    // buttons are only passed on while it is (MediaButtonGate).
+    private static volatile boolean running = false;
+
+    static boolean isRunning() {
+        return running;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        running = true;
         registerPlugin(LoudnessPlugin.class);
         registerPlugin(SystemVolumePlugin.class);
         registerPlugin(LocalMusicPlugin.class);
@@ -42,5 +52,20 @@ public class MainActivity extends BridgeActivity {
         // Bluetooth AVRCP volume sync on at least one car head unit, so it's
         // now a single fixed-gain attempt tied to actual playback starting
         // rather than something that runs unconditionally from launch.
+    }
+
+    // Closing the app takes its media notification with it, instead of
+    // leaving a "playing" one behind with nothing playing.
+    @Override
+    public void onDestroy() {
+        running = false;
+        if (isFinishing()) {
+            try {
+                stopService(new Intent().setClassName(this, "com.capgo.mediasession.MediaSessionService"));
+            } catch (RuntimeException ignored) {
+                // Not running.
+            }
+        }
+        super.onDestroy();
     }
 }
