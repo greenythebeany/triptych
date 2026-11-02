@@ -471,6 +471,10 @@
     "addFolder": "Add folder",
     "rescan": "Rescan",
     "removeFolder": "Remove folder",
-    "homeEmpty": "No music yet. Add a folder with your music files."
+    "homeEmpty": "No music yet. Add a folder with your music files.",
+    "allowAccess": "Allow access",
+    "turnOff": "Turn off",
+    "phoneDesc": "Play the music saved on this phone, alongside your server.",
+    "permissionDenied": "Triptych needs permission to read the music on this phone. You can allow it in the system settings under Apps → Triptych → Permissions."
   }
 }

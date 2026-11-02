@@ -471,6 +471,10 @@
     "addFolder": "Pridať priečinok",
     "rescan": "Znova prehľadať",
     "removeFolder": "Odobrať priečinok",
-    "homeEmpty": "Zatiaľ tu nie je žiadna hudba. Pridajte priečinok so svojimi hudobnými súbormi."
+    "homeEmpty": "Zatiaľ tu nie je žiadna hudba. Pridajte priečinok so svojimi hudobnými súbormi.",
+    "allowAccess": "Povoliť prístup",
+    "turnOff": "Vypnúť",
+    "phoneDesc": "Prehrávajte hudbu uloženú v tomto telefóne spolu so svojím serverom.",
+    "permissionDenied": "Triptych potrebuje povolenie na čítanie hudby v tomto telefóne. Povoliť ho môžete v nastaveniach systému v časti Aplikácie → Triptych → Povolenia."
   }
 }

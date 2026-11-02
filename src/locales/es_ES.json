@@ -473,6 +473,10 @@
     "addFolder": "Añadir carpeta",
     "rescan": "Volver a analizar",
     "removeFolder": "Quitar carpeta",
-    "homeEmpty": "Aún no hay música. Añade una carpeta con tus archivos de música."
+    "homeEmpty": "Aún no hay música. Añade una carpeta con tus archivos de música.",
+    "allowAccess": "Permitir acceso",
+    "turnOff": "Desactivar",
+    "phoneDesc": "Reproduce la música guardada en este teléfono junto a tu servidor.",
+    "permissionDenied": "Triptych necesita permiso para leer la música de este teléfono. Puedes concederlo en los ajustes del sistema, en Aplicaciones → Triptych → Permisos."
   }
 }

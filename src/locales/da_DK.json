@@ -473,6 +473,10 @@
     "addFolder": "Tilføj mappe",
     "rescan": "Scan igen",
     "removeFolder": "Fjern mappe",
-    "homeEmpty": "Ingen musik endnu. Tilføj en mappe med dine musikfiler."
+    "homeEmpty": "Ingen musik endnu. Tilføj en mappe med dine musikfiler.",
+    "allowAccess": "Giv adgang",
+    "turnOff": "Slå fra",
+    "phoneDesc": "Afspil musikken på denne telefon sammen med din server.",
+    "permissionDenied": "Triptych skal have tilladelse til at læse musikken på denne telefon. Du kan give den i systemindstillingerne under Apps → Triptych → Tilladelser."
   }
 }

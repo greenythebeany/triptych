@@ -1,6 +1,6 @@
 import './migrate.js'; // must stay first: renames storage keys before other modules read them
 import { JellyfinClient, initClientVersion, getClientVersion } from './jellyfin.js';
-import { LocalLibraryClient, CombinedClient, isLocalLibrarySupported, isLocalItemId } from './localLibrary.js';
+import { LocalLibraryClient, CombinedClient, isLocalLibrarySupported, isLocalLibraryEnabled, localLibraryUsesFolders, isLocalItemId } from './localLibrary.js';
 import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
@@ -783,17 +783,34 @@ function scanProgressText({ done, total }) {
   return t('local.scanning', { done, total });
 }
 
+// Desktop asks for folders; Android asks for permission to read the phone's
+// music. false when the user backed out (no folder picked, permission refused).
+async function chooseLocalMusic(client) {
+  if (localLibraryUsesFolders()) {
+    const folders = await client.pickFolders();
+    if (!folders.length) return false;
+    await client.setFolders(folders);
+    return true;
+  }
+  return client.enable();
+}
+
 btnUseLocal.addEventListener('click', async () => {
   const client = new LocalLibraryClient();
-  const folders = await client.pickFolders();
-  if (!folders.length) return;
   btnUseLocal.disabled = true;
   btnLogin.disabled = true;
   loginLocalStatus.classList.remove('is-error');
-  loginLocalStatus.textContent = t('local.scanningStart');
-  loginLocalStatus.hidden = false;
   try {
-    await client.setFolders(folders);
+    if (!(await chooseLocalMusic(client))) {
+      if (!localLibraryUsesFolders()) {
+        loginLocalStatus.textContent = t('local.permissionDenied');
+        loginLocalStatus.classList.add('is-error');
+        loginLocalStatus.hidden = false;
+      }
+      return;
+    }
+    loginLocalStatus.textContent = t('local.scanningStart');
+    loginLocalStatus.hidden = false;
     await client.scan((progress) => { loginLocalStatus.textContent = scanProgressText(progress); });
     if (!client.trackCount) {
       loginLocalStatus.textContent = t('local.noMusic');
@@ -807,6 +824,7 @@ btnUseLocal.addEventListener('click', async () => {
   } catch (err) {
     loginLocalStatus.textContent = err?.message || t('login.errorGeneric');
     loginLocalStatus.classList.add('is-error');
+    loginLocalStatus.hidden = false;
   } finally {
     btnUseLocal.disabled = false;
     btnLogin.disabled = false;
@@ -815,11 +833,23 @@ btnUseLocal.addEventListener('click', async () => {
 
 const localFolderList = document.getElementById('local-folder-list');
 const localLibraryStatus = document.getElementById('local-library-status');
+const localFoldersLabel = document.getElementById('local-folders-label');
 const btnLocalAddFolder = document.getElementById('btn-local-add-folder');
 const btnLocalRescan = document.getElementById('btn-local-rescan');
+const btnLocalEnable = document.getElementById('btn-local-enable');
+const btnLocalDisable = document.getElementById('btn-local-disable');
 
 async function refreshLocalLibrarySettings() {
   if (!jellyfin?.getFolders) return;
+  const usesFolders = localLibraryUsesFolders();
+  const enabled = isLocalLibraryEnabled();
+  // Android has no folders: the section is an on/off for the phone's music.
+  setHidden(localFoldersLabel, !usesFolders);
+  setHidden(btnLocalAddFolder, !usesFolders);
+  setHidden(btnLocalEnable, usesFolders || enabled);
+  setHidden(btnLocalRescan, !usesFolders && !enabled);
+  // Without a server it's the only library, so it can't be turned off.
+  setHidden(btnLocalDisable, usesFolders || !enabled || !!jellyfin.isLocal);
   const folders = await jellyfin.getFolders();
   localFolderList.innerHTML = '';
   folders.forEach((folder) => {
@@ -835,14 +865,16 @@ async function refreshLocalLibrarySettings() {
     li.append(label, remove);
     localFolderList.appendChild(li);
   });
-  localLibraryStatus.textContent = t('local.summary', { songs: jellyfin.trackCount, albums: jellyfin.albumCount });
+  localLibraryStatus.textContent = enabled
+    ? t('local.summary', { songs: jellyfin.trackCount, albums: jellyfin.albumCount })
+    : t('local.phoneDesc');
 }
 
 // folders: the new folder list, or omitted to rescan the current ones.
 async function rescanLocalLibrary(folders) {
   if (!jellyfin?.getFolders) return;
-  btnLocalAddFolder.disabled = true;
-  btnLocalRescan.disabled = true;
+  const buttons = [btnLocalAddFolder, btnLocalRescan, btnLocalEnable, btnLocalDisable];
+  buttons.forEach((b) => { b.disabled = true; });
   localLibraryStatus.textContent = t('local.scanningStart');
   try {
     if (folders) await jellyfin.setFolders(folders);
@@ -850,21 +882,32 @@ async function rescanLocalLibrary(folders) {
     allSongsCachePromise = null;
     await refreshCurrentView();
   } finally {
-    btnLocalAddFolder.disabled = false;
-    btnLocalRescan.disabled = false;
+    buttons.forEach((b) => { b.disabled = false; });
     await refreshLocalLibrarySettings();
   }
 }
 
-async function addLocalFolders() {
+// Home's empty state and Settings: more folders (desktop), or switching the
+// phone's music on (Android).
+async function addLocalMusic() {
+  if (!localLibraryUsesFolders()) {
+    if (await jellyfin.enable()) await rescanLocalLibrary();
+    else alert(t('local.permissionDenied'));
+    return;
+  }
   const picked = await jellyfin.pickFolders();
   if (!picked.length) return;
   const current = await jellyfin.getFolders();
   await rescanLocalLibrary([...current, ...picked]);
 }
 
-btnLocalAddFolder.addEventListener('click', () => addLocalFolders());
+btnLocalAddFolder.addEventListener('click', () => addLocalMusic());
+btnLocalEnable.addEventListener('click', () => addLocalMusic());
 btnLocalRescan.addEventListener('click', () => rescanLocalLibrary());
+btnLocalDisable.addEventListener('click', () => {
+  jellyfin.disable();
+  rescanLocalLibrary();
+});
 
 function translateLoginError(err) {
   if (err?.code === 'wrong_credentials') return t('login.errorWrongCredentials');
@@ -2814,9 +2857,9 @@ async function renderHome() {
   if (jellyfin.isLocal && !albums.length) {
     const empty = el('div', 'empty-state', escapeHtml(t('local.homeEmpty')));
     const actions = el('div', 'local-empty-actions');
-    const add = el('button', 'btn-secondary', escapeHtml(t('local.addFolder')));
+    const add = el('button', 'btn-secondary', escapeHtml(t(localLibraryUsesFolders() ? 'local.addFolder' : 'local.allowAccess')));
     add.type = 'button';
-    add.addEventListener('click', () => addLocalFolders());
+    add.addEventListener('click', () => addLocalMusic());
     actions.appendChild(add);
     empty.appendChild(actions);
     viewRoot.appendChild(empty);

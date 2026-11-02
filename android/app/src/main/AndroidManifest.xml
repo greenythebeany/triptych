@@ -42,4 +42,8 @@
          constructed with session 0 fail outright, which is what made the
          native volume boost silently do nothing. -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- "Music on this device" (LocalMusicPlugin.java): reading the phone's
+         music library. Asked for only when the user turns that on. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 </manifest>

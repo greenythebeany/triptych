@@ -473,6 +473,10 @@
     "addFolder": "Map toevoegen",
     "rescan": "Opnieuw scannen",
     "removeFolder": "Map verwijderen",
-    "homeEmpty": "Nog geen muziek. Voeg een map met je muziekbestanden toe."
+    "homeEmpty": "Nog geen muziek. Voeg een map met je muziekbestanden toe.",
+    "allowAccess": "Toegang geven",
+    "turnOff": "Uitzetten",
+    "phoneDesc": "Speel de muziek op deze telefoon af naast je server.",
+    "permissionDenied": "Triptych heeft toestemming nodig om de muziek op deze telefoon te lezen. Je kunt die geven in de systeeminstellingen onder Apps → Triptych → Rechten."
   }
 }

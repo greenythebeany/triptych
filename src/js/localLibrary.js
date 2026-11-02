@@ -4,8 +4,9 @@
 // same shape Jellyfin returns them, so the rest of the app doesn't need to
 // know which one it's talking to. Things a server would normally keep for
 // the account (likes, play counts, playlists) live in local storage here.
-// Desktop only for now: the scan, the files and the covers come from the
-// main process (local-library.js) over window.api.local and tlocal://.
+// The scan, the files and the covers come from a platform bridge (below):
+// the Electron main process (local-library.js) on desktop, the native
+// LocalMusicPlugin.java (MediaStore) on Android.
 
 const LIKES_KEY = 'triptych:local:likes';
 const PLAYS_KEY = 'triptych:local:plays';
@@ -13,7 +14,90 @@ const PLAYLISTS_KEY = 'triptych:local:playlists';
 const DEVICE_ID_KEY = 'triptych:deviceId';
 const TICKS_PER_SECOND = 1e7;
 
-export const isLocalLibrarySupported = () => !!window.api?.local;
+const ANDROID_ENABLED_KEY = 'triptych:local:enabled';
+
+// Desktop: folders the user picks, scanned by the main process.
+function desktopBridge(api) {
+  return {
+    usesFolders: true,
+    isEnabled: () => true,
+    async enable() { return true; },
+    disable() {},
+    getTracks: () => api.getTracks(),
+    scan: () => api.scan(),
+    onScanProgress: (cb) => api.onScanProgress(cb),
+    getLyrics: (id) => api.getLyrics(id),
+    getFolders: () => api.getFolders(),
+    setFolders: (folders) => api.setFolders(folders),
+    pickFolders: () => api.pickFolders(),
+    trackUrl: (id) => `tlocal://track/${id}`,
+    coverUrl: (tag) => `tlocal://cover/${tag}`
+  };
+}
+
+// Android: the phone's whole music library (MediaStore), once the user
+// turns it on and grants the permission. Files and covers are served by the
+// plugin on the app's own origin (see LocalMusicPlugin.java).
+function androidBridge(plugin) {
+  const enabled = () => {
+    try { return localStorage.getItem(ANDROID_ENABLED_KEY) === '1'; } catch (err) { return false; }
+  };
+  return {
+    usesFolders: false,
+    isEnabled: enabled,
+    // false when the permission was refused.
+    async enable() {
+      const { granted } = await plugin.requestAccess();
+      if (granted) {
+        try { localStorage.setItem(ANDROID_ENABLED_KEY, '1'); } catch (err) { /* stays off */ }
+      }
+      return granted;
+    },
+    disable() {
+      try { localStorage.removeItem(ANDROID_ENABLED_KEY); } catch (err) { /* already off */ }
+    },
+    async getTracks() {
+      if (!enabled()) return [];
+      try {
+        return (await plugin.getTracks()).tracks || [];
+      } catch (err) {
+        // Permission taken back in the system settings: an empty library.
+        if (err?.code === 'permission') return [];
+        throw err;
+      }
+    },
+    // The list is read fresh from MediaStore by getTracks(); nothing to do first.
+    async scan() {},
+    onScanProgress(cb) {
+      const handle = plugin.addListener('scanProgress', cb);
+      return () => { Promise.resolve(handle).then((h) => h.remove()).catch(() => {}); };
+    },
+    async getLyrics() { return null; },
+    async getFolders() { return []; },
+    async setFolders() { return []; },
+    async pickFolders() { return []; },
+    trackUrl: (id) => `${location.origin}/_triptych_local_/track/${id}`,
+    coverUrl: (tag) => `${location.origin}/_triptych_local_/cover/${tag}`
+  };
+}
+
+let bridgeCache;
+function localBridge() {
+  if (bridgeCache === undefined) {
+    const plugin = window.Capacitor?.getPlatform?.() === 'android' ? window.Capacitor?.Plugins?.TriptychLocalMusic : null;
+    bridgeCache = window.api?.local ? desktopBridge(window.api.local) : plugin ? androidBridge(plugin) : null;
+  }
+  return bridgeCache;
+}
+
+export const isLocalLibrarySupported = () => !!localBridge();
+// Whether "Music on this device" is switched on here (always on desktop,
+// where it's empty until folders are picked; opt-in on Android).
+export const isLocalLibraryEnabled = () => !!localBridge()?.isEnabled();
+// Whether this platform picks folders (desktop) or reads the whole device (Android).
+export const localLibraryUsesFolders = () => !!localBridge()?.usesFolders;
+// Tracks and covers served by this app (local songs), as opposed to remote URLs.
+export const isLocalMediaUrl = (url) => typeof url === 'string' && (url.startsWith('tlocal:') || url.includes('/_triptych_local_/'));
 
 // Local ids start with a source prefix containing a non-hex letter (lt = track,
 // al = album, ar = artist, ge = genre, pl = playlist), so they can never clash
@@ -87,23 +171,27 @@ export class LocalLibraryClient {
 
   // Reads the last scan from the main process. Call scan() to refresh it.
   async load() {
-    this._build(await window.api.local.getTracks());
+    this._build(await localBridge().getTracks());
     return this;
   }
 
   async scan(onProgress) {
-    const off = onProgress ? window.api.local.onScanProgress(onProgress) : null;
+    const off = onProgress ? localBridge().onScanProgress(onProgress) : null;
     try {
-      await window.api.local.scan();
+      await localBridge().scan();
+      // Inside the try: on Android the progress events come while this runs.
+      this._build(await localBridge().getTracks());
     } finally {
       off?.();
     }
-    return this.load();
+    return this;
   }
 
-  getFolders() { return window.api.local.getFolders(); }
-  setFolders(folders) { return window.api.local.setFolders(folders); }
-  pickFolders() { return window.api.local.pickFolders(); }
+  getFolders() { return localBridge().getFolders(); }
+  setFolders(folders) { return localBridge().setFolders(folders); }
+  pickFolders() { return localBridge().pickFolders(); }
+  enable() { return localBridge().enable(); }
+  disable() { localBridge().disable(); }
   get trackCount() { return this._tracks.length; }
   get albumCount() { return this._albums.length; }
 
@@ -321,7 +409,7 @@ export class LocalLibraryClient {
   }
 
   async getLyrics(itemId) {
-    const found = await window.api.local.getLyrics(itemId);
+    const found = await localBridge().getLyrics(itemId);
     if (!found) return null;
     const lines = found.synced
       ? found.synced.map((l) => ({ Text: l.text, Start: Math.round(l.ms * 10000) }))
@@ -454,7 +542,7 @@ export class LocalLibraryClient {
       return item._image || this._playlists().find((pl) => pl.Id === item.Id)?._image || null;
     }
     const tag = item.ImageTags?.Primary || this._byId.get(item.AlbumId)?.ImageTags?.Primary || this._byId.get(item.Id)?.ImageTags?.Primary;
-    return tag ? `tlocal://cover/${tag}` : null;
+    return tag ? localBridge().coverUrl(tag) : null;
   }
 
   artistPhotoUrl(artistId) {
@@ -464,7 +552,7 @@ export class LocalLibraryClient {
   backdropUrl() { return null; }
 
   streamUrl(item) {
-    return `tlocal://track/${item.Id}`;
+    return localBridge().trackUrl(item.Id);
   }
 }
 

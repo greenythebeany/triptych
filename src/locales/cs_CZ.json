@@ -473,6 +473,10 @@
     "addFolder": "Přidat složku",
     "rescan": "Znovu prohledat",
     "removeFolder": "Odebrat složku",
-    "homeEmpty": "Zatím tu žádná hudba není. Přidejte složku se svými hudebními soubory."
+    "homeEmpty": "Zatím tu žádná hudba není. Přidejte složku se svými hudebními soubory.",
+    "allowAccess": "Povolit přístup",
+    "turnOff": "Vypnout",
+    "phoneDesc": "Přehrávejte hudbu uloženou v tomto telefonu spolu se svým serverem.",
+    "permissionDenied": "Triptych potřebuje oprávnění ke čtení hudby v tomto telefonu. Povolit ho můžete v nastavení systému v části Aplikace → Triptych → Oprávnění."
   }
 }

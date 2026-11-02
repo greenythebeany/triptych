@@ -370,13 +370,15 @@
           <h3 data-i18n="local.settingsTitle">Music on this device</h3>
           <div class="settings-row settings-row-stack">
             <div>
-              <div class="settings-row-label" data-i18n="local.folders">Music folders</div>
+              <div class="settings-row-label" id="local-folders-label" data-i18n="local.folders">Music folders</div>
               <div class="settings-row-desc" id="local-library-status"></div>
             </div>
             <ul id="local-folder-list" class="local-folder-list"></ul>
             <div class="local-folder-actions">
               <button id="btn-local-add-folder" class="btn-secondary" type="button" data-i18n="local.addFolder">Add folder</button>
               <button id="btn-local-rescan" class="btn-secondary" type="button" data-i18n="local.rescan">Rescan</button>
+              <button id="btn-local-enable" class="btn-secondary" type="button" data-i18n="local.useOnDevice" hidden>Use music on this device</button>
+              <button id="btn-local-disable" class="btn-secondary" type="button" data-i18n="local.turnOff" hidden>Turn off</button>
             </div>
           </div>
         </section>
@@ -622,9 +624,9 @@
             </label>
           </div>
         </section>
-        <section class="settings-section server-only" id="storage-section">
+        <section class="settings-section" id="storage-section">
           <h3 data-i18n="settings.storage">Storage</h3>
-          <div class="settings-row">
+          <div class="settings-row server-only">
             <div>
               <div class="settings-row-label" data-i18n="settings.downloadsLabel">Downloaded songs</div>
               <div class="settings-row-desc" id="downloads-usage"></div>
@@ -719,6 +721,7 @@
             <li><strong>App preferences</strong> (theme, language, audio settings, etc.) — stored in local browser storage on desktop, and via the Capacitor Preferences plugin on Android. These also sync to your own Jellyfin server's user-data store so they follow you between your own devices — that sync target is your server, never the developer.</li>
             <li><strong>Downloaded tracks</strong> — saved as ordinary audio files in Triptych's app-data folder for offline playback.</li>
             <li><strong>Music on this device</strong> (desktop, optional) — if you pick music folders, Triptych reads the audio files in them and their tags (title, artist, album, track number, length, cover art). The folder list and the tags are saved in <code>local-library.json</code>, and smaller copies of the cover art in a <code>local-covers</code> folder, both in Triptych's app-data folder; likes, play counts and playlists for these songs are kept in local storage. Your files are only read, never changed, moved or uploaded anywhere — not even to your Jellyfin server.</li>
+            <li><strong>Music on this device</strong> (Android, optional) — only if you turn it on, Triptych asks for Android's permission to read music and reads the phone's music library (title, artist, album, track number, year, genre, length and album covers, which are cached in Triptych's cache folder). Your files are only read, never changed or uploaded; you can take the permission back any time in the system settings.</li>
             <li><strong>Listening stats</strong> (top artists/tracks, play history) — computed from your local playback and stored the same way as preferences, above.</li>
           </ul>
           <h4>Data sent to other services (never to the developer)</h4>
