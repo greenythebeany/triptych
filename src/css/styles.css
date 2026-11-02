@@ -921,6 +921,11 @@ html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; f
   /* The header row (arrows, account pill, the panel's icons) sits on the
      same line as the sidebar's first item (Home). */
   body:not(.platform-mobile) .main-header { padding-top: 4px; box-sizing: border-box; }
+  /* Cast, sleep timer and queue are in the player bar on desktop, so the
+     side panel's own copies go (phones keep them: their player covers the bar). */
+  body:not(.platform-mobile) .lyrics-header #btn-connect-mobile,
+  body:not(.platform-mobile) .lyrics-header #btn-sleep-timer-mobile,
+  body:not(.platform-mobile) .lyrics-header #btn-queue-mobile { display: none; }
 }
 .btn-icon-plain { color: var(--text-secondary); font-size: 17px; padding: 6px; border-radius: 6px; }
 .btn-icon-plain:hover { color: var(--text-primary); }
