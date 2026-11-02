@@ -427,7 +427,7 @@ html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; f
    the panel slides in over it and uncovers it again when it closes. */
 @media (min-width: 821px) {
   body:not(.platform-mobile) .panel-open-btn {
-    position: fixed; right: 14px; top: calc(var(--titlebar-h) + 20px); margin: 0; z-index: 25;
+    position: fixed; right: 14px; top: calc(var(--titlebar-h) + 16px); margin: 0; z-index: 25;
     width: 28px; height: 28px; background: transparent; border: none; color: var(--text-secondary);
   }
   body:not(.platform-mobile) .lyrics-panel { z-index: 30; }
@@ -917,7 +917,11 @@ html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; f
 /* Desktop: the side panel's header row is as tall as the page header, so
    its icons line up with the account pill next to it. */
 @media (min-width: 821px) {
-  body:not(.platform-mobile) .lyrics-header { min-height: 68px; padding-top: 0; padding-bottom: 0; box-sizing: border-box; }
+  body:not(.platform-mobile) .lyrics-header { min-height: 68px; padding-top: 0; padding-bottom: 8px; box-sizing: border-box; }
+  /* The empty title bar above is the same black, so the eye reads one tall
+     dark band; centered in the 68px header the row looked low in it. Lift
+     the row a little (with the panel's icons, which share its line). */
+  body:not(.platform-mobile) .main-header { padding-bottom: 8px; box-sizing: border-box; }
 }
 .btn-icon-plain { color: var(--text-secondary); font-size: 17px; padding: 6px; border-radius: 6px; }
 .btn-icon-plain:hover { color: var(--text-primary); }
