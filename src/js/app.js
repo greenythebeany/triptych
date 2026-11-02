@@ -4658,6 +4658,19 @@ function wirePlayer() {
   npVolumeBar.value = volumeBar.value;
   npVolumeBar.style.setProperty('--pct', rangeFillPercent(Number(volumeBar.value), npVolumeBar, 14));
 
+  // Player bar's queue button: opens the queue (bringing the Now Playing
+  // panel out first if it's closed), or closes it; lit while it's open.
+  const btnQueue = document.getElementById('btn-queue');
+  btnQueue.addEventListener('click', () => {
+    bounceButtons(btnQueue);
+    if (queueSheetOpen) { closeQueueSheet(); return; }
+    if (lyricsPanel.hidden || lyricsPanel.dataset.closing) openNowPlaying();
+    openQueueSheet();
+  });
+  btnQueue.addEventListener('animationend', () => btnQueue.classList.remove('bounce'));
+  new MutationObserver(() => btnQueue.classList.toggle('active', queueSheet.classList.contains('open') && queueSheetOpen))
+    .observe(queueSheet, { attributes: true, attributeFilter: ['class'] });
+
   btnLyrics.addEventListener('click', () => {
     // Mid slide-out counts as closed: a click brings it straight back.
     if (!lyricsPanel.hidden && !lyricsPanel.dataset.closing) { closeNowPlaying(); return; }
