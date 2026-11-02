@@ -1246,6 +1246,9 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
   border-radius: var(--radius-lg);
   box-shadow: 0 24px 60px rgba(0,0,0,0.5);
 }
+/* Keeps the scrollbar on the straight part of the edge, not out past the
+   rounded corners. */
+.modal-card::-webkit-scrollbar-track { margin-block: var(--radius-lg); }
 .modal-card-small { width: 360px; }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 16px; }
 .modal-field input {
