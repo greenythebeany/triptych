@@ -235,7 +235,7 @@
           </div>
         </div>
         <div class="player-controls">
-          <button id="mobile-btn-shuffle" class="ctrl-btn" data-i18n-title="player.shuffle" title="Shuffle"><i class="fi fi-br-shuffle"></i></button>
+          <button id="mobile-btn-shuffle" class="ctrl-btn" data-i18n-title="player.shuffle" title="Shuffle"><i class="fi fi-br-shuffle"></i><i class="fi fi-br-sparkles shuffle-sparkle" aria-hidden="true"></i></button>
           <button id="mobile-btn-prev" class="ctrl-btn" data-i18n-title="player.previous" title="Previous"><i class="fi fi-br-rewind"></i></button>
           <button id="mobile-btn-play" class="ctrl-btn ctrl-btn-play" data-i18n-title="player.play" title="Play">
             <svg id="mobile-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l12-7z"/></svg>
@@ -283,7 +283,7 @@
       <div class="player-center">
         <div class="player-controls">
           <button id="btn-shuffle" class="ctrl-btn" data-i18n-title="player.shuffle" title="Shuffle">
-            <i class="fi fi-br-shuffle"></i>
+            <i class="fi fi-br-shuffle"></i><i class="fi fi-br-sparkles shuffle-sparkle" aria-hidden="true"></i>
           </button>
           <button id="btn-prev" class="ctrl-btn" data-i18n-title="player.previous" title="Previous">
             <i class="fi fi-br-rewind"></i>
@@ -366,20 +366,6 @@
         <button id="btn-close-settings" class="btn-icon-plain" type="button" data-i18n-title="common.close" title="Close"><i class="fi fi-br-cross-small"></i></button>
       </div>
       <div class="modal-body">
-        <section class="settings-section" id="local-library-section">
-          <h3 data-i18n="local.settingsTitle">Music on this device</h3>
-          <div class="settings-row settings-row-stack">
-            <div>
-              <div class="settings-row-label" data-i18n="local.folders">Music folders</div>
-              <div class="settings-row-desc" id="local-library-status"></div>
-            </div>
-            <ul id="local-folder-list" class="local-folder-list"></ul>
-            <div class="local-folder-actions">
-              <button id="btn-local-add-folder" class="btn-secondary" type="button" data-i18n="local.addFolder">Add folder</button>
-              <button id="btn-local-rescan" class="btn-secondary" type="button" data-i18n="local.rescan">Rescan</button>
-            </div>
-          </div>
-        </section>
         <section class="settings-section">
           <h3 data-i18n="settings.appearance">Appearance</h3>
           <div class="settings-row">
@@ -411,6 +397,16 @@
               <button data-value="nothing" type="button" data-i18n="settings.uiNothing">Nothing</button>
             </div>
           </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label" data-i18n="settings.motion">Animations</div>
+              <div class="settings-row-desc" data-i18n="settings.motionDesc">Dynamic animates the lyrics word by word, menus and buttons (uses more battery); Static turns every animation off</div>
+            </div>
+            <div class="segmented" id="motion-toggle">
+              <button data-value="static" type="button" data-i18n="settings.motionStatic">Static</button>
+              <button data-value="dynamic" type="button" data-i18n="settings.motionDynamic">Dynamic</button>
+            </div>
+          </div>
           <!-- Nothing style only (shown by refreshSettingsUI). -->
           <div class="settings-row" id="nothing-dots-row">
             <div>
@@ -436,16 +432,6 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="toggle-art-background" />
-              <span class="switch-track"></span>
-            </label>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-label" data-i18n="settings.wordLyrics">Word-by-word lyrics</div>
-              <div class="settings-row-desc" data-i18n="settings.wordLyricsDesc">Each word fills in and grows as it's sung. Uses more battery, since the lyrics are redrawn every frame.</div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="toggle-word-lyrics" />
               <span class="switch-track"></span>
             </label>
           </div>
@@ -589,6 +575,22 @@
             <a id="discord-connect-link" href="https://discord.com/oauth2/authorize?client_id=1534197353056174180" target="_blank" rel="noopener noreferrer" class="attribution-link" data-i18n="settings.discordConnect">Connect</a>
           </div>
         </section>
+        <section class="settings-section" id="local-library-section">
+          <h3 data-i18n="local.settingsTitle">Music on this device</h3>
+          <div class="settings-row settings-row-stack">
+            <div>
+              <div class="settings-row-label" data-i18n="local.folders">Music folders</div>
+              <div class="settings-row-desc" id="local-library-status"></div>
+            </div>
+            <ul id="local-folder-list" class="local-folder-list"></ul>
+            <div class="local-folder-actions">
+              <button id="btn-local-add-folder" class="btn-secondary" type="button" data-i18n="local.addFolder">Add folder</button>
+              <button id="btn-local-rescan" class="btn-secondary" type="button" data-i18n="local.rescan">Rescan</button>
+              <button id="btn-local-enable" class="btn-secondary" type="button" data-i18n="local.useOnDevice" hidden>Use music on this device</button>
+              <button id="btn-local-disable" class="btn-secondary" type="button" data-i18n="local.turnOff" hidden>Turn off</button>
+            </div>
+          </div>
+        </section>
         <section class="settings-section" id="privacy-section">
           <h3 data-i18n="settings.privacy">Privacy</h3>
           <div class="settings-row" id="album-art-lookup-row">
@@ -598,6 +600,16 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="toggle-album-art-lookup" />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label" data-i18n="settings.relatedArtistsLookup">Online related artists lookup</div>
+              <div class="settings-row-desc" data-i18n="settings.relatedArtistsLookupDesc">Sends the names of artists you play to Deezer's public API to find similar artists in your library, for smart shuffle and Home. Turn off to keep that from ever leaving your device; recommendations then use your library and listening only.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-related-artists" />
               <span class="switch-track"></span>
             </label>
           </div>
@@ -622,9 +634,9 @@
             </label>
           </div>
         </section>
-        <section class="settings-section server-only" id="storage-section">
+        <section class="settings-section" id="storage-section">
           <h3 data-i18n="settings.storage">Storage</h3>
-          <div class="settings-row">
+          <div class="settings-row server-only">
             <div>
               <div class="settings-row-label" data-i18n="settings.downloadsLabel">Downloaded songs</div>
               <div class="settings-row-desc" id="downloads-usage"></div>
@@ -672,6 +684,7 @@
             </div>
           </div>
         </section>
+        <div class="settings-version" id="settings-version"></div>
       </div>
     </div>
   </div>
@@ -719,6 +732,7 @@
             <li><strong>App preferences</strong> (theme, language, audio settings, etc.) — stored in local browser storage on desktop, and via the Capacitor Preferences plugin on Android. These also sync to your own Jellyfin server's user-data store so they follow you between your own devices — that sync target is your server, never the developer.</li>
             <li><strong>Downloaded tracks</strong> — saved as ordinary audio files in Triptych's app-data folder for offline playback.</li>
             <li><strong>Music on this device</strong> (desktop, optional) — if you pick music folders, Triptych reads the audio files in them and their tags (title, artist, album, track number, length, cover art). The folder list and the tags are saved in <code>local-library.json</code>, and smaller copies of the cover art in a <code>local-covers</code> folder, both in Triptych's app-data folder; likes, play counts and playlists for these songs are kept in local storage. Your files are only read, never changed, moved or uploaded anywhere — not even to your Jellyfin server.</li>
+            <li><strong>Music on this device</strong> (Android, optional) — only if you turn it on, Triptych asks for Android's permission to read music and reads the phone's music library (title, artist, album, track number, year, genre, length and album covers, which are cached in Triptych's cache folder). Your files are only read, never changed or uploaded; you can take the permission back any time in the system settings.</li>
             <li><strong>Listening stats</strong> (top artists/tracks, play history) — computed from your local playback and stored the same way as preferences, above.</li>
           </ul>
           <h4>Data sent to other services (never to the developer)</h4>

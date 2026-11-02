@@ -32,10 +32,10 @@ const DEFAULTS = {
   themeMode: 'dark', // 'dark' | 'light' | 'system'
   palette: 'default', // a PALETTES key; 'default' = the interface style's own accent
   uiStyle: 'nothing', // 'spotify' | 'apple' | 'nothing' -- see css/apple.css, css/nothing.css; new installs start in Nothing (red accent via palette 'default')
+  motion: 'dynamic', // 'dynamic' (with word-by-word lyrics) | 'static' -- every animation off (data-motion, see styles.css and isStaticMotion)
   nothingDottedSliders: true, // Nothing style only: dot-matrix seek/volume bars, off = plain lines
   audioQuality: 'auto',
   artBackground: false,
-  wordSyncLyrics: false, // on = word-by-word lyrics that fill as they're sung (see lyrics.js / app.js renderLyrics)
   dynamicAccentColor: false,
   language: detectLocale(), // first run follows the system language; saved choices win
   customCss: '',
@@ -50,6 +50,7 @@ const DEFAULTS = {
   offlineMode: false, // when on, only downloaded tracks are playable/clickable
   hapticsEnabled: true, // phones: vibration on swipes, long-press menus, pull-to-refresh
   albumArtLookupEnabled: true, // off = never send artist/album/track text to Deezer's search API
+  relatedArtistsLookupEnabled: true, // off = smart shuffle never sends artist names to Deezer's artist API (see recommend.js)
   lyricsSearchEnabled: false, // on = index the library's lyrics in the background for search (see lyricsIndex.js)
   autoUpdateCheckEnabled: true, // off = never ping GitHub's releases API in the background
   updatedAt: 0 // bumped on every local change — lets initRemoteSync tell
@@ -144,6 +145,21 @@ function resolvedThemeMode() {
   return current.themeMode;
 }
 
+// Battery saver / Low Power Mode on (see watchPowerSaver in platform.js):
+// animations stay Static until it's off, whatever the setting says.
+let powerSaver = false;
+export function setPowerSaver(on) {
+  if (powerSaver === !!on) return;
+  powerSaver = !!on;
+  applySettings();
+  listeners.forEach((cb) => cb(current));
+}
+
+// What's actually in effect: the setting, or Static while saving power.
+export function isStaticMotion() {
+  return powerSaver || current.motion === 'static';
+}
+
 export function applySettings() {
   const root = document.documentElement;
   root.setAttribute('data-theme', resolvedThemeMode());
@@ -159,6 +175,7 @@ export function applySettings() {
   root.setAttribute('data-palette', palette);
   root.setAttribute('data-ui', ui);
   root.toggleAttribute('data-nd-line-sliders', current.nothingDottedSliders === false);
+  root.setAttribute('data-motion', isStaticMotion() ? 'static' : 'dynamic');
   // Custom CSS that sets the app's colors (e.g. a theme from the README's
   // list, @import-ed from src/themes) -- lets apple.css hand colors over.
   const css = current.customCss || '';

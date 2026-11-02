@@ -11,6 +11,8 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(LoudnessPlugin.class);
         registerPlugin(SystemVolumePlugin.class);
+        registerPlugin(LocalMusicPlugin.class);
+        registerPlugin(PowerSaverPlugin.class);
         super.onCreate(savedInstanceState);
 
         // The WebView's <audio> playback otherwise runs without ever

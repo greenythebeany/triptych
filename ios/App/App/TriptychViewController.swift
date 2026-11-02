@@ -17,6 +17,7 @@ class TriptychViewController: CAPBridgeViewController {
         // stops music another app is playing.
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
         bridge?.registerPluginInstance(SystemVolumePlugin())
+        bridge?.registerPluginInstance(PowerSaverPlugin())
     }
 }
 
@@ -111,5 +112,33 @@ public class SystemVolumePlugin: CAPPlugin, CAPBridgedPlugin {
             slider.sendActions(for: .valueChanged)
             call.resolve(["level": Double(level)])
         }
+    }
+}
+
+// Low Power Mode on/off, so Settings -> Animations can go Static while it's
+// on (see watchPowerSaver in platform.js). Same shape as Android's
+// PowerSaverPlugin.java: getState() and a "change" event, both { on }.
+@objc(PowerSaverPlugin)
+public class PowerSaverPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "PowerSaverPlugin"
+    public let jsName = "TriptychPowerSaver"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "getState", returnType: CAPPluginReturnPromise)
+    ]
+
+    override public func load() {
+        NotificationCenter.default.addObserver(self, selector: #selector(changed), name: .NSProcessInfoPowerStateDidChange, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func changed() {
+        notifyListeners("change", data: ["on": ProcessInfo.processInfo.isLowPowerModeEnabled])
+    }
+
+    @objc func getState(_ call: CAPPluginCall) {
+        call.resolve(["on": ProcessInfo.processInfo.isLowPowerModeEnabled])
     }
 }

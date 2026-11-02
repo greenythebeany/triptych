@@ -31,13 +31,14 @@ https://github.com/user-attachments/assets/4d5fa0a4-d05b-4bf4-8921-1810018c48fb
 ## Features
 
 - Full library browsing: Home, Search, All Songs, Liked Songs, Genres, Albums, Artists, and Playlists
-- Music on this device (desktop): pick one or more folders and Triptych plays the audio files in them (MP3, FLAC, M4A/AAC, Ogg, Opus, WAV) with their tags and cover art. Use it on its own without a Jellyfin server ("Use music on this device" on the sign-in screen), or next to your server, where the local songs show up in the same library. Likes, play counts and playlists for local songs stay on the device; `.lrc` files next to a song and lyrics embedded in its tags are used for lyrics. Folders and Rescan are in Settings → Music on this device
+- Music on this device: on desktop, pick one or more folders and Triptych plays the audio files in them (MP3, FLAC, M4A/AAC, Ogg, Opus, WAV) with their tags and cover art. Use it on its own without a Jellyfin server ("Use music on this device" on the sign-in screen), or next to your server, where the local songs show up in the same library. Likes, play counts and playlists for local songs stay on the device; `.lrc` files next to a song and lyrics embedded in its tags are used for lyrics. Folders and Rescan are in Settings → Music on this device. On Android, Triptych reads the phone's own music library (the songs other music apps see) after you allow access to music
 - Gapless playback with optional crossfade (0-12 seconds) between tracks
 - ReplayGain-based volume normalization, using loudness data from your server
 - Synced lyrics for the currently playing track, with the current line easing into focus as it's sung. Your own Jellyfin server, lrclib.net, NetEase Cloud Music and Kugou are all asked at once and the best synced match is taken as soon as it arrives; plain lyrics (also from lyrics.ovh) only when nobody has synced ones. Titles are matched loosely ("feat.", "Remastered 2011", "- Live", brackets, accents and Chinese/Japanese/Korean titles) and checked against the song's length, and lyrics are cached per song and fetched ahead for the next song
-- Word-by-word lyrics (Settings → Appearance): each word fills in and grows as it's sung, using real word timing where a source has it (Kugou, enhanced LRC) and an estimate otherwise; it redraws every frame, so it uses more battery
+- Word-by-word lyrics (part of Dynamic animations, Settings → Appearance): each word fills in and grows as it's sung, using real word timing where a source has it (Kugou, enhanced LRC) and an estimate otherwise; it redraws every frame, so it uses more battery
+- Animations: Dynamic or Static (Settings → Appearance); Static turns every animation off, word-by-word lyrics included (lyrics, menus, the nav dot, player buttons), and it switches to Static by itself while battery saver / Low Power Mode is on
 - 19 languages, including Simplified Chinese, Traditional Chinese, Japanese and Korean; the first start follows your system language
-- Queue view with shuffle and repeat modes
+- Queue view with shuffle and repeat modes, plus smart shuffle: tap shuffle again and everything after the song you picked is recommended songs from your own library that sound close to it (related artists, artists you play together, features and genres)
 - Native lock-screen and notification media controls on Android, including playback that survives the app going to the background
 - Discord Rich Presence on desktop: shows what you're currently listening to, with cover art
 - Custom CSS support for further tweaking the look of the app, including a set of ready-made community color schemes (see [Themes](#themes) below)
@@ -99,6 +100,14 @@ npm run dist        # build a Windows installer
 ```
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
+
+## What's new in 2.4.1
+
+- Smart shuffle: tap shuffle twice and, after the song you pick, the queue fills with recommended songs from your own library (related artists from Deezer, artists featured together on your songs, what you play in the same sittings). Removing one means "not this one again"; Settings → Privacy → "Online related artists lookup" turns the Deezer part off
+- "Because you listened to …" on Home uses the same, better recommendations
+- Animations: Static or Dynamic (Settings → Appearance). Static turns every animation off; battery saver / Low Power Mode switches to Static on its own
+- Music on this device on Android: the phone's own music library, on its own or mixed into your Jellyfin library
+- The app version is shown at the bottom of Settings
 
 ## What's new in 2.4.0
 

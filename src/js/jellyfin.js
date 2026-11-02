@@ -52,7 +52,7 @@ const LEGACY_PREFS = { listening: 'JellyWaveListening', settings: 'JellyWaveSett
 // literal below is only the fallback for the brief window before that
 // resolves (or if neither bridge is available, e.g. running in a plain
 // browser during development).
-let CLIENT_VERSION = '2.4.0';
+let CLIENT_VERSION = '2.4.1';
 
 export function getClientVersion() {
   return CLIENT_VERSION;
@@ -663,6 +663,16 @@ export class JellyfinClient {
       UserId: this.userId,
       Limit: limit,
       Fields: 'PrimaryImageAspectRatio,AlbumArtist'
+    });
+    return data.Items || [];
+  }
+
+  // Songs Jellyfin would mix with this one (smart shuffle, see recommend.js).
+  async getInstantMix(itemId, limit = 60) {
+    const data = await this._get(`/Items/${itemId}/InstantMix`, {
+      UserId: this.userId,
+      Limit: limit,
+      Fields: 'AlbumArtist,ArtistItems'
     });
     return data.Items || [];
   }
