@@ -4658,6 +4658,22 @@ function wirePlayer() {
   npVolumeBar.value = volumeBar.value;
   npVolumeBar.style.setProperty('--pct', rangeFillPercent(Number(volumeBar.value), npVolumeBar, 14));
 
+  // The speaker mutes, and a second click brings back the volume from
+  // before. Goes through the slider so everything else follows.
+  let volumeBeforeMute = 50;
+  const toggleMute = () => {
+    const now = Number(volumeBar.value);
+    if (now > 0) volumeBeforeMute = now;
+    volumeBar.value = now > 0 ? 0 : (volumeBeforeMute || 50);
+    volumeBar.dispatchEvent(new Event('input'));
+    bounceButtons(volumeIcon);
+  };
+  volumeIcon.addEventListener('click', toggleMute);
+  volumeIcon.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Enter' || evt.key === ' ') { evt.preventDefault(); toggleMute(); }
+  });
+  volumeIcon.addEventListener('animationend', () => volumeIcon.classList.remove('bounce'));
+
   // Player bar's queue button: opens the queue (bringing the Now Playing
   // panel out first if it's closed), or closes it; lit while it's open.
   const btnQueue = document.getElementById('btn-queue');

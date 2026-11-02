@@ -1160,7 +1160,8 @@ body.platform-mobile .lyrics-header-actions #btn-lyrics-mobile { display: flex; 
 
 /* The player buttons -- and the heart, download, lyrics, queue, cast and
    sleep-timer buttons -- give a little bounce when tapped. */
-button.bounce { animation: ctrl-bounce 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
+button.bounce, .volume-icon.bounce { animation: ctrl-bounce 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
+.volume-icon { cursor: pointer; }
 @keyframes ctrl-bounce {
   0% { transform: scale(1); }
   35% { transform: scale(0.82); }
