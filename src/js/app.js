@@ -4726,6 +4726,17 @@ function wirePlayer() {
   });
   // Crossing the phone-layout breakpoint moves the cat between its spots.
   window.matchMedia('(max-width: 820px)').addEventListener('change', syncCatJamVisibility);
+  // The player's close arrow points the way it leaves: right for the
+  // desktop side panel, down for the phone's full-screen player. A real
+  // right-chevron icon rather than a rotated one, which sat off-center.
+  const syncCollapseIcon = () => {
+    const icon = btnCloseLyrics.querySelector('.fi');
+    if (!icon) return;
+    icon.classList.toggle('fi-br-angle-small-right', !isPhoneLayout());
+    icon.classList.toggle('fi-br-angle-small-down', isPhoneLayout());
+  };
+  syncCollapseIcon();
+  window.matchMedia('(max-width: 820px)').addEventListener('change', syncCollapseIcon);
   wireQueueSheet();
 
   player.on('queuechange', () => {
