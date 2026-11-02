@@ -894,8 +894,13 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
   flex-shrink: 0;
   position: relative; z-index: 1;
 }
+/* Desktop: the side panel's header row is as tall as the page header, so
+   its icons line up with the account pill next to it. */
+@media (min-width: 821px) {
+  body:not(.platform-mobile) .lyrics-header { min-height: 68px; padding-top: 0; padding-bottom: 0; box-sizing: border-box; }
+}
 .btn-icon-plain { color: var(--text-secondary); font-size: 17px; padding: 6px; border-radius: 6px; }
-.btn-icon-plain:hover { color: var(--text-primary); background: var(--bg-highlight); }
+.btn-icon-plain:hover { color: var(--text-primary); }
 .lyrics-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .lyrics-header-actions .btn-icon-plain { width: 29px; height: 29px; display: flex; align-items: center; justify-content: center; }
 
