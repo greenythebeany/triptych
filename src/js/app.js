@@ -5,10 +5,11 @@ import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
 import { addListening, persistLocal as persistListening, getOwnLog, isDirty as listeningDirty, markSynced as listeningSynced, adoptIfLarger, combineLogs, dayKey } from './listening.js';
-import { getSettings, updateSettings, applySettings, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
+import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
 import { LOCALES, loadLocale, applyTranslations, t } from './i18n.js';
-import { setHapticsEnabled, platform, isDesktop, isMobile, isAndroid, sessionStore, windowControls, wireHardwareBackButton, exitApp, requestNotificationPermission, setDiscordActivity, clearDiscordActivity, searchDeezerAlbumArt, hapticImpact } from './platform.js';
+import { setHapticsEnabled, platform, isDesktop, isMobile, isAndroid, sessionStore, windowControls, wireHardwareBackButton, exitApp, requestNotificationPermission, setDiscordActivity, clearDiscordActivity, searchDeezerAlbumArt, hapticImpact, watchPowerSaver } from './platform.js';
 import { createConnect } from './connect.js';
+import { createRecommender, trackArtistKeys } from './recommend.js';
 import { isSupported as downloadsSupported, isDownloaded, downloadTrack, deleteDownload, onDownloadsChange, getDownloadedTracks, getTotalDownloadedBytes, getLocalImageUri } from './downloads.js';
 import { renderGrab } from './grab.js';
 import { getPinnedAlbums, isAlbumPinned, togglePinAlbum, onPinnedAlbumsChange } from './pinnedAlbums.js';
@@ -97,12 +98,12 @@ const settingsOverlay = document.getElementById('settings-overlay');
 const btnCloseSettings = document.getElementById('btn-close-settings');
 const themeModeToggle = document.getElementById('theme-mode-toggle');
 const uiStyleToggle = document.getElementById('ui-style-toggle');
+const motionToggle = document.getElementById('motion-toggle');
 const npVolumeBar = document.getElementById('np-volume-bar');
 const paletteGrid = document.getElementById('palette-grid');
 const audioQualitySelect = document.getElementById('audio-quality-select');
 const languageSelect = document.getElementById('language-select');
 const toggleArtBackground = document.getElementById('toggle-art-background');
-const toggleWordLyrics = document.getElementById('toggle-word-lyrics');
 const toggleDynamicAccentColor = document.getElementById('toggle-dynamic-accent-color');
 const crossfadeSlider = document.getElementById('crossfade-slider');
 const crossfadeValue = document.getElementById('crossfade-value');
@@ -110,6 +111,7 @@ const toggleReplayGain = document.getElementById('toggle-replaygain');
 const toggleOfflineMode = document.getElementById('toggle-offline-mode');
 const albumArtLookupRow = document.getElementById('album-art-lookup-row');
 const toggleAlbumArtLookup = document.getElementById('toggle-album-art-lookup');
+const toggleRelatedArtists = document.getElementById('toggle-related-artists');
 const toggleLyricsSearch = document.getElementById('toggle-lyrics-search');
 const lyricsIndexStatus = document.getElementById('lyrics-index-status');
 const toggleHaptics = document.getElementById('toggle-haptics');
@@ -955,6 +957,10 @@ function openAccountMenu() {
   const o = accountMenuOrigin();
   const full = Math.hypot(Math.max(o.x, o.w - o.x), Math.max(o.y, o.h - o.y)) + 4;
   const circle = (r) => `circle(${r}px at ${o.x}px ${o.y}px)`;
+  if (isStaticMotion()) {
+    morphAccountAvatar(true, 0);
+    return;
+  }
   morphAccountAvatar(true, 320);
   accountMenu.animate([{ clipPath: circle(o.r) }, { clipPath: circle(full) }], { duration: 460, easing: MENU_EASE });
   [...accountMenu.children].forEach((row, i) =>
@@ -977,6 +983,10 @@ function closeAccountMenu() {
     finishAccountMenuClose = null;
   };
   finishAccountMenuClose = finish;
+  if (isStaticMotion()) {
+    finish();
+    return;
+  }
   // Also on a timer: a window that isn't drawing frames never finishes the
   // animations.
   setTimeout(finish, 560);
@@ -1082,6 +1092,15 @@ function wireSettingsUI() {
     });
   });
 
+  motionToggle.querySelectorAll('button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const wordsBefore = wordSyncActive();
+      updateSettings({ motion: btn.dataset.value === 'static' ? 'static' : 'dynamic' });
+      refreshSettingsUI();
+      if (wordSyncActive() !== wordsBefore) reloadLyricsForWordMode();
+    });
+  });
+
   uiStyleToggle.querySelectorAll('button').forEach((btn) => {
     btn.addEventListener('click', () => {
       updateSettings({ uiStyle: btn.dataset.value });
@@ -1095,13 +1114,6 @@ function wireSettingsUI() {
     updateSettings({ audioQuality: audioQualitySelect.value });
   });
 
-  toggleWordLyrics.addEventListener('change', () => {
-    updateSettings({ wordSyncLyrics: toggleWordLyrics.checked });
-    // Word-timed lyrics are a separate lookup (see lyrics.js cacheKey).
-    currentLyrics = null;
-    lyricsTrackId = null;
-    if (!lyricsPanel.hidden || lyricsSheetOpen) loadLyricsForCurrentTrack();
-  });
 
   toggleArtBackground.addEventListener('change', () => {
     updateSettings({ artBackground: toggleArtBackground.checked });
@@ -1175,6 +1187,9 @@ function wireSettingsUI() {
   onIndexProgress(showLyricsIndexStatus);
   toggleAlbumArtLookup.addEventListener('change', () => {
     updateSettings({ albumArtLookupEnabled: toggleAlbumArtLookup.checked });
+  });
+  toggleRelatedArtists.addEventListener('change', () => {
+    updateSettings({ relatedArtistsLookupEnabled: toggleRelatedArtists.checked });
   });
   toggleAutoUpdateCheck.addEventListener('change', () => {
     updateSettings({ autoUpdateCheckEnabled: toggleAutoUpdateCheck.checked });
@@ -1956,7 +1971,7 @@ function listeningTotals() {
 // localStorage, and only the fields the player and UI actually use.
 const RESUME_KEY = 'triptych:resume';
 const RESUME_TRACK_FIELDS = ['Id', 'Name', 'Album', 'AlbumId', 'AlbumArtist', 'Artists', 'ArtistItems', 'ImageTags',
-  'AlbumPrimaryImageTag', 'RunTimeTicks', 'NormalizationGain', 'UserData', 'Genres', 'Type', '__queued'];
+  'AlbumPrimaryImageTag', 'RunTimeTicks', 'NormalizationGain', 'UserData', 'Genres', 'Type', '__queued', '__rec'];
 let resumeSaveTimer = null;
 
 function saveResumeState() {
@@ -1973,6 +1988,7 @@ function saveResumeState() {
       index: player.currentIndex - from,
       position: Math.floor(player.audio.currentTime || 0),
       shuffle: player.shuffle,
+      smartShuffle: player.smartShuffle,
       repeat: player.repeat,
       savedAt: Date.now()
     }));
@@ -1990,9 +2006,8 @@ function restoreResumeState() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); } catch (err) { /* corrupt */ }
   if (!saved?.tracks?.length) return;
-  player.restoreQueue(saved.tracks, saved.index, saved.position, { shuffle: saved.shuffle, repeat: saved.repeat });
-  btnShuffle.classList.toggle('active', !!saved.shuffle);
-  mobileBtnShuffle.classList.toggle('active', !!saved.shuffle);
+  player.restoreQueue(saved.tracks, saved.index, saved.position, { shuffle: saved.shuffle, smartShuffle: saved.smartShuffle, repeat: saved.repeat });
+  updateShuffleButtons();
   const repeatOn = saved.repeat && saved.repeat !== RepeatMode.OFF;
   btnRepeat.classList.toggle('active', !!repeatOn);
   mobileBtnRepeat.classList.toggle('active', !!repeatOn);
@@ -2173,13 +2188,13 @@ function refreshSettingsUI() {
   const s = getSettings();
   languageSelect.value = s.language;
   toggleArtBackground.checked = !!s.artBackground;
-  toggleWordLyrics.checked = !!s.wordSyncLyrics;
   toggleDynamicAccentColor.checked = !!s.dynamicAccentColor;
   crossfadeSlider.value = s.crossfadeSeconds || 0;
   crossfadeValue.textContent = s.crossfadeSeconds ? `${s.crossfadeSeconds}s` : t('settings.crossfadeOff');
   crossfadeSlider.style.setProperty('--pct', rangeFillPercent(((s.crossfadeSeconds || 0) / 12) * 100, crossfadeSlider, 13));
   toggleOfflineMode.checked = !!s.offlineMode;
   toggleAlbumArtLookup.checked = s.albumArtLookupEnabled !== false;
+  toggleRelatedArtists.checked = s.relatedArtistsLookupEnabled !== false;
   toggleLyricsSearch.checked = !!s.lyricsSearchEnabled;
   toggleHaptics.checked = s.hapticsEnabled !== false;
   toggleNothingDots.checked = s.nothingDottedSliders !== false;
@@ -2218,6 +2233,9 @@ function refreshSettingsUI() {
   });
   uiStyleToggle.querySelectorAll('button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
+  });
+  motionToggle.querySelectorAll('button').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.value === (s.motion === 'static' ? 'static' : 'dynamic'));
   });
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
@@ -2395,6 +2413,7 @@ function loadPinnedAlbumsSidebar() {
 // sidebar and in the phone's tab bar. Ported from MessageMe.
 const NAV_DOT = 6;
 function moveNavGliders({ instant = false } = {}) {
+  if (isStaticMotion()) instant = true;
   for (const nav of document.querySelectorAll('.sidebar-nav, .bottom-nav')) {
     const glider = nav.querySelector('.nav-glider');
     const dot = nav.querySelector('.nav-dot');
@@ -2820,8 +2839,9 @@ async function renderSmartMix(state) {
 // hundred covers it without pulling the whole library.
 const HOME_RECENT_PLAYED_LIMIT = 300;
 
-// The artist you've played most lately, and albums Jellyfin considers
-// similar to their most recently played album (minus their own albums).
+// The artist you've played most lately, and albums by the library artists
+// most like them (see recommend.js), topped up with albums Jellyfin
+// considers similar to their most recently played one.
 async function fillBecauseYouListened(slot, recentTracks, excludeAlbumIds = new Set()) {
   const counts = new Map();
   for (const tr of recentTracks) {
@@ -2833,12 +2853,36 @@ async function fillBecauseYouListened(slot, recentTracks, excludeAlbumIds = new 
   }
   const top = [...counts.values()].sort((a, b) => b.count - a.count)[0];
   if (!top) return;
-  const similar = (await jellyfin.getSimilarItems(top.albumId, 16))
-    .filter((al) => al.Type === 'MusicAlbum' && !excludeAlbumIds.has(al.Id) && !(al.AlbumArtist || '').toLowerCase().includes((top.artist.Name || '').toLowerCase()))
-    .slice(0, 12);
-  if (similar.length < 3 || !slot.isConnected) return;
+  const topKey = trackArtistKeys({ ArtistItems: [top.artist] })[0];
+  const picked = [];
+  const seen = new Set(excludeAlbumIds);
+  const add = (album) => {
+    if (picked.length >= 12 || !album.Id || seen.has(album.Id)) return;
+    seen.add(album.Id);
+    picked.push(album);
+  };
+  const similarArtists = await getRecommender().similarArtists(top.artist.Name, 10).catch(() => []);
+  for (const artist of similarArtists) {
+    // Their most played album here, skipping ones by the artist itself.
+    const plays = new Map();
+    for (const tr of artist.tracks) {
+      if (!tr.AlbumId || trackArtistKeys({ AlbumArtist: tr.AlbumArtist }).includes(topKey)) continue;
+      const entry = plays.get(tr.AlbumId) || { tr, n: 0 };
+      entry.n += 1 + (tr.UserData?.PlayCount || 0);
+      plays.set(tr.AlbumId, entry);
+    }
+    const best = [...plays.values()].sort((a, b) => b.n - a.n)[0]?.tr;
+    if (best) add({ Id: best.AlbumId, AlbumId: best.AlbumId, Name: best.Album, AlbumArtist: best.AlbumArtist || artistNames(best), Type: 'MusicAlbum' });
+  }
+  if (picked.length < 12) {
+    const similar = await jellyfin.getSimilarItems(top.albumId, 16).catch(() => []);
+    similar
+      .filter((al) => al.Type === 'MusicAlbum' && !(al.AlbumArtist || '').toLowerCase().includes((top.artist.Name || '').toLowerCase()))
+      .forEach(add);
+  }
+  if (picked.length < 3 || !slot.isConnected) return;
   slot.appendChild(el('div', 'section-title', escapeHtml(t('home.becauseYouListened', { artist: formatDisplayName(top.artist.Name) }))));
-  slot.appendChild(buildCardRow(similar, 'album'));
+  slot.appendChild(buildCardRow(picked, 'album'));
 }
 
 async function renderHome() {
@@ -3613,10 +3657,10 @@ function buildCardRow(items, kind) {
   const scrollAmount = () => Math.max(300, row.clientWidth * 0.8);
   const prevBtn = el('button', 'card-row-nav card-row-nav-prev', '<i class="fi fi-br-angle-small-left"></i>');
   prevBtn.type = 'button';
-  prevBtn.addEventListener('click', () => row.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }));
+  prevBtn.addEventListener('click', () => row.scrollBy({ left: -scrollAmount(), behavior: isStaticMotion() ? 'auto' : 'smooth' }));
   const nextBtn = el('button', 'card-row-nav card-row-nav-next', '<i class="fi fi-br-angle-small-right"></i>');
   nextBtn.type = 'button';
-  nextBtn.addEventListener('click', () => row.scrollBy({ left: scrollAmount(), behavior: 'smooth' }));
+  nextBtn.addEventListener('click', () => row.scrollBy({ left: scrollAmount(), behavior: isStaticMotion() ? 'auto' : 'smooth' }));
   wrap.appendChild(prevBtn);
   wrap.appendChild(nextBtn);
 
@@ -4158,15 +4202,27 @@ function wireSwipeActions(rowEl, { onSwipeRight, onSwipeLeft, onLongPress } = {}
 }
 
 // ---------- Player wiring ----------
+function bounceButtons(...buttons) {
+  if (isStaticMotion()) return;
+  buttons.forEach((btn) => {
+    btn.classList.remove('bounce');
+    void btn.offsetWidth; // restart the animation on quick repeat taps
+    btn.classList.add('bounce');
+  });
+}
+
 function wirePlayer() {
   btnPlay.addEventListener('click', () => uiTogglePlay());
   btnPrev.addEventListener('click', () => uiPrevious());
   btnNext.addEventListener('click', () => uiNext());
   btnShuffle.addEventListener('click', () => {
-    player.toggleShuffle();
-    btnShuffle.classList.toggle('active', player.shuffle);
-    mobileBtnShuffle.classList.toggle('active', player.shuffle);
+    player.cycleShuffle();
+    updateShuffleButtons();
+    bounceButtons(btnShuffle, mobileBtnShuffle);
   });
+  [btnShuffle, mobileBtnShuffle, btnRepeat, mobileBtnRepeat, btnPlay, btnPrev, btnNext, mobileBtnPlay, mobileBtnPrev, mobileBtnNext]
+    .forEach((btn) => btn.addEventListener('animationend', () => btn.classList.remove('bounce')));
+  [btnPlay, btnPrev, btnNext, mobileBtnPlay, mobileBtnPrev, mobileBtnNext].forEach((btn) => btn.addEventListener('click', () => bounceButtons(btn)));
   btnRepeat.addEventListener('click', () => {
     const mode = player.cycleRepeat();
     btnRepeat.classList.toggle('active', mode !== RepeatMode.OFF);
@@ -4174,17 +4230,14 @@ function wirePlayer() {
     const repeatIconClass = mode === RepeatMode.ONE ? 'fi fi-br-arrows-repeat-1' : 'fi fi-br-arrows-repeat';
     iconRepeat.className = repeatIconClass;
     mobileIconRepeat.className = repeatIconClass;
+    bounceButtons(btnRepeat, mobileBtnRepeat);
   });
 
   // Mobile full-screen player controls — same player calls as the desktop ones.
   mobileBtnPlay.addEventListener('click', () => uiTogglePlay());
   mobileBtnPrev.addEventListener('click', () => uiPrevious());
   mobileBtnNext.addEventListener('click', () => uiNext());
-  mobileBtnShuffle.addEventListener('click', () => {
-    player.toggleShuffle();
-    btnShuffle.classList.toggle('active', player.shuffle);
-    mobileBtnShuffle.classList.toggle('active', player.shuffle);
-  });
+  mobileBtnShuffle.addEventListener('click', () => btnShuffle.click());
   mobileBtnRepeat.addEventListener('click', () => btnRepeat.click());
   mobileSeekBar.addEventListener('input', () => {
     const pct = Number(mobileSeekBar.value);
@@ -4289,6 +4342,11 @@ function wirePlayer() {
   }, true);
   wirePullToRefresh();
   initSystemVolume();
+  watchPowerSaver((on) => {
+    const wordsBefore = wordSyncActive();
+    setPowerSaver(on);
+    if (wordSyncActive() !== wordsBefore) reloadLyricsForWordMode();
+  });
   // Crossing the phone-layout breakpoint moves the cat between its spots.
   window.matchMedia('(max-width: 820px)').addEventListener('change', syncCatJamVisibility);
   wireQueueSheet();
@@ -4296,6 +4354,11 @@ function wirePlayer() {
   player.on('queuechange', () => {
     if (queueSheetOpen || (!lyricsPanel.hidden && activePanelTab === 'queue')) renderQueue();
     scheduleResumeSave();
+    scheduleSmartShuffleFill();
+  });
+  player.on('trackchange', () => {
+    recommender?.notePlayed(player.currentTrack?.Id);
+    scheduleSmartShuffleFill();
   });
   player.on('trackchange', scheduleResumeSave);
   player.on('playstate', scheduleResumeSave);
@@ -4928,6 +4991,73 @@ function showPanelTab(tab) {
   loadLyricsForCurrentTrack();
 }
 
+// ---------- Smart shuffle ----------
+// Shuffle's third state: after the song you picked (and anything you queued
+// yourself), the queue is recommended songs from your library (see
+// recommend.js), kept a few songs ahead as it plays. They stay close to the
+// song you picked, drifting a little with what's playing.
+const SMART_AHEAD = 8;
+let recommender = null;
+let smartFillTimer = null;
+let smartFilling = false;
+
+function getRecommender() {
+  if (!recommender) {
+    recommender = createRecommender({
+      getLibrary: () => ensureAllSongsCache(),
+      getInstantMix: (id) => (isLocalItemId(id) || !jellyfin?.getInstantMix ? [] : jellyfin.getInstantMix(id)),
+      canPlay: (tr) => !getSettings().offlineMode || isDownloaded(tr.Id)
+    });
+  }
+  return recommender;
+}
+
+function updateShuffleButtons() {
+  const mode = player.shuffleMode;
+  const title = t(mode === 'smart' ? 'player.smartShuffle' : 'player.shuffle');
+  [btnShuffle, mobileBtnShuffle].forEach((btn) => {
+    btn.classList.toggle('active', mode !== 'off');
+    btn.classList.toggle('smart', mode === 'smart');
+    btn.title = title;
+  });
+}
+
+function scheduleSmartShuffleFill() {
+  if (!player?.smartShuffle) return;
+  clearTimeout(smartFillTimer);
+  smartFillTimer = setTimeout(() => fillSmartShuffle().catch((err) => console.error('[smart shuffle]', err)), 300);
+}
+
+async function fillSmartShuffle() {
+  if (smartFilling) return;
+  smartFilling = true;
+  try {
+    while (player.smartShuffle && player.currentTrack) {
+      const q = player.queue;
+      const upcoming = q.slice(player.currentIndex + 1);
+      if (upcoming.filter((e) => e.__rec).length >= SMART_AHEAD) break;
+      // The song the user picked leads; what's playing now and the last
+      // recommendation follow.
+      let anchor = null;
+      for (let i = player.currentIndex; i >= 0 && !anchor; i--) if (!q[i].__rec) anchor = q[i];
+      const seeds = [...new Set([anchor, player.currentTrack, q[q.length - 1]].filter(Boolean))];
+      const avoidArtists = new Set(q.slice(-6).filter((e) => e.__rec).flatMap(trackArtistKeys));
+      const picked = await getRecommender().pick(seeds, { exclude: new Set(q.map((e) => e.Id)), avoidArtists });
+      if (!picked || !player.smartShuffle) break; // nothing fits: try again on the next song
+      player.appendRecommendation(picked.track);
+    }
+  } finally {
+    smartFilling = false;
+  }
+}
+
+// Removing a recommendation also means "not this one again".
+function removeQueueEntry(idx) {
+  const entry = player.queue[idx];
+  if (entry?.__rec) getRecommender().decline(entry.Id);
+  player.removeFromQueueAt(idx);
+}
+
 function buildQueueRow(track, idx, isPlaying) {
   const row = el('div', isPlaying ? 'queue-row playing' : 'queue-row');
   row.dataset.idx = idx;
@@ -4942,7 +5072,7 @@ function buildQueueRow(track, idx, isPlaying) {
   const openQueueRowMenu = (x, y) => openContextMenu(syntheticPointerEvent(x, y), buildTrackContextMenuItems(track, {
     onPlay: () => player.playAt(idx),
     anchorEl: row,
-    onRemove: isPlaying ? null : () => player.removeFromQueueAt(idx)
+    onRemove: isPlaying ? null : () => removeQueueEntry(idx)
   }));
 
   // Can't remove/reorder what's currently playing this way — only "Up Next" rows.
@@ -4951,7 +5081,7 @@ function buildQueueRow(track, idx, isPlaying) {
       // Delay the actual removal slightly so the slide-out animation has
       // time to play before renderQueue() (triggered by queuechange) wipes
       // and rebuilds the whole list out from under it.
-      onSwipeLeft: () => setTimeout(() => player.removeFromQueueAt(idx), 180),
+      onSwipeLeft: () => setTimeout(() => removeQueueEntry(idx), 180),
       onLongPress: isMobile ? openQueueRowMenu : undefined
     });
     const handle = el('div', 'queue-row-handle', '<i class="fi fi-br-grip-dots-vertical"></i>');
@@ -5109,7 +5239,7 @@ function renderQueue() {
   const restStart = player.currentIndex + 1 + queued.length;
   const upNext = player.queue.slice(restStart);
   if (upNext.length) {
-    queueBody.appendChild(el('div', 'queue-section-title', escapeHtml(t('nowPlaying.upNext'))));
+    queueBody.appendChild(el('div', 'queue-section-title', escapeHtml(t(player.smartShuffle ? 'nowPlaying.recommendedQueue' : 'nowPlaying.upNext'))));
     upNext.forEach((track, offset) => {
       queueBody.appendChild(buildQueueRow(track, restStart + offset, false));
     });
@@ -5122,6 +5252,20 @@ function highlightPlayingRow(trackId) {
   });
 }
 
+// Word-by-word lyrics come with Dynamic animations (Static, or battery
+// saver, shows whole lines).
+function wordSyncActive() {
+  return !isStaticMotion();
+}
+
+// Word-timed lyrics are a separate lookup (see lyrics.js cacheKey), so a
+// change reloads them.
+function reloadLyricsForWordMode() {
+  currentLyrics = null;
+  lyricsTrackId = null;
+  if (!lyricsPanel.hidden || lyricsSheetOpen) loadLyricsForCurrentTrack();
+}
+
 function lyricsQueryFor(track) {
   return {
     trackId: track.Id,
@@ -5129,7 +5273,7 @@ function lyricsQueryFor(track) {
     artist: artistNames(track),
     album: track.Album,
     durationSeconds: ticksToSeconds(track.RunTimeTicks),
-    wordSync: !!getSettings().wordSyncLyrics,
+    wordSync: wordSyncActive(),
     // The server's own lyrics for this track (.lrc / embedded), one source
     // among several -- see lyrics.js.
     fromServer: jellyfin ? () => jellyfin.getLyrics(track.Id) : null
@@ -5228,7 +5372,7 @@ function renderLyrics(result) {
   activeLyricIdx = -1;
   lyricLineEls = [];
   filledLine = null;
-  const wordMode = !!(getSettings().wordSyncLyrics && result?.synced?.length);
+  const wordMode = !!(wordSyncActive() && result?.synced?.length);
   lyricsBody.classList.toggle('word-mode', wordMode);
   if (!result || (!result.synced && !result.plain)) {
     lyricsBody.innerHTML = `<div class="lyrics-empty">${escapeHtml(t('nowPlaying.noLyrics'))}</div>`;
@@ -5338,7 +5482,7 @@ function centerLyricLine(line, smooth) {
   const max = lyricsBody.scrollHeight - lyricsBody.clientHeight;
   const target = Math.min(max, Math.max(0, line.offsetTop - (lyricsBody.clientHeight - line.offsetHeight) / 2));
   const from = lyricsBody.scrollTop;
-  if (!smooth || Math.abs(target - from) < 1 || Math.abs(target - from) > lyricsBody.clientHeight * 2) {
+  if (!smooth || isStaticMotion() || Math.abs(target - from) < 1 || Math.abs(target - from) > lyricsBody.clientHeight * 2) {
     lyricsBody.scrollTop = target;
     return;
   }

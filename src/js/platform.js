@@ -135,3 +135,37 @@ export async function searchDeezerAlbumArt(artist, album, trackName) {
     return null;
   }
 }
+
+// Deezer's artist API (related artists for smart shuffle, see
+// recommend.js). No CORS headers, so desktop goes through the main process
+// and phones through Capacitor's native HTTP. The caller checks the privacy
+// setting. Resolves to the parsed JSON, or null on any failure.
+export async function deezerApiGet(path, params = {}) {
+  try {
+    if (isDesktop) return await window.api.deezer.get(path, params);
+    const http = window.Capacitor?.Plugins?.CapacitorHttp;
+    if (!isMobile || !http) return null;
+    const qs = new URLSearchParams(params).toString();
+    const res = await http.request({ url: `https://api.deezer.com${path}${qs ? `?${qs}` : ''}`, method: 'GET', connectTimeout: 10000, readTimeout: 10000 });
+    if (res.status !== 200) return null;
+    return typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+  } catch (err) {
+    return null;
+  }
+}
+
+// Battery saver / Low Power Mode, for Settings -> Animations (Static while
+// it's on). Desktop: main.js; phones: the app's own TriptychPowerSaver
+// plugin (PowerSaverPlugin.java, TriptychViewController.swift). Calls back
+// with the current state, then on every change.
+export function watchPowerSaver(callback) {
+  if (isDesktop && window.api?.power) {
+    window.api.power.onSaverChange(callback);
+    window.api.power.getSaver().then(callback, () => {});
+    return;
+  }
+  const plugin = isMobile ? window.Capacitor?.Plugins?.TriptychPowerSaver : null;
+  if (!plugin) return;
+  plugin.addListener('change', ({ on }) => callback(!!on));
+  plugin.getState().then(({ on }) => callback(!!on), () => {});
+}

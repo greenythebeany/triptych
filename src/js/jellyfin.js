@@ -667,6 +667,16 @@ export class JellyfinClient {
     return data.Items || [];
   }
 
+  // Songs Jellyfin would mix with this one (smart shuffle, see recommend.js).
+  async getInstantMix(itemId, limit = 60) {
+    const data = await this._get(`/Items/${itemId}/InstantMix`, {
+      UserId: this.userId,
+      Limit: limit,
+      Fields: 'AlbumArtist,ArtistItems'
+    });
+    return data.Items || [];
+  }
+
   async getSyncedSettings() {
     let raw = (await this._getPrefs(PREFS.settings, CLIENT_NAME)).settings;
     if (!raw) raw = (await this._getPrefs(LEGACY_PREFS.settings, LEGACY_CLIENT_NAME)).settings;

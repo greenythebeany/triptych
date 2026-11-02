@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, safeStorage, shell, globalShortcut, dialog, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { spawn, execFile } = require('child_process');
 const { Client: DiscordRpcClient } = require('@xhayper/discord-rpc');
 const { checkForUpdates, downloadUpdate, installAndQuit } = require('./update-checker');
 
@@ -212,10 +212,59 @@ if (!app.requestSingleInstanceLock()) {
   });
 }
 
+// Battery saver (Windows) / Low Power Mode (macOS): the renderer turns
+// animations to Static while it's on (see setPowerSaver in settings.js).
+// Electron has no API for it. On Windows a hidden PowerShell asks
+// GetSystemPowerStatus every 10 seconds and prints the flag when it
+// changes; on macOS `pmset -g` is checked every 30 seconds.
+let powerSaverOn = false;
+let powerSaverProcess = null;
+
+function setPowerSaverOn(on) {
+  if (on === powerSaverOn) return;
+  powerSaverOn = on;
+  mainWindow?.webContents.send('power:saver', on);
+}
+
+const POWER_STATUS_SCRIPT = [
+  "Add-Type -Namespace TriptychPower -Name Native -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern bool GetSystemPowerStatus(out Status s); public struct Status { public byte ACLineStatus; public byte BatteryFlag; public byte BatteryLifePercent; public byte SystemStatusFlag; public int BatteryLifeTime; public int BatteryFullLifeTime; }'",
+  '$last = -1',
+  'while ($true) {',
+  '  $s = New-Object TriptychPower.Native+Status',
+  '  if ([TriptychPower.Native]::GetSystemPowerStatus([ref]$s) -and $s.SystemStatusFlag -ne $last) { $last = $s.SystemStatusFlag; [Console]::Out.WriteLine($last); [Console]::Out.Flush() }',
+  '  Start-Sleep -Seconds 10',
+  '}'
+].join('\n');
+
+function watchPowerSaver() {
+  if (process.platform === 'win32') {
+    try {
+      const encoded = Buffer.from(POWER_STATUS_SCRIPT, 'utf16le').toString('base64');
+      powerSaverProcess = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', encoded], { windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
+      powerSaverProcess.stdout.on('data', (chunk) => {
+        const flags = chunk.toString().trim().split(/\s+/);
+        setPowerSaverOn(flags[flags.length - 1] === '1');
+      });
+      powerSaverProcess.on('error', () => { powerSaverProcess = null; });
+    } catch (err) {
+      powerSaverProcess = null;
+    }
+  } else if (process.platform === 'darwin') {
+    const check = () => execFile('pmset', ['-g'], (err, out) => {
+      if (!err) setPowerSaverOn(/lowpowermode\s+1/.test(out));
+    });
+    check();
+    setInterval(check, 30000);
+  }
+}
+
+ipcMain.handle('power:getSaver', () => powerSaverOn);
+
 app.whenReady().then(() => {
   if (!app.hasSingleInstanceLock()) return;
   localLibrary.setup(ipcMain, () => mainWindow);
   createWindow();
+  watchPowerSaver();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -300,6 +349,7 @@ function shutdownForUpdate() {
 app.on('will-quit', () => {
   session.defaultSession.flushStorageData();
   killGrabProcess();
+  try { powerSaverProcess?.kill(); } catch (err) { /* already gone */ }
   globalShortcut.unregisterAll();
   try {
     smtc?.detach();
@@ -481,6 +531,26 @@ ipcMain.handle('deezer:searchAlbumArt', async (_event, artist, album, trackName)
     (await deezerSearch(`${artist} ${album}`, 'track')) ||
     (await deezerSearch(album, 'album'))
   );
+});
+
+// Related artists for smart shuffle (see src/js/recommend.js) -- same
+// missing CORS headers. Only Deezer's artist search/lookup endpoints.
+const DEEZER_ARTIST_PATH = /^\/(?:search\/artist|artist\/\d+(?:\/(?:related|albums|top))?)$/;
+
+ipcMain.handle('deezer:get', async (_event, path, params) => {
+  if (typeof path !== 'string' || !DEEZER_ARTIST_PATH.test(path)) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const qs = new URLSearchParams(params && typeof params === 'object' ? params : {}).toString();
+    const res = await fetch(`https://api.deezer.com${path}${qs ? `?${qs}` : ''}`, { signal: controller.signal });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 });
 
 // NetEase and Kugou's lyrics APIs don't send CORS headers either (see

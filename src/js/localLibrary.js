@@ -397,6 +397,11 @@ export class LocalLibraryClient {
       .slice(0, limit);
   }
 
+  // No instant mix on this device; recommend.js uses genres and artists.
+  async getInstantMix() {
+    return [];
+  }
+
   async search(term) {
     const q = fold(term);
     if (!q) return [];
@@ -682,6 +687,7 @@ export class CombinedClient {
   getItem(id) { return this._for(id).getItem(id); }
   getAlbumTracks(id) { return this._for(id).getAlbumTracks(id); }
   getSimilarItems(id, limit) { return this._for(id).getSimilarItems(id, limit); }
+  getInstantMix(id, limit) { return this._for(id).getInstantMix(id, limit); }
   getLyrics(id) { return this._for(id).getLyrics(id); }
   likeItem(id) { return this._for(id).likeItem(id); }
   unlikeItem(id) { return this._for(id).unlikeItem(id); }
