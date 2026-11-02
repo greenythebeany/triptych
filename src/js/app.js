@@ -550,9 +550,14 @@ function closeSelectMenu() {
   select.setAttribute('aria-expanded', 'false');
   select.parentElement?.classList.remove('open');
   if (isStaticMotion()) { menu.remove(); return; }
+  // Rolls back up into the dropdown it came out of.
   menu.classList.add('closing');
-  menu.addEventListener('animationend', () => menu.remove(), { once: true });
-  setTimeout(() => menu.remove(), 300);
+  const up = menu.dataset.up === '1';
+  menu.animate([
+    { clipPath: 'inset(0 0 0 0 round var(--menu-r))', opacity: 1 },
+    { clipPath: up ? 'inset(100% 0 0 0 round var(--menu-r))' : 'inset(0 0 100% 0 round var(--menu-r))', opacity: 0.6 }
+  ], { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }).finished.catch(() => {}).then(() => menu.remove());
+  setTimeout(() => menu.remove(), 400);
 }
 
 function showSelectMenu(select) {
@@ -581,6 +586,34 @@ function showSelectMenu(select) {
     menu.appendChild(item);
     return item;
   });
+  // One highlight pill that moves between the items like the nav's sticky
+  // dot (stretches toward the next one, then catches up) instead of each
+  // row lighting up on its own.
+  const glider = el('span', 'select-glider');
+  glider.setAttribute('aria-hidden', 'true');
+  menu.prepend(glider);
+  let gliderAt = null;
+  const moveGlider = (item, instant) => {
+    const to = { top: item.offsetTop, height: item.offsetHeight };
+    glider.style.top = `${to.top}px`;
+    glider.style.height = `${to.height}px`;
+    glider.style.opacity = '1';
+    const from = gliderAt;
+    gliderAt = to;
+    if (instant || !from || from.top === to.top || isStaticMotion()) return;
+    const lead = Math.min(from.top, to.top);
+    const span = Math.max(from.top + from.height, to.top + to.height) - lead;
+    glider.getAnimations().forEach((an) => an.cancel());
+    glider.animate([
+      { top: `${from.top}px`, height: `${from.height}px`, offset: 0 },
+      { top: `${lead}px`, height: `${span}px`, offset: 0.45 },
+      { top: `${to.top}px`, height: `${to.height}px`, offset: 1 }
+    ], { duration: 300, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+  };
+  items.forEach((item) => {
+    item.addEventListener('pointerenter', () => { if (!item.disabled) moveGlider(item); });
+    item.addEventListener('focus', () => moveGlider(item));
+  });
   document.body.appendChild(menu);
 
   // Below the dropdown, or above it when there's more room there; as wide
@@ -597,9 +630,27 @@ function showSelectMenu(select) {
   if (up) menu.style.bottom = `${innerHeight - r.top + gap}px`;
   else menu.style.top = `${r.bottom + gap}px`;
   menu.style.transformOrigin = up ? 'bottom right' : 'top right';
+  menu.dataset.up = up ? '1' : '0';
   const current = items.find((item) => item.classList.contains('selected'));
+  // Scroll only the list itself (scrollIntoView would also scroll the page,
+  // which closes the menu).
+  if (current) menu.scrollTop = Math.max(0, current.offsetTop - (menu.clientHeight - current.offsetHeight) / 2);
+  if (current || items[0]) moveGlider(current || items[0], true);
   (current || items[0])?.focus({ preventScroll: true });
-  current?.scrollIntoView({ block: 'nearest' });
+  // Opens like the account menu: unrolls out of the dropdown (down, or up
+  // when it opens above it) and the options slide in one after another.
+  if (!isStaticMotion()) {
+    const ease = 'cubic-bezier(0.32, 0.72, 0, 1)';
+    menu.animate([
+      { clipPath: up ? 'inset(100% 0 0 0 round var(--menu-r))' : 'inset(0 0 100% 0 round var(--menu-r))', transform: `translateY(${up ? 6 : -6}px)` },
+      { clipPath: 'inset(0 0 0 0 round var(--menu-r))', transform: 'none' }
+    ], { duration: 420, easing: ease });
+    const firstVisible = Math.floor(menu.scrollTop / ((items[0]?.offsetHeight) || 36));
+    items.slice(firstVisible, firstVisible + 12).forEach((item, i) => item.animate(
+      [{ opacity: 0, transform: `translateY(${up ? 6 : -6}px)` }, { opacity: 1, transform: 'none' }],
+      { duration: 260, delay: 60 + i * 22, easing: ease, fill: 'backwards' }
+    ));
+  }
 
   const onOutside = (evt) => { if (!menu.contains(evt.target) && evt.target !== select) closeSelectMenu(); };
   const onKey = (evt) => {
@@ -621,6 +672,93 @@ function showSelectMenu(select) {
   select.setAttribute('aria-expanded', 'true');
   select.parentElement?.classList.add('open');
   openSelectMenu = { menu, select, onOutside, onKey, onMove };
+}
+
+// Segmented toggles (theme, interface style, animations): the highlight is
+// one pill that moves between options like the nav's sticky dot -- it
+// stretches toward the new option, then its back end lets go and catches
+// up -- instead of jumping. Follows the buttons' .active class, so every
+// place that sets it gets the motion for free.
+function enhanceSegmented(seg) {
+  const glider = el('span', 'seg-glider');
+  glider.setAttribute('aria-hidden', 'true');
+  seg.prepend(glider);
+  seg.classList.add('has-glider');
+  let at = null;
+  const place = (instant) => {
+    const active = seg.querySelector('button.active');
+    if (!active || !active.offsetWidth) { glider.style.opacity = '0'; return; }
+    const to = { left: active.offsetLeft, width: active.offsetWidth };
+    glider.style.opacity = '1';
+    glider.style.top = `${active.offsetTop}px`;
+    glider.style.height = `${active.offsetHeight}px`;
+    glider.style.left = `${to.left}px`;
+    glider.style.width = `${to.width}px`;
+    const from = at;
+    at = to;
+    if (instant || !from || isStaticMotion() || from.left === to.left) return;
+    const lead = Math.min(from.left, to.left);
+    const span = Math.max(from.left + from.width, to.left + to.width) - lead;
+    glider.getAnimations().forEach((an) => an.cancel());
+    glider.animate([
+      { left: `${from.left}px`, width: `${from.width}px`, offset: 0 },
+      { left: `${lead}px`, width: `${span}px`, offset: 0.45 },
+      { left: `${to.left}px`, width: `${to.width}px`, offset: 1 }
+    ], { duration: 460, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+  };
+  new MutationObserver(() => place(false)).observe(seg, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  if (window.ResizeObserver) new ResizeObserver(() => place(true)).observe(seg);
+  place(true);
+}
+
+// Switches: the knob's drop animation (styles.css .switch.tapped) plays on
+// a real tap only, and is cleared afterwards so it doesn't replay when
+// Settings is shown again.
+document.addEventListener('change', (evt) => {
+  const sw = evt.target.closest?.('.switch');
+  if (!sw || isStaticMotion()) return;
+  sw.classList.remove('tapped');
+  void sw.offsetWidth;
+  sw.classList.add('tapped');
+}, true);
+document.addEventListener('animationend', (evt) => {
+  if (evt.animationName === 'switch-on' || evt.animationName === 'switch-off') evt.target.closest('.switch')?.classList.remove('tapped');
+}, true);
+
+// Accent colors: the selection box slides between swatches the sticky way
+// too -- across rows, it stretches over both and then lets go of the old one.
+function enhancePaletteGrid(grid) {
+  grid.classList.add('has-glider');
+  const glider = el('span', 'swatch-glider');
+  glider.setAttribute('aria-hidden', 'true');
+  let at = null;
+  const place = (instant) => {
+    if (glider.parentElement !== grid) grid.prepend(glider); // the grid is rebuilt on language change
+    const active = grid.querySelector('.palette-swatch.active');
+    if (!active || !active.offsetWidth) { glider.style.opacity = '0'; return; }
+    const to = { left: active.offsetLeft, top: active.offsetTop, width: active.offsetWidth, height: active.offsetHeight };
+    Object.assign(glider.style, { opacity: '1', left: `${to.left}px`, top: `${to.top}px`, width: `${to.width}px`, height: `${to.height}px` });
+    const from = at;
+    at = to;
+    if (instant || !from || isStaticMotion() || (from.left === to.left && from.top === to.top)) return;
+    const box = {
+      left: Math.min(from.left, to.left), top: Math.min(from.top, to.top),
+      right: Math.max(from.left + from.width, to.left + to.width), bottom: Math.max(from.top + from.height, to.top + to.height)
+    };
+    const px = (r) => ({ left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+    glider.getAnimations().forEach((an) => an.cancel());
+    glider.animate([
+      { ...px(from), offset: 0 },
+      { ...px({ left: box.left, top: box.top, width: box.right - box.left, height: box.bottom - box.top }), offset: 0.45 },
+      { ...px(to), offset: 1 }
+    ], { duration: 480, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+  };
+  new MutationObserver((records) => {
+    if (records.some((r) => r.type === 'attributes' && r.target !== glider)) place(false);
+    else if (records.some((r) => r.type === 'childList')) { at = null; place(true); }
+  }).observe(grid, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  if (window.ResizeObserver) new ResizeObserver(() => place(true)).observe(grid);
+  place(true);
 }
 
 function enhanceSelect(select) {
@@ -695,6 +833,8 @@ async function init() {
   customCssStyle.textContent = getSettings().customCss || '';
   wireSettingsUI();
   document.querySelectorAll('select.settings-select').forEach(enhanceSelect);
+  document.querySelectorAll('.segmented').forEach(enhanceSegmented);
+  enhancePaletteGrid(paletteGrid);
   wireCreatePlaylistUI();
   wireLegalOverlay();
   wirePrivacyNotice();

@@ -244,6 +244,22 @@ body.platform-mac .titlebar-controls { display: none; }
 /* Monochrome's track is the text color (white in dark mode), so a white
    knob vanished on it -- use the background color for the knob instead. */
 :root[data-palette="mono"] .switch input:checked + .switch-track::before { background: var(--bg-base); }
+/* Tapped (app.js marks it .tapped): the knob moves like a drop, stretching
+   across to the other side and then letting go of where it was. Only on a
+   tap, so opening Settings doesn't replay it on every switch. */
+.switch-track::before { border-radius: 999px; }
+.switch.tapped input:checked + .switch-track::before { animation: switch-on 0.42s cubic-bezier(0.65, 0, 0.35, 1); }
+.switch.tapped input:not(:checked) + .switch-track::before { animation: switch-off 0.42s cubic-bezier(0.65, 0, 0.35, 1); }
+@keyframes switch-on {
+  0% { transform: translateX(0); width: 16px; }
+  45% { transform: translateX(0); width: 34px; }
+  100% { transform: translateX(18px); width: 16px; }
+}
+@keyframes switch-off {
+  0% { transform: translateX(18px); width: 16px; }
+  45% { transform: translateX(0); width: 34px; }
+  100% { transform: translateX(0); width: 16px; }
+}
 .btn-primary {
   margin-top: 6px;
   background: var(--accent);
@@ -1411,6 +1427,14 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
   color: var(--text-secondary);
 }
 .segmented button.active { background: var(--accent); color: var(--accent-contrast); }
+/* The moving highlight (app.js enhanceSegmented) replaces the active
+   button's own background. */
+.segmented.has-glider { position: relative; }
+.segmented.has-glider > button { position: relative; z-index: 1; transition: color 0.25s ease; }
+:root[data-ui] .segmented.has-glider > button.active { background: transparent; box-shadow: none; }
+.seg-glider { position: absolute; z-index: 0; border-radius: 999px; background: var(--accent); pointer-events: none; }
+:root[data-ui="nothing"] .seg-glider { background: var(--text-primary); }
+:root[data-ui="apple"] .seg-glider { background: var(--bg-elevated); border-radius: 7px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25); }
 
 .palette-grid { display: flex; gap: 12px; flex-wrap: wrap; }
 .palette-swatch {
@@ -1418,6 +1442,10 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
   padding: 8px; border-radius: var(--radius-sm); border: 2px solid transparent;
 }
 .palette-swatch.active { border-color: var(--text-primary); }
+/* The moving selection box (app.js enhancePaletteGrid). */
+.palette-grid.has-glider { position: relative; }
+.palette-grid.has-glider .palette-swatch.active { border-color: transparent; }
+.swatch-glider { position: absolute; border: 2px solid var(--text-primary); border-radius: var(--radius-sm); pointer-events: none; box-sizing: border-box; }
 .palette-swatch .dot { width: 28px; height: 28px; border-radius: 50%; }
 .palette-swatch span { font-size: 11.5px; color: var(--text-secondary); }
 
@@ -1458,15 +1486,14 @@ html:root[data-ui] select.settings-select { padding-right: 38px; }
 /* In-app list for settings dropdowns (app.js enhanceSelect), in place of
    the operating system's popup. */
 .select-menu {
+  --menu-r: var(--radius-md);
   position: fixed; z-index: 400; overflow-y: auto; overscroll-behavior: contain;
   padding: 6px; max-width: min(320px, calc(100vw - 24px));
   background: var(--bg-highlight); border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-  animation: select-menu-in 0.16s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
-@keyframes select-menu-in { from { opacity: 0; transform: scale(0.96); } }
-.select-menu.closing { animation: select-menu-out 0.12s ease-in forwards; pointer-events: none; }
-@keyframes select-menu-out { to { opacity: 0; transform: scale(0.97); } }
+.select-menu.closing { pointer-events: none; }
+:root[data-ui="apple"] .select-menu { --menu-r: 12px; }
 /* Same as .modal-card: the scrollbar stays on the straight part of the
    edge instead of running out past the rounded corners. */
 .select-menu::-webkit-scrollbar-track { margin-block: var(--radius-md); }
@@ -1476,7 +1503,11 @@ html:root[data-ui] select.settings-select { padding-right: 38px; }
   padding: 9px 12px; border-radius: var(--radius-sm); text-align: left; white-space: nowrap;
   font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-primary);
 }
-.select-menu-item:hover, .select-menu-item:focus-visible { background: var(--bg-card-hover); outline: none; }
+.select-menu-item { position: relative; z-index: 1; }
+.select-menu-item:hover, .select-menu-item:focus-visible { outline: none; }
+.select-glider { position: absolute; left: 6px; right: 6px; z-index: 0; border-radius: var(--radius-sm); background: var(--bg-card-hover); pointer-events: none; opacity: 0; }
+:root[data-ui="nothing"] .select-glider { border-radius: 999px; }
+:root[data-ui="apple"] .select-glider { border-radius: 8px; }
 .select-menu-item.selected { color: var(--accent); }
 .select-menu-item.selected::after { content: ''; margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 .select-menu-item:disabled { opacity: 0.4; }
