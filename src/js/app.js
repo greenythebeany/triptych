@@ -4737,6 +4737,19 @@ function wirePlayer() {
   };
   syncCollapseIcon();
   window.matchMedia('(max-width: 820px)').addEventListener('change', syncCollapseIcon);
+  // Desktop: with the Now Playing panel closed, a left arrow at the right
+  // edge of the header brings it back (the panel's own close arrow points
+  // right, the way it leaves).
+  const btnOpenPanel = document.getElementById('btn-open-panel');
+  const syncPanelOpenButton = () => {
+    btnOpenPanel.hidden = isPhoneLayout() || !player.currentTrack || !(lyricsPanel.hidden || lyricsPanel.dataset.closing);
+  };
+  btnOpenPanel.addEventListener('click', () => { bounceButtons(btnOpenPanel); openNowPlaying(); });
+  btnOpenPanel.addEventListener('animationend', () => btnOpenPanel.classList.remove('bounce'));
+  new MutationObserver(syncPanelOpenButton).observe(lyricsPanel, { attributes: true, attributeFilter: ['hidden', 'data-closing'] });
+  window.matchMedia('(max-width: 820px)').addEventListener('change', syncPanelOpenButton);
+  player.on('trackchange', syncPanelOpenButton);
+  syncPanelOpenButton();
   wireQueueSheet();
 
   player.on('queuechange', () => {
