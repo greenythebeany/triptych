@@ -146,6 +146,21 @@ function resolvedThemeMode() {
   return current.themeMode;
 }
 
+// Battery saver / Low Power Mode on (see watchPowerSaver in platform.js):
+// animations stay Static until it's off, whatever the setting says.
+let powerSaver = false;
+export function setPowerSaver(on) {
+  if (powerSaver === !!on) return;
+  powerSaver = !!on;
+  applySettings();
+  listeners.forEach((cb) => cb(current));
+}
+
+// What's actually in effect: the setting, or Static while saving power.
+export function isStaticMotion() {
+  return powerSaver || current.motion === 'static';
+}
+
 export function applySettings() {
   const root = document.documentElement;
   root.setAttribute('data-theme', resolvedThemeMode());
@@ -161,7 +176,7 @@ export function applySettings() {
   root.setAttribute('data-palette', palette);
   root.setAttribute('data-ui', ui);
   root.toggleAttribute('data-nd-line-sliders', current.nothingDottedSliders === false);
-  root.setAttribute('data-motion', current.motion === 'static' ? 'static' : 'dynamic');
+  root.setAttribute('data-motion', isStaticMotion() ? 'static' : 'dynamic');
   // Custom CSS that sets the app's colors (e.g. a theme from the README's
   // list, @import-ed from src/themes) -- lets apple.css hand colors over.
   const css = current.customCss || '';

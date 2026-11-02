@@ -5,6 +5,12 @@ contextBridge.exposeInMainWorld('api', {
   app: {
     getVersion: () => ipcRenderer.invoke('app:getVersion')
   },
+  power: {
+    getSaver: () => ipcRenderer.invoke('power:getSaver'),
+    onSaverChange: (callback) => {
+      ipcRenderer.on('power:saver', (_event, on) => callback(on));
+    }
+  },
   window: {
     minimize: () => ipcRenderer.send('window:minimize'),
     maximize: () => ipcRenderer.send('window:maximize'),

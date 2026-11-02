@@ -1084,11 +1084,17 @@ body.platform-mobile .lyrics-header-actions #btn-lyrics-mobile { display: flex; 
 .ctrl-btn .shuffle-sparkle { opacity: 0; transform: translate(-50%, -50%) rotate(-180deg) scale(0.3); }
 .ctrl-btn.smart .shuffle-sparkle { opacity: 1; transform: translate(-50%, -50%); }
 .ctrl-btn.smart .fi-br-shuffle { opacity: 0; transform: translate(-50%, -50%) rotate(180deg) scale(0.3); }
-/* Settings -> Appearance -> Animations: Static. Nothing moves; things just
-   appear in their end state (JS-driven ones check isStaticMotion in app.js). */
+/* Settings -> Appearance -> Animations: Static (or battery saver on).
+   Nothing moves; things just appear in their end state (JS-driven ones
+   check isStaticMotion). Animations are cut to zero length rather than
+   removed: removing them (animation: none) restarts every one of them when
+   Dynamic comes back, which flickered the whole window. */
 :root[data-motion="static"] *, :root[data-motion="static"] *::before, :root[data-motion="static"] *::after {
-  animation: none !important;
-  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
   scroll-behavior: auto !important;
 }
 

@@ -400,11 +400,12 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-label" data-i18n="settings.motion">Animations</div>
-              <div class="settings-row-desc" data-i18n="settings.motionDesc">Dynamic moves things around (lyrics, menus, buttons); Static turns every animation off</div>
+              <div class="settings-row-desc" data-i18n="settings.motionDesc">Static turns every animation off; Dynamic animates lyrics, menus and buttons; Word by word also fills in each lyric word as it's sung (uses more battery)</div>
             </div>
             <div class="segmented" id="motion-toggle">
-              <button data-value="dynamic" type="button" data-i18n="settings.motionDynamic">Dynamic</button>
               <button data-value="static" type="button" data-i18n="settings.motionStatic">Static</button>
+              <button data-value="dynamic" type="button" data-i18n="settings.motionDynamic">Dynamic</button>
+              <button data-value="words" type="button" data-i18n="settings.motionWords">Word by word</button>
             </div>
           </div>
           <!-- Nothing style only (shown by refreshSettingsUI). -->
@@ -432,16 +433,6 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="toggle-art-background" />
-              <span class="switch-track"></span>
-            </label>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-label" data-i18n="settings.wordLyrics">Word-by-word lyrics</div>
-              <div class="settings-row-desc" data-i18n="settings.wordLyricsDesc">Each word fills in and grows as it's sung. Uses more battery, since the lyrics are redrawn every frame.</div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="toggle-word-lyrics" />
               <span class="switch-track"></span>
             </label>
           </div>

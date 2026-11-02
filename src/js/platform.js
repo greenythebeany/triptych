@@ -153,3 +153,19 @@ export async function deezerApiGet(path, params = {}) {
     return null;
   }
 }
+
+// Battery saver / Low Power Mode, for Settings -> Animations (Static while
+// it's on). Desktop: main.js; phones: the app's own TriptychPowerSaver
+// plugin (PowerSaverPlugin.java, TriptychViewController.swift). Calls back
+// with the current state, then on every change.
+export function watchPowerSaver(callback) {
+  if (isDesktop && window.api?.power) {
+    window.api.power.onSaverChange(callback);
+    window.api.power.getSaver().then(callback, () => {});
+    return;
+  }
+  const plugin = isMobile ? window.Capacitor?.Plugins?.TriptychPowerSaver : null;
+  if (!plugin) return;
+  plugin.addListener('change', ({ on }) => callback(!!on));
+  plugin.getState().then(({ on }) => callback(!!on), () => {});
+}

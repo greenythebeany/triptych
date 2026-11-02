@@ -5,9 +5,9 @@ import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
 import { addListening, persistLocal as persistListening, getOwnLog, isDirty as listeningDirty, markSynced as listeningSynced, adoptIfLarger, combineLogs, dayKey } from './listening.js';
-import { getSettings, updateSettings, applySettings, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
+import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
 import { LOCALES, loadLocale, applyTranslations, t } from './i18n.js';
-import { setHapticsEnabled, platform, isDesktop, isMobile, isAndroid, sessionStore, windowControls, wireHardwareBackButton, exitApp, requestNotificationPermission, setDiscordActivity, clearDiscordActivity, searchDeezerAlbumArt, hapticImpact } from './platform.js';
+import { setHapticsEnabled, platform, isDesktop, isMobile, isAndroid, sessionStore, windowControls, wireHardwareBackButton, exitApp, requestNotificationPermission, setDiscordActivity, clearDiscordActivity, searchDeezerAlbumArt, hapticImpact, watchPowerSaver } from './platform.js';
 import { createConnect } from './connect.js';
 import { createRecommender, trackArtistKeys } from './recommend.js';
 import { isSupported as downloadsSupported, isDownloaded, downloadTrack, deleteDownload, onDownloadsChange, getDownloadedTracks, getTotalDownloadedBytes, getLocalImageUri } from './downloads.js';
@@ -104,7 +104,6 @@ const paletteGrid = document.getElementById('palette-grid');
 const audioQualitySelect = document.getElementById('audio-quality-select');
 const languageSelect = document.getElementById('language-select');
 const toggleArtBackground = document.getElementById('toggle-art-background');
-const toggleWordLyrics = document.getElementById('toggle-word-lyrics');
 const toggleDynamicAccentColor = document.getElementById('toggle-dynamic-accent-color');
 const crossfadeSlider = document.getElementById('crossfade-slider');
 const crossfadeValue = document.getElementById('crossfade-value');
@@ -890,13 +889,6 @@ function accountMenuOrigin() {
   return { x: a.left + a.width / 2 - m.left, y: a.top + a.height / 2 - m.top, r: a.width / 2, w: m.width, h: m.height, size: a.width };
 }
 
-// Settings -> Appearance -> Animations: Static. CSS animations and
-// transitions are switched off in styles.css; the ones animated from here
-// check this.
-function isStaticMotion() {
-  return document.documentElement.getAttribute('data-motion') === 'static';
-}
-
 function morphAccountAvatar(toDot, duration) {
   const small = `scale(${Math.min(0.32, 10 / (accountAvatar.offsetWidth || 30))})`;
   const opts = { duration, fill: 'forwards' };
@@ -1057,10 +1049,14 @@ function wireSettingsUI() {
     });
   });
 
+  // Static / Dynamic / Word by word: the last is Dynamic plus word-by-word
+  // lyrics (settings.wordSyncLyrics).
   motionToggle.querySelectorAll('button').forEach((btn) => {
     btn.addEventListener('click', () => {
-      updateSettings({ motion: btn.dataset.value });
+      const wordsBefore = wordSyncActive();
+      updateSettings({ motion: btn.dataset.value === 'static' ? 'static' : 'dynamic', wordSyncLyrics: btn.dataset.value === 'words' });
       refreshSettingsUI();
+      if (wordSyncActive() !== wordsBefore) reloadLyricsForWordMode();
     });
   });
 
@@ -1077,13 +1073,6 @@ function wireSettingsUI() {
     updateSettings({ audioQuality: audioQualitySelect.value });
   });
 
-  toggleWordLyrics.addEventListener('change', () => {
-    updateSettings({ wordSyncLyrics: toggleWordLyrics.checked });
-    // Word-timed lyrics are a separate lookup (see lyrics.js cacheKey).
-    currentLyrics = null;
-    lyricsTrackId = null;
-    if (!lyricsPanel.hidden || lyricsSheetOpen) loadLyricsForCurrentTrack();
-  });
 
   toggleArtBackground.addEventListener('change', () => {
     updateSettings({ artBackground: toggleArtBackground.checked });
@@ -2158,7 +2147,6 @@ function refreshSettingsUI() {
   const s = getSettings();
   languageSelect.value = s.language;
   toggleArtBackground.checked = !!s.artBackground;
-  toggleWordLyrics.checked = !!s.wordSyncLyrics;
   toggleDynamicAccentColor.checked = !!s.dynamicAccentColor;
   crossfadeSlider.value = s.crossfadeSeconds || 0;
   crossfadeValue.textContent = s.crossfadeSeconds ? `${s.crossfadeSeconds}s` : t('settings.crossfadeOff');
@@ -2206,7 +2194,8 @@ function refreshSettingsUI() {
     btn.classList.toggle('active', btn.dataset.value === (s.uiStyle || 'nothing'));
   });
   motionToggle.querySelectorAll('button').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.value === (s.motion === 'static' ? 'static' : 'dynamic'));
+    const value = s.motion === 'static' ? 'static' : s.wordSyncLyrics ? 'words' : 'dynamic';
+    btn.classList.toggle('active', btn.dataset.value === value);
   });
   paletteGrid.querySelectorAll('.palette-swatch').forEach((swatch) => {
     swatch.classList.toggle('active', swatch.dataset.value === s.palette);
@@ -4313,6 +4302,11 @@ function wirePlayer() {
   }, true);
   wirePullToRefresh();
   initSystemVolume();
+  watchPowerSaver((on) => {
+    const wordsBefore = wordSyncActive();
+    setPowerSaver(on);
+    if (wordSyncActive() !== wordsBefore) reloadLyricsForWordMode();
+  });
   // Crossing the phone-layout breakpoint moves the cat between its spots.
   window.matchMedia('(max-width: 820px)').addEventListener('change', syncCatJamVisibility);
   wireQueueSheet();
@@ -5218,6 +5212,20 @@ function highlightPlayingRow(trackId) {
   });
 }
 
+// Word-by-word lyrics: the "Word by word" animations option, unless
+// animations are Static right now (battery saver).
+function wordSyncActive() {
+  return !!getSettings().wordSyncLyrics && !isStaticMotion();
+}
+
+// Word-timed lyrics are a separate lookup (see lyrics.js cacheKey), so a
+// change reloads them.
+function reloadLyricsForWordMode() {
+  currentLyrics = null;
+  lyricsTrackId = null;
+  if (!lyricsPanel.hidden || lyricsSheetOpen) loadLyricsForCurrentTrack();
+}
+
 function lyricsQueryFor(track) {
   return {
     trackId: track.Id,
@@ -5225,7 +5233,7 @@ function lyricsQueryFor(track) {
     artist: artistNames(track),
     album: track.Album,
     durationSeconds: ticksToSeconds(track.RunTimeTicks),
-    wordSync: !!getSettings().wordSyncLyrics,
+    wordSync: wordSyncActive(),
     // The server's own lyrics for this track (.lrc / embedded), one source
     // among several -- see lyrics.js.
     fromServer: jellyfin ? () => jellyfin.getLyrics(track.Id) : null
@@ -5324,7 +5332,7 @@ function renderLyrics(result) {
   activeLyricIdx = -1;
   lyricLineEls = [];
   filledLine = null;
-  const wordMode = !!(getSettings().wordSyncLyrics && result?.synced?.length);
+  const wordMode = !!(wordSyncActive() && result?.synced?.length);
   lyricsBody.classList.toggle('word-mode', wordMode);
   if (!result || (!result.synced && !result.plain)) {
     lyricsBody.innerHTML = `<div class="lyrics-empty">${escapeHtml(t('nowPlaying.noLyrics'))}</div>`;
