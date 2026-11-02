@@ -31,8 +31,6 @@ const btnRetryConnection = document.getElementById('btn-retry-connection');
 
 const viewRoot = document.getElementById('view-root');
 const playlistListEl = document.getElementById('playlist-list');
-const pinnedAlbumsListEl = document.getElementById('pinned-albums-list');
-const pinnedAlbumsSectionEl = document.getElementById('pinned-albums-section');
 const globalSearchWrap = document.getElementById('global-search-wrap');
 const globalSearchInput = document.getElementById('global-search');
 
@@ -2698,13 +2696,12 @@ document.querySelectorAll('.nav-item, .bottom-nav-item').forEach((btn) => {
   btn.addEventListener('click', () => navigateTo({ view: btn.dataset.view }));
 });
 
+// The sidebar's one list: playlists, then pinned albums after them (no
+// separate section taking room of its own).
 async function loadPlaylistSidebar() {
   playlistListEl.innerHTML = '';
   const playlists = await jellyfin.getPlaylists();
-  if (!playlists.length) {
-    playlistListEl.appendChild(el('div', 'playlist-empty', t('playlist.sidebarEmpty')));
-    return;
-  }
+  playlistListEl.querySelectorAll('.playlist-item, .playlist-empty').forEach((node) => node.remove());
   playlists.forEach((pl) => {
     const item = el('button', 'playlist-item');
     const img = document.createElement('img');
@@ -2718,14 +2715,14 @@ async function loadPlaylistSidebar() {
     wirePlaylistDropTarget(item, pl.Id);
     playlistListEl.appendChild(item);
   });
+  loadPinnedAlbumsSidebar();
 }
 
 function loadPinnedAlbumsSidebar() {
   const albums = getPinnedAlbums();
-  pinnedAlbumsSectionEl.hidden = !albums.length;
-  pinnedAlbumsListEl.innerHTML = '';
+  playlistListEl.querySelectorAll('.pinned-album-item, .playlist-empty').forEach((node) => node.remove());
   albums.forEach((album) => {
-    const item = el('button', 'playlist-item');
+    const item = el('button', 'playlist-item pinned-album-item');
     const img = document.createElement('img');
     img.className = 'pl-thumb';
     img.src = artUrl(album, 'album', 48);
@@ -2734,8 +2731,11 @@ function loadPinnedAlbumsSidebar() {
     span.textContent = album.Name;
     item.appendChild(span);
     item.addEventListener('click', () => navigateTo({ view: 'album', id: album.Id }));
-    pinnedAlbumsListEl.appendChild(item);
+    playlistListEl.appendChild(item);
   });
+  if (!playlistListEl.querySelector('.playlist-item')) {
+    playlistListEl.appendChild(el('div', 'playlist-empty', t('playlist.sidebarEmpty')));
+  }
 }
 
 // ---------- Nav glider + sticky dot ----------
