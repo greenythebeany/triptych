@@ -253,8 +253,40 @@ const IS_RETURNING_USER = (() => {
   }
 })();
 
+// Modal windows close the way they open, in reverse: the backdrop fades
+// and the card sinks a little. Reopening mid-close cancels it.
+function hideOverlay(overlay) {
+  if (overlay.hidden || overlay._closing) return;
+  if (isStaticMotion()) { overlay.hidden = true; return; }
+  const token = {};
+  overlay._closing = token;
+  const card = overlay.querySelector('.modal-card');
+  const ease = 'cubic-bezier(0.4, 0, 1, 1)';
+  const anims = [overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: ease, fill: 'forwards' })];
+  if (card) anims.push(card.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(12px) scale(0.97)' }], { duration: 180, easing: ease, fill: 'forwards' }));
+  overlay.style.pointerEvents = 'none';
+  const finish = () => {
+    if (overlay._closing !== token) return;
+    overlay._closing = null;
+    overlay.hidden = true;
+    overlay.style.pointerEvents = '';
+    anims.forEach((a) => a.cancel());
+  };
+  Promise.all(anims.map((a) => a.finished)).then(finish, finish);
+  setTimeout(finish, 400);
+}
+function showOverlay(overlay) {
+  if (overlay._closing) {
+    overlay._closing = null;
+    overlay.style.pointerEvents = '';
+    overlay.getAnimations().forEach((a) => a.cancel());
+    overlay.querySelector('.modal-card')?.getAnimations().forEach((a) => a.cancel());
+  }
+  overlay.hidden = false;
+}
+
 function closeWhatsNew() {
-  whatsNewOverlay.hidden = true;
+  hideOverlay(whatsNewOverlay);
 }
 
 function maybeShowWhatsNew() {
@@ -287,7 +319,7 @@ function maybeShowWhatsNew() {
       <div class="whats-new-item-desc">${escapeHtml(t(`whatsNew.${key}Desc`))}</div></div>`;
     whatsNewList.appendChild(li);
   });
-  whatsNewOverlay.hidden = false;
+  showOverlay(whatsNewOverlay);
   // Keyboard users land on Continue; no focus ring drawn for a popup that
   // simply opened on its own.
   whatsNewClose.focus({ focusVisible: false });
@@ -760,6 +792,39 @@ function enhancePaletteGrid(grid) {
   if (window.ResizeObserver) new ResizeObserver(() => place(true)).observe(grid);
   place(true);
 }
+
+// Nothing look: a page's big title types itself in, the red dot riding
+// along at the end like a cursor, then the dot blinks slowly
+// (nothing.css .view-title.typed). Any view that adds a .view-title gets it.
+function typeInTitle(title) {
+  const text = title.textContent;
+  if (!text || document.documentElement.dataset.ui !== 'nothing' || isStaticMotion()) {
+    title.classList.add('typed');
+    return;
+  }
+  title.setAttribute('aria-label', text);
+  const chars = [...text];
+  const step = Math.max(22, Math.min(60, 650 / chars.length));
+  title.textContent = '';
+  let shown = 0;
+  const tick = () => {
+    if (!title.isConnected) return;
+    shown += 1;
+    title.textContent = chars.slice(0, shown).join('');
+    if (shown < chars.length) setTimeout(tick, step);
+    else { title.removeAttribute('aria-label'); title.classList.add('typed'); }
+  };
+  setTimeout(tick, 80);
+}
+new MutationObserver((records) => {
+  for (const r of records) {
+    for (const node of r.addedNodes) {
+      if (node.nodeType !== 1) continue;
+      const title = node.classList.contains('view-title') ? node : node.querySelector?.('.view-title');
+      if (title && !title.dataset.typing) { title.dataset.typing = '1'; typeInTitle(title); }
+    }
+  }
+}).observe(viewRoot, { childList: true, subtree: true });
 
 function enhanceSelect(select) {
   const wrap = el('span', 'select-wrap');
@@ -2514,11 +2579,11 @@ function openSettings() {
   document.getElementById('settings-version').textContent = `Triptych ${getClientVersion()}`;
   refreshLocalLibrarySettings().catch(() => {});
   settingsTriggerEl = document.activeElement;
-  settingsOverlay.hidden = false;
+  showOverlay(settingsOverlay);
   btnCloseSettings.focus();
 }
 function closeSettings() {
-  settingsOverlay.hidden = true;
+  hideOverlay(settingsOverlay);
   settingsTriggerEl?.focus();
 }
 
@@ -2526,14 +2591,14 @@ function closeSettings() {
 let legalTriggerEl = null;
 function openLegal(anchor) {
   legalTriggerEl = document.activeElement;
-  legalOverlay.hidden = false;
+  showOverlay(legalOverlay);
   const target = anchor && document.getElementById(anchor);
   if (target) target.scrollIntoView({ block: 'start' });
   else legalBody.scrollTop = 0;
   btnCloseLegal.focus();
 }
 function closeLegal() {
-  legalOverlay.hidden = true;
+  hideOverlay(legalOverlay);
   legalTriggerEl?.focus();
 }
 function wireLegalOverlay() {
@@ -2572,7 +2637,7 @@ function wireCreatePlaylistUI() {
   btnNewPlaylist.addEventListener('click', () => {
     inputPlaylistName.value = '';
     createPlaylistTriggerEl = document.activeElement;
-    createPlaylistOverlay.hidden = false;
+    showOverlay(createPlaylistOverlay);
     inputPlaylistName.focus();
   });
   btnCloseCreatePlaylist.addEventListener('click', closeCreatePlaylist);
@@ -2598,7 +2663,7 @@ function wireCreatePlaylistUI() {
   });
 }
 function closeCreatePlaylist() {
-  createPlaylistOverlay.hidden = true;
+  hideOverlay(createPlaylistOverlay);
   createPlaylistTriggerEl?.focus();
 }
 
@@ -5440,6 +5505,7 @@ function wireQueueDragHandle(handle, row) {
     try { handle.setPointerCapture(evt.pointerId); } catch (err) { /* moves still reach the handle */ }
 
     const onMove = (moveEvt) => {
+      if (moveEvt.pointerId !== evt.pointerId) return;
       let dy = moveEvt.clientY - startY;
       row.style.transform = `translateY(${dy}px)`;
       row.style.zIndex = '10';
@@ -5460,9 +5526,12 @@ function wireQueueDragHandle(handle, row) {
         const prev = row.previousElementSibling?.matches('.queue-row:not(.playing)') ? row.previousElementSibling : null;
         const next = row.nextElementSibling?.matches('.queue-row:not(.playing)') ? row.nextElementSibling : null;
         const centerOf = (r) => { const b = r.getBoundingClientRect(); return b.top + b.height / 2; };
+        // The neighbour moves, not the grabbed row: taking the row out of
+        // the page (even to put it straight back) drops its pointer
+        // capture, so a fast drag lost the finger and froze mid-list.
         let target = null;
-        if (next && rowCenter > centerOf(next)) target = () => row.parentElement.insertBefore(row, next.nextSibling);
-        else if (prev && rowCenter < centerOf(prev)) target = () => row.parentElement.insertBefore(row, prev);
+        if (next && rowCenter > centerOf(next)) target = () => row.parentElement.insertBefore(next, row);
+        else if (prev && rowCenter < centerOf(prev)) target = () => row.parentElement.insertBefore(prev, row.nextSibling);
         if (!target) break;
         // The DOM move shifts the row's untransformed position; compensate
         // startY by exactly that (offsetTop ignores transforms, and this
@@ -5476,12 +5545,13 @@ function wireQueueDragHandle(handle, row) {
       }
     };
 
-    const onUp = () => {
+    const onUp = (upEvt) => {
+      if (upEvt && upEvt.pointerId !== evt.pointerId) return;
       // Never let a failed release leave the row grabbed or the list dimmed.
       try { handle.releasePointerCapture(evt.pointerId); } catch (err) { /* capture already gone */ }
-      handle.removeEventListener('pointermove', onMove);
-      handle.removeEventListener('pointerup', onUp);
-      handle.removeEventListener('pointercancel', onUp);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
       row.classList.remove('dragging');
       row.parentElement?.classList.remove('queue-dragging');
       row.style.transform = '';
@@ -5503,9 +5573,11 @@ function wireQueueDragHandle(handle, row) {
       if (queueRenderPending) renderQueue();
     };
 
-    handle.addEventListener('pointermove', onMove);
-    handle.addEventListener('pointerup', onUp);
-    handle.addEventListener('pointercancel', onUp);
+    // On the window, not the handle: a fast drag outruns the handle, and
+    // the move/up events then go to whatever is under the pointer.
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
   });
 }
 

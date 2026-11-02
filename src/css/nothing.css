@@ -87,6 +87,10 @@
   width: 0.2em; height: 0.2em; margin-left: 0.12em; border-radius: 50%;
   background: var(--accent);
 }
+/* Once the title has typed itself in (app.js typeInTitle), the dot blinks
+   slowly, like a resting cursor. */
+:root[data-ui="nothing"] .view-title.typed::after { animation: nd-dot-blink 2.4s ease-in-out 0.4s infinite; }
+@keyframes nd-dot-blink { 0%, 55%, 100% { opacity: 1; } 75% { opacity: 0.15; } }
 :root[data-ui="nothing"] .section-title { font-size: 23px; line-height: 1.15; margin: 30px 0 14px; }
 :root[data-ui="nothing"] .detail-title { font-size: 42px; line-height: 1.1; }
 :root[data-ui="nothing"] .titlebar-logo { font-size: 15px; }

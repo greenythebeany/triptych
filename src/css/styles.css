@@ -413,6 +413,11 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
   display: flex; align-items: center; justify-content: center;
 }
 .nav-arrow svg { width: 16px; height: 16px; }
+/* Optical centering: a chevron's point looks lighter than its open side,
+   so a mathematically centered one reads as off toward the open side --
+   nudge each toward its point. */
+#btn-back svg { transform: translateX(-1px); }
+#btn-forward svg { transform: translateX(1px); }
 /* Icon-font glyphs carry their own internal metrics (ascent/descent, side
    bearing) that throw off simple flex/line-height centering — position the
    glyph by its own box instead of relying on font baseline alignment. */
