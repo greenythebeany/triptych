@@ -4743,6 +4743,9 @@ function wirePlayer() {
   const btnOpenPanel = document.getElementById('btn-open-panel');
   const syncPanelOpenButton = () => {
     btnOpenPanel.hidden = isPhoneLayout() || !player.currentTrack;
+    // Only there once the panel is fully closed: it fades out as the panel
+    // starts opening and back in after it has slid away.
+    btnOpenPanel.classList.toggle('concealed', !lyricsPanel.hidden);
     // Room for it in the header while the panel's closed; when open, the
     // panel just covers it.
     appRoot.classList.toggle('np-closed', !btnOpenPanel.hidden && lyricsPanel.hidden);
@@ -5252,7 +5255,7 @@ function slideSidePanel(opening) {
   else lyricsPanel.dataset.closing = '1';
   const width = 340;
   const anim = lyricsPanel.animate(
-    opening ? [{ width: '0px', opacity: 0.4 }, { width: `${width}px`, opacity: 1 }] : [{ width: `${width}px`, opacity: 1 }, { width: '0px', opacity: 0.4 }],
+    opening ? [{ width: '0px' }, { width: `${width}px` }] : [{ width: `${width}px` }, { width: '0px' }],
     { duration: opening ? 380 : 300, easing: opening ? 'cubic-bezier(0.32, 0.72, 0, 1)' : 'cubic-bezier(0.4, 0, 1, 1)' }
   );
   const done = () => {

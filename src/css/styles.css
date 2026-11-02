@@ -417,6 +417,11 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
    so a mathematically centered one reads as off toward the open side --
    nudge each toward its point. */
 #btn-back svg, #btn-open-panel svg { transform: translateX(-1px); }
+/* Back / forward: bare chevrons, no circle behind them (every look); over
+   artwork (hero headers) a soft shadow keeps them readable. */
+html:root[data-ui] .main .header-nav-arrows .nav-arrow { background: transparent; border: none; box-shadow: none; color: var(--text-secondary); transition: color 0.15s ease; }
+html:root[data-ui] .main .header-nav-arrows .nav-arrow:hover { color: var(--text-primary); filter: none; }
+html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
 .panel-open-btn { flex-shrink: 0; margin-left: -6px; }
 /* Desktop: the open-panel arrow stays put at the right edge of the header;
    the panel slides in over it and uncovers it again when it closes. */
@@ -430,6 +435,8 @@ body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.se
   :root[data-ui] .panel-open-btn { background: transparent; border: none; }
   body:not(.platform-mobile) .app.np-closed .main-header { padding-right: 40px; }
   body:not(.platform-mobile) .panel-open-btn:hover { color: var(--text-primary); filter: none; }
+  body:not(.platform-mobile) .panel-open-btn { transition: opacity 0.2s ease, color 0.15s ease; }
+  body:not(.platform-mobile) .panel-open-btn.concealed { opacity: 0; pointer-events: none; transition-duration: 0.1s; }
 }
 #btn-forward svg { transform: translateX(1px); }
 /* Icon-font glyphs carry their own internal metrics (ascent/descent, side
