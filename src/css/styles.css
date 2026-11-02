@@ -1100,8 +1100,9 @@ body.platform-mobile .lyrics-header-actions #btn-lyrics-mobile { display: flex; 
   scroll-behavior: auto !important;
 }
 
-/* The player buttons give a little bounce when tapped. */
-.ctrl-btn.bounce { animation: ctrl-bounce 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
+/* The player buttons -- and the heart, download, lyrics, queue, cast and
+   sleep-timer buttons -- give a little bounce when tapped. */
+button.bounce { animation: ctrl-bounce 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
 @keyframes ctrl-bounce {
   0% { transform: scale(1); }
   35% { transform: scale(0.82); }
@@ -1424,7 +1425,7 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
 select option { background: var(--bg-elevated); color: var(--text-primary); }
 /* The label side gets the room; a long option (e.g. "Automatic (adapts to
    your connection)") truncates instead of squeezing the label to a sliver. */
-.settings-row:has(> select) > div:first-child { flex: 1; min-width: 0; }
+.settings-row:has(> select, > .select-wrap) > div:first-child { flex: 1; min-width: 0; }
 /* About rows (label + credit link): the label keeps its width, the long
    credit wraps instead. */
 .settings-row > .settings-row-label { flex-shrink: 0; }
@@ -1435,7 +1436,54 @@ select.settings-select {
   color: var(--text-primary); padding: 8px 10px; border-radius: var(--radius-sm);
   font-size: 13px; font-weight: 600;
 }
+/* The native arrow sat right against the (rounded, in Nothing a pill)
+   edge and can't be moved, so the same solid down-triangle is drawn on a
+   wrapper (app.js enhanceSelect), inset from the edge; it turns to point
+   up while the list is open. */
+select.settings-select { -webkit-appearance: none; appearance: none; }
+html:root[data-ui] select.settings-select { padding-right: 38px; }
+.select-wrap { position: relative; display: inline-flex; min-width: 0; max-width: 52%; color: var(--text-primary); }
+.select-wrap > select.settings-select { max-width: 100%; min-width: 0; }
+.select-wrap:has(> .eq-preset-select) { display: flex; width: 100%; max-width: none; }
+.select-wrap:has(> .eq-preset-select) > select { width: 100%; }
+.select-wrap::after {
+  content: ''; position: absolute; right: 16px; top: 50%; width: 10px; height: 5px; pointer-events: none;
+  background: conic-gradient(from -45deg at 50% 100%, currentColor 90deg, transparent 0);
+  transform: translateY(-50%); transition: transform 0.28s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.select-wrap.open::after { transform: translateY(-50%) rotate(180deg); }
+.select-wrap:has(> .eq-preset-select)::after { top: calc(50% - 4px); }
 .eq-preset-select { width: 100%; margin-bottom: 8px; }
+
+/* In-app list for settings dropdowns (app.js enhanceSelect), in place of
+   the operating system's popup. */
+.select-menu {
+  position: fixed; z-index: 400; overflow-y: auto; overscroll-behavior: contain;
+  padding: 6px; max-width: min(320px, calc(100vw - 24px));
+  background: var(--bg-highlight); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  animation: select-menu-in 0.16s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes select-menu-in { from { opacity: 0; transform: scale(0.96); } }
+.select-menu.closing { animation: select-menu-out 0.12s ease-in forwards; pointer-events: none; }
+@keyframes select-menu-out { to { opacity: 0; transform: scale(0.97); } }
+/* Same as .modal-card: the scrollbar stays on the straight part of the
+   edge instead of running out past the rounded corners. */
+.select-menu::-webkit-scrollbar-track { margin-block: var(--radius-md); }
+:root[data-ui="apple"] .select-menu::-webkit-scrollbar-track { margin-block: 12px; }
+.select-menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 12px; border-radius: var(--radius-sm); text-align: left; white-space: nowrap;
+  font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-primary);
+}
+.select-menu-item:hover, .select-menu-item:focus-visible { background: var(--bg-card-hover); outline: none; }
+.select-menu-item.selected { color: var(--accent); }
+.select-menu-item.selected::after { content: ''; margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.select-menu-item:disabled { opacity: 0.4; }
+:root[data-ui="nothing"] .select-menu { background: var(--bg-elevated); border-radius: var(--radius-md); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); }
+:root[data-ui="nothing"] .select-menu-item { border-radius: 999px; font-weight: 500; }
+:root[data-ui="apple"] .select-menu { background: color-mix(in srgb, var(--bg-elevated) 94%, transparent); backdrop-filter: var(--apple-blur); border-radius: 12px; }
+:root[data-ui="apple"] .select-menu-item { border-radius: 8px; font-weight: 500; }
 
 [hidden] { display: none !important; }
 

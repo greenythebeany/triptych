@@ -532,6 +532,116 @@ function canDownload(track) {
   return downloadsSupported() && !jellyfin?.isLocal && !isLocalItemId(track?.Id);
 }
 
+// ---------- Dropdowns ----------
+// Settings dropdowns keep their real <select> (value, change events, the
+// arrow) but open an in-app list instead of the operating system's popup,
+// which ignores the app's fonts and colors (system font, light-blue
+// highlight). Styled like the app's other menus, in every look.
+let openSelectMenu = null;
+
+function closeSelectMenu() {
+  if (!openSelectMenu) return;
+  const { menu, select, onOutside, onKey, onMove } = openSelectMenu;
+  openSelectMenu = null;
+  document.removeEventListener('pointerdown', onOutside, true);
+  document.removeEventListener('keydown', onKey, true);
+  window.removeEventListener('resize', onMove);
+  document.removeEventListener('scroll', onMove, true);
+  select.setAttribute('aria-expanded', 'false');
+  select.parentElement?.classList.remove('open');
+  if (isStaticMotion()) { menu.remove(); return; }
+  menu.classList.add('closing');
+  menu.addEventListener('animationend', () => menu.remove(), { once: true });
+  setTimeout(() => menu.remove(), 300);
+}
+
+function showSelectMenu(select) {
+  if (openSelectMenu?.select === select) { closeSelectMenu(); return; }
+  closeSelectMenu();
+  const menu = el('div', 'select-menu');
+  menu.setAttribute('role', 'listbox');
+  const items = [...select.options].map((option) => {
+    const item = el('button', 'select-menu-item');
+    item.type = 'button';
+    item.setAttribute('role', 'option');
+    item.textContent = option.textContent;
+    item.dataset.value = option.value;
+    item.disabled = option.disabled;
+    const chosen = option.value === select.value;
+    item.classList.toggle('selected', chosen);
+    item.setAttribute('aria-selected', String(chosen));
+    item.addEventListener('click', () => {
+      closeSelectMenu();
+      if (select.value !== option.value) {
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      select.focus({ preventScroll: true });
+    });
+    menu.appendChild(item);
+    return item;
+  });
+  document.body.appendChild(menu);
+
+  // Below the dropdown, or above it when there's more room there; as wide
+  // as the dropdown at least, never off screen.
+  const r = select.getBoundingClientRect();
+  const gap = 6;
+  const below = innerHeight - r.bottom - gap - 12;
+  const above = r.top - gap - 12;
+  const up = below < Math.min(menu.scrollHeight, 260) && above > below;
+  menu.style.maxHeight = `${Math.max(160, Math.min(up ? above : below, 420))}px`;
+  menu.style.minWidth = `${r.width}px`;
+  const left = Math.max(12, Math.min(innerWidth - menu.offsetWidth - 12, r.right - menu.offsetWidth));
+  menu.style.left = `${left}px`;
+  if (up) menu.style.bottom = `${innerHeight - r.top + gap}px`;
+  else menu.style.top = `${r.bottom + gap}px`;
+  menu.style.transformOrigin = up ? 'bottom right' : 'top right';
+  const current = items.find((item) => item.classList.contains('selected'));
+  (current || items[0])?.focus({ preventScroll: true });
+  current?.scrollIntoView({ block: 'nearest' });
+
+  const onOutside = (evt) => { if (!menu.contains(evt.target) && evt.target !== select) closeSelectMenu(); };
+  const onKey = (evt) => {
+    if (evt.key === 'Escape') { evt.preventDefault(); evt.stopPropagation(); closeSelectMenu(); select.focus(); return; }
+    if (evt.key === 'ArrowDown' || evt.key === 'ArrowUp') {
+      evt.preventDefault();
+      const enabled = items.filter((item) => !item.disabled);
+      const at = enabled.indexOf(document.activeElement);
+      const next = enabled[Math.max(0, Math.min(enabled.length - 1, at + (evt.key === 'ArrowDown' ? 1 : -1)))];
+      next?.focus();
+    }
+    if (evt.key === 'Tab') closeSelectMenu();
+  };
+  const onMove = (evt) => { if (!evt || !menu.contains(evt.target)) closeSelectMenu(); };
+  document.addEventListener('pointerdown', onOutside, true);
+  document.addEventListener('keydown', onKey, true);
+  window.addEventListener('resize', onMove);
+  document.addEventListener('scroll', onMove, true);
+  select.setAttribute('aria-expanded', 'true');
+  select.parentElement?.classList.add('open');
+  openSelectMenu = { menu, select, onOutside, onKey, onMove };
+}
+
+function enhanceSelect(select) {
+  const wrap = el('span', 'select-wrap');
+  select.before(wrap);
+  wrap.appendChild(select);
+  select.setAttribute('aria-haspopup', 'listbox');
+  select.setAttribute('aria-expanded', 'false');
+  // Stop the native popup (mouse, touch and keyboard all open it) and open
+  // ours instead.
+  const open = (evt) => {
+    evt.preventDefault();
+    if (!select.disabled) showSelectMenu(select);
+  };
+  select.addEventListener('mousedown', open);
+  select.addEventListener('touchend', open);
+  select.addEventListener('keydown', (evt) => {
+    if ([' ', 'Enter', 'ArrowDown', 'ArrowUp'].includes(evt.key) && !evt.altKey) open(evt);
+  });
+}
+
 function el(tag, className, html) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -584,6 +694,7 @@ async function init() {
   applyTranslations();
   customCssStyle.textContent = getSettings().customCss || '';
   wireSettingsUI();
+  document.querySelectorAll('select.settings-select').forEach(enhanceSelect);
   wireCreatePlaylistUI();
   wireLegalOverlay();
   wirePrivacyNotice();
@@ -2487,10 +2598,48 @@ if (window.ResizeObserver) {
 window.addEventListener('resize', () => moveNavGliders({ instant: true }));
 
 // ---------- View router with back/forward ----------
+// Phones: switching between the tab bar's tabs slides the page sideways
+// like MessageMe -- the old page out one way, the new one in from the
+// other, in tab-bar order (Home, Search, Library). A frozen copy of the old
+// page is laid over it for the slide-out.
+const TAB_ORDER = ['home', 'search', 'library'];
+function tabSlideDirection(fromView, toView) {
+  if (!isPhoneLayout() || isStaticMotion() || fromView === toView) return 0;
+  const from = TAB_ORDER.indexOf(fromView);
+  const to = TAB_ORDER.indexOf(toView);
+  return from < 0 || to < 0 ? 0 : Math.sign(to - from);
+}
+
+function snapshotMain() {
+  const r = mainEl.getBoundingClientRect();
+  const ghost = mainEl.cloneNode(true);
+  ghost.removeAttribute('id');
+  ghost.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+  ghost.querySelectorAll('video, audio').forEach((node) => node.remove());
+  Object.assign(ghost.style, {
+    position: 'fixed', left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`,
+    margin: '0', pointerEvents: 'none', overflow: 'hidden'
+  });
+  ghost.setAttribute('aria-hidden', 'true');
+  mainEl.after(ghost);
+  ghost.scrollTop = mainEl.scrollTop;
+  return ghost;
+}
+
+function slideMain(ghost, dir) {
+  const ease = 'cubic-bezier(0.32, 0.72, 0, 1)';
+  ghost.animate([{ transform: 'none', opacity: 1 }, { transform: `translate3d(${-dir * 28}%, 0, 0)`, opacity: 0 }], { duration: 380, easing: ease, fill: 'forwards' })
+    .finished.catch(() => {}).then(() => ghost.remove());
+  mainEl.animate([{ transform: `translate3d(${dir * 22}%, 0, 0)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
+}
+
 function navigateTo(state, pushHistory = true) {
+  const dir = tabSlideDirection(viewHistory[viewHistory.length - 1]?.view, state.view);
+  const ghost = dir ? snapshotMain() : null;
   if (pushHistory && viewHistory.length) viewFuture = [];
   if (pushHistory) viewHistory.push(state);
   renderView(state);
+  if (ghost) slideMain(ghost, dir);
   document.querySelectorAll('.nav-item, .bottom-nav-item').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
   moveNavGliders();
   globalSearchWrap.hidden = state.view !== 'search';
@@ -4238,6 +4387,12 @@ function wirePlayer() {
   [btnShuffle, mobileBtnShuffle, btnRepeat, mobileBtnRepeat, btnPlay, btnPrev, btnNext, mobileBtnPlay, mobileBtnPrev, mobileBtnNext]
     .forEach((btn) => btn.addEventListener('animationend', () => btn.classList.remove('bounce')));
   [btnPlay, btnPrev, btnNext, mobileBtnPlay, mobileBtnPrev, mobileBtnNext].forEach((btn) => btn.addEventListener('click', () => bounceButtons(btn)));
+  // The full-screen player's other buttons bounce the same way.
+  [nowPlayingLikeBtn, nowPlayingDownloadBtn, btnLyrics, btnLyricsMobile, btnQueueMobile,
+    btnConnect, btnConnectMobile, btnSleepTimer, btnSleepTimerMobile].filter(Boolean).forEach((btn) => {
+    btn.addEventListener('click', () => bounceButtons(btn));
+    btn.addEventListener('animationend', (evt) => { if (evt.animationName === 'ctrl-bounce') btn.classList.remove('bounce'); });
+  });
   btnRepeat.addEventListener('click', () => {
     const mode = player.cycleRepeat();
     btnRepeat.classList.toggle('active', mode !== RepeatMode.OFF);
