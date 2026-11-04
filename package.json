@@ -45,6 +45,8 @@
       "update-checker.js",
       "src/**/*",
       "node_modules/**/*",
+      "!node_modules/@capacitor/**",
+      "!node_modules/@capgo/**",
       "downloader/**/*",
       "!downloader/cookies.txt",
       "!downloader/__pycache__/**",
