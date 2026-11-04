@@ -101,8 +101,9 @@ export const isLocalMediaUrl = (url) => typeof url === 'string' && (url.startsWi
 
 // Local ids start with a source prefix containing a non-hex letter (lt = track,
 // al = album, ar = artist, ge = genre, pl = playlist), so they can never clash
-// with Jellyfin's all-hex ids.
-export const isLocalItemId = (id) => typeof id === 'string' && /^(lt|al|ar|ge|pl)/.test(id);
+// with Jellyfin's all-hex ids. Matched in full, not by prefix: Navidrome's
+// ids are mixed-case base62 and can start with those letters too.
+export const isLocalItemId = (id) => typeof id === 'string' && /^(lt[0-9a-f]+|(al|ar|ge)[0-9a-f]{16}|pl[0-9a-z]+)$/.test(id);
 
 function readJson(key, fallback) {
   try {
@@ -194,6 +195,7 @@ export class LocalLibraryClient {
   disable() { localBridge().disable(); }
   get trackCount() { return this._tracks.length; }
   get albumCount() { return this._albums.length; }
+  owns(id) { return this._byId.has(id) || this._playlistStore().some((pl) => pl.id === id); }
 
   _build(raw) {
     const likes = new Set(readJson(LIKES_KEY, []));
@@ -601,7 +603,7 @@ export class CombinedClient {
   }
 
   _for(id) {
-    return isLocalItemId(id) ? this.local : this.server;
+    return isLocalItemId(id) && this.local.owns(id) ? this.local : this.server;
   }
 
   // Server first; a local entry with the same name is folded into it.
@@ -685,6 +687,7 @@ export class CombinedClient {
   }
 
   getItem(id) { return this._for(id).getItem(id); }
+  canUploadPlaylistImage(id) { return this._for(id).canUploadPlaylistImage?.(id) !== false; }
   getAlbumTracks(id) { return this._for(id).getAlbumTracks(id); }
   getSimilarItems(id, limit) { return this._for(id).getSimilarItems(id, limit); }
   getInstantMix(id, limit) { return this._for(id).getInstantMix(id, limit); }

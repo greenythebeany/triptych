@@ -5,6 +5,11 @@ contextBridge.exposeInMainWorld('api', {
   app: {
     getVersion: () => ipcRenderer.invoke('app:getVersion')
   },
+  appIcon: {
+    get: () => ipcRenderer.invoke('appIcon:get'),
+    pick: () => ipcRenderer.invoke('appIcon:pick'),
+    reset: () => ipcRenderer.invoke('appIcon:reset')
+  },
   power: {
     getSaver: () => ipcRenderer.invoke('power:getSaver'),
     onSaverChange: (callback) => {

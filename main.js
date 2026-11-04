@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, safeStorage, shell, globalShortcut, dialog, session } = require('electron');
+const { app, BrowserWindow, ipcMain, safeStorage, shell, globalShortcut, dialog, session, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn, execFile } = require('child_process');
@@ -130,6 +130,28 @@ function trackWindowState(win) {
   win.on('close', () => { clearTimeout(timer); save(); });
 }
 
+// Settings -> App icon: a user-picked image, re-encoded as a 256px PNG in
+// userData so the original file can move/vanish. Per device, not synced.
+const DEFAULT_ICON_PATH = path.join(__dirname, 'src', 'assets', 'icon.png');
+const CUSTOM_ICON_PATH = path.join(app.getPath('userData'), 'custom-icon.png');
+
+function currentIconPath() {
+  return fs.existsSync(CUSTOM_ICON_PATH) ? CUSTOM_ICON_PATH : DEFAULT_ICON_PATH;
+}
+
+function applyAppIcon() {
+  const image = nativeImage.createFromPath(currentIconPath());
+  if (image.isEmpty()) return;
+  mainWindow?.setIcon(image);
+  if (process.platform === 'darwin') app.dock?.setIcon(image);
+}
+
+function customIconDataUrl() {
+  if (!fs.existsSync(CUSTOM_ICON_PATH)) return null;
+  const image = nativeImage.createFromPath(CUSTOM_ICON_PATH);
+  return image.isEmpty() ? null : image.toDataURL();
+}
+
 function createWindow() {
   const saved = loadWindowState();
   mainWindow = new BrowserWindow({
@@ -144,7 +166,7 @@ function createWindow() {
     ...(process.platform === 'darwin'
       ? { titleBarStyle: 'hidden', trafficLightPosition: { x: 14, y: 11 } }
       : { frame: false, titleBarStyle: 'hidden' }),
-    icon: path.join(__dirname, 'src', 'assets', 'icon.png'),
+    icon: currentIconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -172,6 +194,7 @@ function createWindow() {
   mainWindow.on('unmaximize', () => mainWindow.webContents.send('window:state', 'normal'));
 
   setupSmtc();
+  if (process.platform === 'darwin') applyAppIcon();
 }
 
 ipcMain.on('smtc:setMetadata', (_event, meta) => {
@@ -404,6 +427,30 @@ ipcMain.on('update:setAutoCheckEnabled', (_event, enabled) => {
 // which is already the single source of truth kept up to date at release
 // time.
 ipcMain.handle('app:getVersion', () => app.getVersion());
+
+ipcMain.handle('appIcon:get', () => customIconDataUrl());
+
+ipcMain.handle('appIcon:pick', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'ico', 'bmp', 'gif', 'webp'] }]
+  });
+  if (result.canceled || !result.filePaths.length) return { ok: false, canceled: true };
+  const image = nativeImage.createFromPath(result.filePaths[0]);
+  if (image.isEmpty()) return { ok: false, error: 'unreadable' };
+  const { width, height } = image.getSize();
+  const side = Math.min(width, height);
+  const square = image.crop({ x: Math.floor((width - side) / 2), y: Math.floor((height - side) / 2), width: side, height: side });
+  fs.writeFileSync(CUSTOM_ICON_PATH, square.resize({ width: 256, height: 256, quality: 'best' }).toPNG());
+  applyAppIcon();
+  return { ok: true, dataUrl: customIconDataUrl() };
+});
+
+ipcMain.handle('appIcon:reset', () => {
+  fs.rmSync(CUSTOM_ICON_PATH, { force: true });
+  applyAppIcon();
+  return { ok: true };
+});
 
 // --- Window controls for the custom title bar ---
 ipcMain.on('window:minimize', () => mainWindow?.minimize());

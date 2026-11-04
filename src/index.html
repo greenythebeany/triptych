@@ -35,7 +35,7 @@
        this discloses them up front instead of leaving people to find out
        from a settings menu they may never open. -->
   <div id="privacy-notice" class="privacy-notice" hidden role="region" aria-label="Privacy notice">
-    <p data-i18n="privacyNotice.text">Triptych keeps everything on your own device and your own Jellyfin server. A couple of background lookups (album art, update checks) talk to outside services — see the Privacy Policy for exactly what's sent, and turn them off any time in Settings.</p>
+    <p data-i18n="privacyNotice.text">Triptych keeps everything on your own device and your own server. A couple of background lookups (album art, update checks) talk to outside services — see the Privacy Policy for exactly what's sent, and turn them off any time in Settings.</p>
     <div class="privacy-notice-actions">
       <button type="button" id="privacy-notice-view" class="attribution-link" data-i18n="privacyNotice.viewPolicy">Privacy Policy</button>
       <button type="button" id="privacy-notice-dismiss" class="btn-primary" data-i18n="privacyNotice.dismiss">Got it</button>
@@ -76,11 +76,11 @@
         <svg id="login-icon" class="brand-mark login-icon" viewBox="0 0 411 453" aria-hidden="true"><rect y="103" width="113" height="350" rx="24"/><rect x="149" width="113" height="453" rx="24"/><rect class="brand-accent" x="298" y="103" width="113" height="350" rx="24"/></svg>
         <h1>Triptych</h1>
       </div>
-      <p class="login-sub" data-i18n="login.subtitle">Sign in to your Jellyfin server</p>
+      <p class="login-sub" data-i18n="login.subtitle">Sign in to your Jellyfin or Navidrome server</p>
       <form id="login-form" class="login-form">
         <label>
           <span data-i18n="login.serverLabel">Server address</span>
-          <input type="text" id="input-server" placeholder="https://jellyfin.example.com" required autocomplete="url" />
+          <input type="text" id="input-server" placeholder="https://music.example.com" required autocomplete="url" />
         </label>
         <label>
           <span data-i18n="login.usernameLabel">Username</span>
@@ -203,7 +203,7 @@
       <div class="lyrics-header">
         <button id="btn-close-lyrics" class="btn-icon-plain np-collapse-btn" data-i18n-title="nowPlaying.title" title="Now Playing"><i class="fi fi-br-angle-small-down"></i></button>
         <div class="lyrics-header-actions">
-          <button id="btn-connect-mobile" class="btn-icon-plain server-only" type="button" data-i18n-title="connect.title" title="Connect"><i class="fi fi-br-screencast"></i></button>
+          <button id="btn-connect-mobile" class="btn-icon-plain server-only connect-only" type="button" data-i18n-title="connect.title" title="Connect"><i class="fi fi-br-screencast"></i></button>
           <button id="btn-sleep-timer-mobile" class="btn-icon-plain" type="button" data-i18n-title="player.sleepTimer" title="Sleep timer"><i class="fi fi-br-moon"></i></button>
           <button id="btn-lyrics-mobile" class="btn-icon-plain btn-queue-mobile" type="button" data-i18n-title="nowPlaying.lyricsTab" title="Lyrics"><i class="fi fi-br-quote-right"></i></button>
           <button id="btn-queue-mobile" class="btn-icon-plain btn-queue-mobile" type="button" data-i18n-title="nowPlaying.queueTab" title="Queue"><i class="fi fi-br-list-music"></i></button>
@@ -312,7 +312,7 @@
           </button>
           <span id="sleep-timer-badge" class="sleep-timer-badge" hidden></span>
         </div>
-        <button id="btn-connect" class="ctrl-btn server-only" data-i18n-title="connect.title" title="Connect">
+        <button id="btn-connect" class="ctrl-btn server-only connect-only" data-i18n-title="connect.title" title="Connect">
           <i class="fi fi-br-screencast"></i>
         </button>
         <button id="btn-queue" class="ctrl-btn" data-i18n-title="nowPlaying.queueTab" title="Queue">
@@ -467,6 +467,18 @@
               <span id="cat-jam-scale-value" class="crossfade-value">1x</span>
             </div>
           </div>
+          <!-- Desktop only (hidden by wireSettingsUI elsewhere). -->
+          <div class="settings-row" id="app-icon-row">
+            <div>
+              <div class="settings-row-label" data-i18n="settings.appIcon">App icon</div>
+              <div class="settings-row-desc" data-i18n="settings.appIconDesc">Use your own image for the window and taskbar icon</div>
+            </div>
+            <div class="app-icon-control">
+              <img id="app-icon-preview" class="app-icon-preview" src="assets/icon.png" alt="" />
+              <button id="btn-app-icon-pick" class="btn-secondary" type="button" data-i18n="settings.appIconPick">Choose image</button>
+              <button id="btn-app-icon-reset" class="btn-danger-plain" type="button" data-i18n="settings.appIconReset" hidden>Reset</button>
+            </div>
+          </div>
         </section>
         <section class="settings-section">
           <h3 data-i18n="settings.audio">Audio</h3>
@@ -599,7 +611,7 @@
           <div class="settings-row" id="album-art-lookup-row">
             <div>
               <div class="settings-row-label" data-i18n="settings.albumArtLookup">Online album art lookup</div>
-              <div class="settings-row-desc" data-i18n="settings.albumArtLookupDesc">Sends the artist/album name to Deezer's public search API when your Jellyfin server doesn't have cover art. Turn off to keep that from ever leaving your device.</div>
+              <div class="settings-row-desc" data-i18n="settings.albumArtLookupDesc">Sends the artist/album name to Deezer's public search API when your Jellyfin/Navidrome server doesn't have cover art. Turn off to keep that from ever leaving your device.</div>
             </div>
             <label class="switch">
               <input type="checkbox" id="toggle-album-art-lookup" />
@@ -724,31 +736,31 @@
         <a href="#legal-accessibility" data-i18n="legal.navAccessibility">Accessibility Statement</a>
       </nav>
       <div class="modal-body legal-body" id="legal-body" tabindex="-1">
-        <p class="legal-meta">Last updated: 2026-09-18. Triptych is a free, open-source (MIT-licensed) personal project maintained by one developer (GitHub: <a href="https://github.com/greenythebeany" target="_blank" rel="noopener noreferrer">greenythebeany</a>). There is no company behind it. The only contact channel is <a href="https://github.com/greenythebeany/triptych/issues" target="_blank" rel="noopener noreferrer">GitHub Issues on the jellywave repo</a> — that's also where to report a privacy, accessibility, or licensing concern.</p>
+        <p class="legal-meta">Last updated: 2026-11-04. Triptych is a free, open-source (MIT-licensed) personal project maintained by one developer (GitHub: <a href="https://github.com/greenythebeany" target="_blank" rel="noopener noreferrer">greenythebeany</a>). There is no company behind it. The only contact channel is <a href="https://github.com/greenythebeany/triptych/issues" target="_blank" rel="noopener noreferrer">GitHub Issues on the jellywave repo</a> — that's also where to report a privacy, accessibility, or licensing concern.</p>
 
         <section id="legal-privacy">
           <h3>Privacy Policy</h3>
-          <p>Triptych is a client app for a Jellyfin media server <strong>you host yourself</strong>. The developer does not run any backend for Triptych, does not receive analytics or telemetry from your copy of the app, and cannot see your library, your account, or what you play. Everything below is a complete list of where data goes — nothing happens beyond it.</p>
+          <p>Triptych is a client app for a Jellyfin or Navidrome media server <strong>you host yourself</strong>. The developer does not run any backend for Triptych, does not receive analytics or telemetry from your copy of the app, and cannot see your library, your account, or what you play. Everything below is a complete list of where data goes — nothing happens beyond it.</p>
           <h4>Data that stays on your device</h4>
           <ul>
-            <li><strong>Your Jellyfin session</strong> (server address, username, access token) — saved to a local file (<code>session.dat</code> in Triptych's app-data folder) using your OS's encryption (Electron <code>safeStorage</code>) when the OS supports it. If your OS doesn't support that encryption, the file is saved as plain text instead — worth knowing if your device disk itself isn't encrypted.</li>
-            <li><strong>App preferences</strong> (theme, language, audio settings, etc.) — stored in local browser storage on desktop, and via the Capacitor Preferences plugin on Android. These also sync to your own Jellyfin server's user-data store so they follow you between your own devices — that sync target is your server, never the developer.</li>
+            <li><strong>Your server session</strong> (server address, username, access token — for Navidrome, a salted hash made from your password at sign-in; the password itself is never stored) — saved to a local file (<code>session.dat</code> in Triptych's app-data folder) using your OS's encryption (Electron <code>safeStorage</code>) when the OS supports it. If your OS doesn't support that encryption, the file is saved as plain text instead — worth knowing if your device disk itself isn't encrypted.</li>
+            <li><strong>App preferences</strong> (theme, language, audio settings, etc.) — stored in local browser storage on desktop, and via the Capacitor Preferences plugin on Android. On Jellyfin, these also sync to your own server's user-data store so they follow you between your own devices — that sync target is your server, never the developer. Navidrome has no such store, so with Navidrome they stay on each device.</li>
             <li><strong>Downloaded tracks</strong> — saved as ordinary audio files in Triptych's app-data folder for offline playback.</li>
-            <li><strong>Music on this device</strong> (desktop, optional) — if you pick music folders, Triptych reads the audio files in them and their tags (title, artist, album, track number, length, cover art). The folder list and the tags are saved in <code>local-library.json</code>, and smaller copies of the cover art in a <code>local-covers</code> folder, both in Triptych's app-data folder; likes, play counts and playlists for these songs are kept in local storage. Your files are only read, never changed, moved or uploaded anywhere — not even to your Jellyfin server.</li>
+            <li><strong>Music on this device</strong> (desktop, optional) — if you pick music folders, Triptych reads the audio files in them and their tags (title, artist, album, track number, length, cover art). The folder list and the tags are saved in <code>local-library.json</code>, and smaller copies of the cover art in a <code>local-covers</code> folder, both in Triptych's app-data folder; likes, play counts and playlists for these songs are kept in local storage. Your files are only read, never changed, moved or uploaded anywhere — not even to your own server.</li>
             <li><strong>Music on this device</strong> (Android, optional) — only if you turn it on, Triptych asks for Android's permission to read music and reads the phone's music library (title, artist, album, track number, year, genre, length and album covers, which are cached in Triptych's cache folder). Your files are only read, never changed or uploaded; you can take the permission back any time in the system settings.</li>
             <li><strong>Listening stats</strong> (top artists/tracks, play history) — computed from your local playback and stored the same way as preferences, above.</li>
           </ul>
           <h4>Data sent to other services (never to the developer)</h4>
           <ul>
-            <li><strong>Your own Jellyfin server</strong> — the app talks to it directly with your credentials to stream your library. This is infrastructure you control.</li>
+            <li><strong>Your own Jellyfin or Navidrome server</strong> — the app talks to it directly with your credentials to stream your library. This is infrastructure you control.</li>
             <li><strong>GitHub (api.github.com)</strong> — a background check for a newer Triptych release. Sends a generic app identifier, nothing that identifies you. Can be turned off in Settings → Privacy.</li>
             <li><strong>Deezer (api.deezer.com)</strong> — when your server (or a song file on this device) has no cover art for a track, the current artist/album/track name is sent to Deezer's public search to find one. No account or personal identifier is sent. Can be turned off in Settings → Privacy.</li>
-            <li><strong>Lyrics: lrclib.net, then lyrics.ovh</strong> — when you view lyrics, the current track's title, artist, album and length are sent to lrclib.net's public lyrics API to find them. If lrclib and your own Jellyfin server don't have them, the title and first artist are also sent to lyrics.ovh. No account or personal identifier is sent; lyrics are only kept in memory while the app is open. If you turn on <strong>Search by lyrics</strong> (Settings → Privacy, off by default), the same lookups also run in the background for the songs in your library, about one per second, and the lyrics found are stored on your device so you can search them; turning it off stops this.</li>
+            <li><strong>Lyrics: lrclib.net, then lyrics.ovh</strong> — when you view lyrics, the current track's title, artist, album and length are sent to lrclib.net's public lyrics API to find them. If lrclib and your own server don't have them, the title and first artist are also sent to lyrics.ovh. No account or personal identifier is sent; lyrics are only kept in memory while the app is open. If you turn on <strong>Search by lyrics</strong> (Settings → Privacy, off by default), the same lookups also run in the background for the songs in your library, about one per second, and the lyrics found are stored on your device so you can search them; turning it off stops this.</li>
             <li><strong>Discord</strong> — only if you explicitly connect it in Settings → Audio → Discord Rich Presence. While connected, the currently playing track/artist and its cover art URL are sent to your local Discord client so it can show on your Discord profile. Off by default; disconnect any time.</li>
             <li><strong>YouTube / YouTube Music / SoundCloud</strong> — only if you use the "Import" feature to paste a link, which fetches that specific media directly to your device. See the Terms of Service section below for the responsibility that comes with this feature.</li>
           </ul>
           <h4>Children's data</h4>
-          <p>Triptych has no sign-up, no account creation of its own, and no data collection by the developer, so there's nothing here that depends on a user's age — the developer never receives personal data regardless of who's using the app. That said, Triptych is not directed at children, and using it requires access to a Jellyfin server, which should be set up and supervised by an adult.</p>
+          <p>Triptych has no sign-up, no account creation of its own, and no data collection by the developer, so there's nothing here that depends on a user's age — the developer never receives personal data regardless of who's using the app. That said, Triptych is not directed at children, and using it requires access to a Jellyfin or Navidrome server, which should be set up and supervised by an adult.</p>
           <h4>Email</h4>
           <p>Triptych does not send email, does not run a mailing list, and does not collect email addresses. There's no "unsubscribe" link anywhere because no such messages exist.</p>
         </section>
@@ -757,10 +769,10 @@
           <h3>Terms of Service</h3>
           <ul>
             <li>Triptych is provided <strong>as-is, free of charge, under the MIT license</strong> (see the repository's <code>LICENSE</code>/README) — no warranty of any kind, to the extent the law allows.</li>
-            <li>You need your own Jellyfin server and account; Triptych is an independent, unofficial client and is not affiliated with, endorsed by, or supported by the Jellyfin project.</li>
+            <li>You need your own Jellyfin or Navidrome server and account; Triptych is an independent, unofficial client and is not affiliated with, endorsed by, or supported by the Jellyfin or Navidrome projects.</li>
             <li>Discord, Deezer, GitHub, lrclib.net, lyrics.ovh, YouTube, YouTube Music, and SoundCloud are third-party services referenced only to describe how Triptych integrates with them. Triptych is not affiliated with or endorsed by any of them, and each remains governed by its own terms.</li>
             <li>The "Import" feature downloads media from a URL you provide, using the open-source <code>yt-dlp</code> engine. <strong>You are solely responsible</strong> for having the right to download that media and for complying with the source platform's terms of service and applicable copyright law in your country. The developer does not host, index, or distribute any third-party media.</li>
-            <li>You're responsible for the security of your own Jellyfin server and account credentials.</li>
+            <li>You're responsible for the security of your own server and account credentials.</li>
           </ul>
         </section>
 
@@ -774,7 +786,7 @@
           <p>Triptych does not use cookies, and does not use any advertising or analytics trackers. The app does use ordinary local storage mechanisms that exist to make it function at all, not to track you across sessions or devices:</p>
           <ul>
             <li>Local storage / Capacitor Preferences — app settings and cached UI state, kept only on your device.</li>
-            <li>An encrypted local file — your Jellyfin session, so you don't have to log in every launch.</li>
+            <li>An encrypted local file — your server session, so you don't have to log in every launch.</li>
           </ul>
           <p>None of this is shared with any third party, and none of it is used to track you across other apps or sites. You can clear it at any time by logging out (clears the session file) or by uninstalling the app (clears everything).</p>
         </section>
@@ -784,7 +796,7 @@
           <p>Because the developer never receives or stores your data in the first place, there is nothing for the developer to delete on your behalf. Deleting it means clearing what's on your own device and your own server:</p>
           <ul>
             <li><strong>On this device</strong> — Settings → Log Out clears your saved session immediately. Uninstalling Triptych (or deleting its app-data folder — on Windows, typically <code>%APPDATA%\Triptych</code>) removes all local settings, downloads, and cached data.</li>
-            <li><strong>Synced settings/stats on your Jellyfin server</strong> — since these live in your own server's user-data store, delete them from your Jellyfin server directly (its admin dashboard or database), the same as any other Jellyfin client's data. The developer has no access to your server and cannot delete anything on it.</li>
+            <li><strong>Synced settings/stats on your Jellyfin server</strong> — since these live in your own server's user-data store, delete them from your Jellyfin server directly (its admin dashboard or database), the same as any other Jellyfin client's data. On Navidrome, Triptych stores no settings or stats on the server; your likes, playlists and play counts there are the same ones any other Subsonic client uses. The developer has no access to your server and cannot delete anything on it.</li>
           </ul>
           <p>Questions about this can be raised via <a href="https://github.com/greenythebeany/triptych/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.</p>
         </section>
@@ -793,6 +805,7 @@
           <h3>Third-Party Notices &amp; Licenses</h3>
           <ul>
             <li><strong>Jellyfin</strong> — the media server this app connects to. Triptych is an independent, unofficial client, not affiliated with or endorsed by the Jellyfin project. See <a href="https://jellyfin.org/" target="_blank" rel="noopener noreferrer">jellyfin.org</a>.</li>
+            <li><strong>Navidrome</strong> — a media server this app can connect to instead, through the OpenSubsonic API. Triptych is not affiliated with or endorsed by the Navidrome project. See <a href="https://www.navidrome.org/" target="_blank" rel="noopener noreferrer">navidrome.org</a>.</li>
             <li><strong>Electron</strong> and <strong>Capacitor</strong> (and its official plugins: app, filesystem, haptics, local-notifications, preferences, android/ios core) — open-source app runtimes, MIT-licensed.</li>
             <li><strong>@xhayper/discord-rpc</strong> — MIT-licensed library used for the optional Discord Rich Presence integration.</li>
             <li><strong>music-metadata</strong> (by Borewit) — MIT-licensed library that reads tags and cover art from audio files for "Music on this device" on desktop.</li>

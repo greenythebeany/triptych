@@ -101,6 +101,11 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.3
+
+- Navidrome: sign in to a Navidrome (OpenSubsonic) server as well as Jellyfin; browse, play, like and use playlists the same way. Settings sync, listening history sync, Connect, playlist cover upload and artist pictures stay Jellyfin-only
+- Desktop: pick any image as the app icon in Settings → Appearance; it becomes the window, taskbar and dock icon; Reset brings the default back
+
 ## What's new in 2.4.2
 
 - Phone lock screen and notification: the real song length and progress (they showed the song as finished when streaming at lower quality), square covers, covers for downloaded songs, and no more "playing" notification when Triptych is closed

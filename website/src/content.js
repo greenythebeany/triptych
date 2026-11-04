@@ -14,14 +14,14 @@ export const FEATURES = [
   ['Equalizer', 'A five-band EQ with presets, and a loudness boost on Android.'],
   ['Themes & custom CSS', 'Light and dark, a dozen accent colors, community color schemes, or your own CSS.'],
   ['Discord status', 'On desktop, show what you are listening to, cover art included.'],
-  ['Cast & sleep timer', 'Send playback to other Jellyfin devices, or stop the music after a set time.'],
+  ['Cast & sleep timer', 'Send playback to your other devices (on Jellyfin), or stop the music after a set time.'],
   ['19 languages', 'English, Chinese, Japanese, Korean, German, French, Spanish and more.']
 ];
 
 export const FAQ = [
   ['Is Triptych free?', 'Yes. It is free and open source, with no subscription, ads or account of ours to sign up for.'],
-  ['Do I need a Jellyfin server?', 'Yes. Triptych plays music from a Jellyfin server, and does not include music of its own. Jellyfin is free too, and runs on Windows, macOS, Linux and most NAS boxes.'],
-  ['Can I play Spotify or Apple Music songs with it?', 'No. Triptych plays music files you own that are on your Jellyfin server. The Spotify, Apple Music and Nothing options only change how the app looks.'],
+  ['Do I need a server?', 'Yes, Jellyfin or Navidrome. Triptych plays music from your own server, and does not include music of its own. Both are free and run on Windows, macOS, Linux and most NAS boxes; Navidrome is the lighter, music-only one. On Navidrome, settings sync and sending playback to another device are not available.'],
+  ['Can I play Spotify or Apple Music songs with it?', 'No. Triptych plays music files you own that are on your own server. The Spotify, Apple Music and Nothing options only change how the app looks.'],
   ['Does it work away from home?', 'Yes, as long as your phone can reach your server, for example through a VPN like Tailscale or a public address. Songs you download play with no connection at all.'],
   ['What happens to my data?', 'Your library and listening history stay on your device and your own server. A few optional lookups (missing cover art, lyrics and update checks) talk to outside services, and the Privacy Policy lists exactly what is sent.'],
   ['Which devices are supported?', 'Windows, macOS, Linux, Android and iPhone. The Mac app is not signed by Apple, so it needs one extra step the first time you open it (see Opening Triptych on a Mac, under Download). On iPhone the app is installed by sideloading an unsigned .ipa, for example with AltStore or Sideloadly.']

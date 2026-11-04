@@ -1,5 +1,6 @@
 import './migrate.js'; // must stay first: renames storage keys before other modules read them
 import { JellyfinClient, initClientVersion, getClientVersion } from './jellyfin.js';
+import { SubsonicClient, isSubsonicServer } from './subsonic.js';
 import { LocalLibraryClient, CombinedClient, isLocalLibrarySupported, isLocalLibraryEnabled, localLibraryUsesFolders, isLocalItemId } from './localLibrary.js';
 import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
@@ -108,6 +109,10 @@ const crossfadeValue = document.getElementById('crossfade-value');
 const toggleReplayGain = document.getElementById('toggle-replaygain');
 const toggleOfflineMode = document.getElementById('toggle-offline-mode');
 const albumArtLookupRow = document.getElementById('album-art-lookup-row');
+const appIconRow = document.getElementById('app-icon-row');
+const appIconPreview = document.getElementById('app-icon-preview');
+const btnAppIconPick = document.getElementById('btn-app-icon-pick');
+const btnAppIconReset = document.getElementById('btn-app-icon-reset');
 const toggleAlbumArtLookup = document.getElementById('toggle-album-art-lookup');
 const toggleRelatedArtists = document.getElementById('toggle-related-artists');
 const toggleLyricsSearch = document.getElementById('toggle-lyrics-search');
@@ -165,6 +170,10 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  '2.4.3': [
+    { icon: 'fi-br-headphones', key: 'navidrome243' },
+    { icon: 'fi-br-palette', key: 'appIcon243' }
+  ],
   '2.4.2': [
     { icon: 'fi-br-mobile', key: 'controls242' },
     { icon: 'fi-br-magic-wand', key: 'motion242' },
@@ -939,7 +948,7 @@ async function tryRestoreSession() {
     showLogin();
     return;
   }
-  jellyfin = new JellyfinClient(saved);
+  jellyfin = saved.type === 'subsonic' ? new SubsonicClient(saved) : new JellyfinClient(saved);
 
   // No network at all: don't spend seconds on retries that can't succeed --
   // go straight in with the saved session (downloads still work offline).
@@ -1002,6 +1011,7 @@ async function enterApp(username) {
   loginScreen.hidden = true;
   appRoot.hidden = false;
   document.body.classList.toggle('local-mode', !!jellyfin.isLocal);
+  document.body.classList.toggle('subsonic-mode', !!jellyfin.isSubsonic);
 
   player = new Player(jellyfin, currentBitrateKbps);
   const savedSettings = getSettings();
@@ -1087,8 +1097,13 @@ loginForm.addEventListener('submit', async (evt) => {
   const remember = document.getElementById('input-remember').checked;
 
   try {
-    const auth = await JellyfinClient.authenticate(serverUrl, username, password);
-    jellyfin = new JellyfinClient(auth);
+    // Navidrome/Subsonic answers /rest/ping; anything else is treated as
+    // Jellyfin, so a Jellyfin sign-in goes exactly as before.
+    const subsonic = await isSubsonicServer(serverUrl);
+    const auth = subsonic
+      ? await SubsonicClient.authenticate(serverUrl, username, password)
+      : await JellyfinClient.authenticate(serverUrl, username, password);
+    jellyfin = subsonic ? new SubsonicClient(auth) : new JellyfinClient(auth);
     if (remember) {
       await sessionStore.save(auth);
     }
@@ -1241,6 +1256,8 @@ btnLocalDisable.addEventListener('click', () => {
 
 function translateLoginError(err) {
   if (err?.code === 'wrong_credentials') return t('login.errorWrongCredentials');
+  // Nothing at Jellyfin's sign-in path either: not a music server URL.
+  if (err?.code === 'server_error' && err.status === 404) return t('login.errorNotServer');
   if (err?.code === 'server_error') return t('login.errorServer', { status: err.status });
   return null;
 }
@@ -1479,6 +1496,8 @@ function wireSettingsUI() {
   // The update check runs on desktop AND phones (checkForUpdatesOnMobile),
   // so its switch shows on both; only a plain browser has neither.
   if (!isDesktop) setHidden(albumArtLookupRow, true);
+  if (!isDesktop || !window.api.appIcon) setHidden(appIconRow, true);
+  else wireAppIconRow();
   if (!isDesktop && !isMobile) setHidden(autoUpdateCheckRow, true);
   // No empty section headings: hide a section whose rows are all hidden.
   document.querySelectorAll('#settings-overlay .settings-section').forEach((section) => {
@@ -1598,6 +1617,29 @@ function wireSettingsUI() {
   catJamScaleSlider.addEventListener('change', () => {
     updateSettings({ catJamScale: Number(catJamScaleSlider.value) });
   });
+
+  function showAppIcon(dataUrl) {
+    appIconPreview.src = dataUrl || 'assets/icon.png';
+    setHidden(btnAppIconReset, !dataUrl);
+  }
+
+  function wireAppIconRow() {
+    window.api.appIcon.get().then(showAppIcon).catch(() => {});
+    btnAppIconPick.addEventListener('click', async () => {
+      btnAppIconPick.disabled = true;
+      try {
+        const result = await window.api.appIcon.pick();
+        if (result.ok) showAppIcon(result.dataUrl);
+        else if (!result.canceled) alert(t('settings.appIconInvalid'));
+      } finally {
+        btnAppIconPick.disabled = false;
+      }
+    });
+    btnAppIconReset.addEventListener('click', async () => {
+      await window.api.appIcon.reset();
+      showAppIcon(null);
+    });
+  }
 
   let customCssDebounce;
   customCssInput.addEventListener('input', () => {
@@ -3920,7 +3962,8 @@ async function renderPlaylistDetail(id, name) {
     onPlayAll: tracks.length ? () => player.setQueue(tracks, 0, id) : undefined,
     trackIds: tracks.map((t) => t.Id),
     downloadTracks: tracks,
-    onChangeArt: async (file) => {
+    // Subsonic has no API for playlist covers.
+    onChangeArt: jellyfin.canUploadPlaylistImage?.(id) === false ? undefined : async (file) => {
       try {
         await jellyfin.uploadPlaylistImage(id, file);
         await loadPlaylistSidebar();

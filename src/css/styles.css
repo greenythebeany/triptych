@@ -283,6 +283,8 @@ body.platform-mac .titlebar-controls { display: none; }
 
 /* Music on this device without a server: server-only features hidden. */
 body.local-mode .server-only { display: none !important; }
+/* Subsonic servers have no Sessions API to hand playback to other devices. */
+body.subsonic-mode .connect-only { display: none !important; }
 /* A settings section left with no visible rows (e.g. Storage on desktop). */
 body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.server-only))) { display: none; }
 .local-folder-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -1398,6 +1400,8 @@ input[type="range"].volume-bar { width: 110px; flex: none; }
 }
 .btn-danger-plain:hover { background: color-mix(in srgb, var(--danger) 20%, transparent); }
 .btn-danger-plain:disabled { opacity: 0.45; cursor: default; }
+.app-icon-control { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.app-icon-preview { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
 
 .settings-version { text-align: center; font-size: 11.5px; color: var(--text-tertiary); padding: 18px 0 6px; user-select: text; }
 :root[data-ui="nothing"] .settings-version { font-family: var(--nd-mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
