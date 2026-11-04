@@ -108,6 +108,10 @@ const crossfadeValue = document.getElementById('crossfade-value');
 const toggleReplayGain = document.getElementById('toggle-replaygain');
 const toggleOfflineMode = document.getElementById('toggle-offline-mode');
 const albumArtLookupRow = document.getElementById('album-art-lookup-row');
+const appIconRow = document.getElementById('app-icon-row');
+const appIconPreview = document.getElementById('app-icon-preview');
+const btnAppIconPick = document.getElementById('btn-app-icon-pick');
+const btnAppIconReset = document.getElementById('btn-app-icon-reset');
 const toggleAlbumArtLookup = document.getElementById('toggle-album-art-lookup');
 const toggleRelatedArtists = document.getElementById('toggle-related-artists');
 const toggleLyricsSearch = document.getElementById('toggle-lyrics-search');
@@ -1479,6 +1483,8 @@ function wireSettingsUI() {
   // The update check runs on desktop AND phones (checkForUpdatesOnMobile),
   // so its switch shows on both; only a plain browser has neither.
   if (!isDesktop) setHidden(albumArtLookupRow, true);
+  if (!isDesktop || !window.api.appIcon) setHidden(appIconRow, true);
+  else wireAppIconRow();
   if (!isDesktop && !isMobile) setHidden(autoUpdateCheckRow, true);
   // No empty section headings: hide a section whose rows are all hidden.
   document.querySelectorAll('#settings-overlay .settings-section').forEach((section) => {
@@ -1598,6 +1604,29 @@ function wireSettingsUI() {
   catJamScaleSlider.addEventListener('change', () => {
     updateSettings({ catJamScale: Number(catJamScaleSlider.value) });
   });
+
+  function showAppIcon(dataUrl) {
+    appIconPreview.src = dataUrl || 'assets/icon.png';
+    setHidden(btnAppIconReset, !dataUrl);
+  }
+
+  function wireAppIconRow() {
+    window.api.appIcon.get().then(showAppIcon).catch(() => {});
+    btnAppIconPick.addEventListener('click', async () => {
+      btnAppIconPick.disabled = true;
+      try {
+        const result = await window.api.appIcon.pick();
+        if (result.ok) showAppIcon(result.dataUrl);
+        else if (!result.canceled) alert(t('settings.appIconInvalid'));
+      } finally {
+        btnAppIconPick.disabled = false;
+      }
+    });
+    btnAppIconReset.addEventListener('click', async () => {
+      await window.api.appIcon.reset();
+      showAppIcon(null);
+    });
+  }
 
   let customCssDebounce;
   customCssInput.addEventListener('input', () => {

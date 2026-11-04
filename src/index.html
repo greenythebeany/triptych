@@ -467,6 +467,18 @@
               <span id="cat-jam-scale-value" class="crossfade-value">1x</span>
             </div>
           </div>
+          <!-- Desktop only (hidden by wireSettingsUI elsewhere). -->
+          <div class="settings-row" id="app-icon-row">
+            <div>
+              <div class="settings-row-label" data-i18n="settings.appIcon">App icon</div>
+              <div class="settings-row-desc" data-i18n="settings.appIconDesc">Use your own image for the window and taskbar icon</div>
+            </div>
+            <div class="app-icon-control">
+              <img id="app-icon-preview" class="app-icon-preview" src="assets/icon.png" alt="" />
+              <button id="btn-app-icon-pick" class="btn-secondary" type="button" data-i18n="settings.appIconPick">Choose image</button>
+              <button id="btn-app-icon-reset" class="btn-danger-plain" type="button" data-i18n="settings.appIconReset" hidden>Reset</button>
+            </div>
+          </div>
         </section>
         <section class="settings-section">
           <h3 data-i18n="settings.audio">Audio</h3>
