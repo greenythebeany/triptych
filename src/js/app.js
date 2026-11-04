@@ -170,6 +170,10 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  '2.4.3': [
+    { icon: 'fi-br-headphones', key: 'navidrome243' },
+    { icon: 'fi-br-palette', key: 'appIcon243' }
+  ],
   '2.4.2': [
     { icon: 'fi-br-mobile', key: 'controls242' },
     { icon: 'fi-br-magic-wand', key: 'motion242' },
