@@ -220,7 +220,7 @@
     "offlineModeDesc": "Viser og spiller kun nedlastede sanger — resten er nedtonet",
     "privacy": "Personvern",
     "albumArtLookup": "Søk etter omslag på nett",
-    "albumArtLookupDesc": "Sender artist-/albumnavnet til Deezers offentlige søke-API når Jellyfin-serveren din mangler omslag. Slå av så de dataene aldri forlater enheten din.",
+    "albumArtLookupDesc": "Sender artist-/albumnavnet til Deezers offentlige søke-API når Jellyfin/Navidrome-serveren din mangler omslag. Slå av så de dataene aldri forlater enheten din.",
     "relatedArtistsLookup": "Nettsøk etter lignende artister",
     "relatedArtistsLookupDesc": "Sender navnene på artistene du spiller til Deezers offentlige API for å finne lignende artister i biblioteket ditt, for smart shuffle og Hjem. Slå av for at det aldri skal forlate enheten din; anbefalinger bruker da bare biblioteket og lyttingen din.",
     "autoUpdateCheck": "Automatisk oppdateringssjekk",
@@ -246,7 +246,7 @@
     "lyricsSearchStatus": "{done} av {total} sanger behandlet ({found} med tekst)."
   },
   "privacyNotice": {
-    "text": "Triptych lagrer alt på din egen enhet og din egen Jellyfin-server. Noen få oppslag i bakgrunnen (omslag, oppdateringssjekk) snakker med eksterne tjenester — se personvernerklæringen for nøyaktig hva som sendes, og slå dem av når som helst i Innstillinger.",
+    "text": "Triptych lagrer alt på din egen enhet og din egen Jellyfin/Navidrome-server. Noen få oppslag i bakgrunnen (omslag, oppdateringssjekk) snakker med eksterne tjenester — se personvernerklæringen for nøyaktig hva som sendes, og slå dem av når som helst i Innstillinger.",
     "viewPolicy": "Personvernerklæring",
     "dismiss": "Skjønner"
   },

@@ -1,8 +1,9 @@
 # Third-Party Notices & Licenses
 
-_Last updated: 2026-09-18_
+_Last updated: 2026-11-04_
 
 - **Jellyfin** — the media server this app connects to. Triptych is an independent, unofficial client, not affiliated with or endorsed by the Jellyfin project. See [jellyfin.org](https://jellyfin.org/).
+- **Navidrome** — a media server this app can connect to instead, through the OpenSubsonic API. Triptych is not affiliated with or endorsed by the Navidrome project. See [navidrome.org](https://www.navidrome.org/).
 - **Electron** and **Capacitor** (and its official plugins: app, filesystem, haptics, local-notifications, preferences, android/ios core) — open-source app runtimes, MIT-licensed.
 - **@xhayper/discord-rpc** — MIT-licensed library used for the optional Discord Rich Presence integration.
 - **music-metadata** (by Borewit) — MIT-licensed library that reads tags and cover art from audio files for "Music on this device" on desktop.

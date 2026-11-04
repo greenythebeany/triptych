@@ -220,7 +220,7 @@
     "offlineModeDesc": "Zobrazí a přehraje jen stažené skladby — ostatní jsou šedé",
     "privacy": "Soukromí",
     "albumArtLookup": "Hledání obalů online",
-    "albumArtLookupDesc": "Pošle jméno interpreta/alba do veřejného vyhledávacího API Deezeru, když tvůj server Jellyfin nemá obal. Vypni, aby tato data nikdy neopustila tvé zařízení.",
+    "albumArtLookupDesc": "Pošle jméno interpreta/alba do veřejného vyhledávacího API Deezeru, když tvůj server Jellyfin/Navidrome nemá obal. Vypni, aby tato data nikdy neopustila tvé zařízení.",
     "relatedArtistsLookup": "Hledání podobných interpretů online",
     "relatedArtistsLookupDesc": "Posílá jména interpretů, které posloucháš, do veřejného API Deezeru, aby našlo podobné interprety ve tvé knihovně pro chytré náhodné přehrávání a Domů. Vypni, aby tyto údaje nikdy neopustily tvé zařízení; doporučení pak vycházejí jen z tvé knihovny a poslechu.",
     "autoUpdateCheck": "Automatická kontrola aktualizací",
@@ -246,7 +246,7 @@
     "lyricsSearchStatus": "Zpracováno {done} z {total} skladeb ({found} s textem)."
   },
   "privacyNotice": {
-    "text": "Triptych uchovává vše ve tvém zařízení a na tvém vlastním serveru Jellyfin. Několik dotazů na pozadí (obaly, kontrola aktualizací) komunikuje s externími službami — co přesně se posílá, najdeš v zásadách ochrany osobních údajů, a v Nastavení je můžeš kdykoli vypnout.",
+    "text": "Triptych uchovává vše ve tvém zařízení a na tvém vlastním serveru Jellyfin/Navidrome. Několik dotazů na pozadí (obaly, kontrola aktualizací) komunikuje s externími službami — co přesně se posílá, najdeš v zásadách ochrany osobních údajů, a v Nastavení je můžeš kdykoli vypnout.",
     "viewPolicy": "Zásady ochrany osobních údajů",
     "dismiss": "Rozumím"
   },

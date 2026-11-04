@@ -220,7 +220,7 @@
     "offlineModeDesc": "Zeigt und spielt nur heruntergeladene Songs — der Rest ist ausgegraut",
     "privacy": "Datenschutz",
     "albumArtLookup": "Online-Coversuche",
-    "albumArtLookupDesc": "Sendet Künstler-/Albumnamen an die öffentliche Such-API von Deezer, wenn dein Jellyfin-Server kein Cover hat. Ausschalten, damit diese Daten dein Gerät nie verlassen.",
+    "albumArtLookupDesc": "Sendet Künstler-/Albumnamen an die öffentliche Such-API von Deezer, wenn dein Jellyfin/Navidrome-Server kein Cover hat. Ausschalten, damit diese Daten dein Gerät nie verlassen.",
     "relatedArtistsLookup": "Online-Suche nach ähnlichen Künstlern",
     "relatedArtistsLookupDesc": "Sendet die Namen der Künstler, die du hörst, an die öffentliche API von Deezer, um ähnliche Künstler in deiner Bibliothek für Smart Shuffle und die Startseite zu finden. Ausschalten, damit diese Daten dein Gerät nie verlassen; Empfehlungen nutzen dann nur deine Bibliothek und dein Hörverhalten.",
     "autoUpdateCheck": "Automatische Update-Prüfung",
@@ -246,7 +246,7 @@
     "lyricsSearchStatus": "{done} von {total} Songs verarbeitet ({found} mit Text)."
   },
   "privacyNotice": {
-    "text": "Triptych speichert alles auf deinem eigenen Gerät und deinem eigenen Jellyfin-Server. Einige Abfragen im Hintergrund (Cover, Update-Prüfung) sprechen mit externen Diensten – was genau gesendet wird, steht in der Datenschutzerklärung, und du kannst sie jederzeit in den Einstellungen ausschalten.",
+    "text": "Triptych speichert alles auf deinem eigenen Gerät und deinem eigenen Jellyfin/Navidrome-Server. Einige Abfragen im Hintergrund (Cover, Update-Prüfung) sprechen mit externen Diensten – was genau gesendet wird, steht in der Datenschutzerklärung, und du kannst sie jederzeit in den Einstellungen ausschalten.",
     "viewPolicy": "Datenschutzerklärung",
     "dismiss": "Verstanden"
   },

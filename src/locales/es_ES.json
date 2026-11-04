@@ -220,7 +220,7 @@
     "offlineModeDesc": "Solo muestra y reproduce canciones descargadas — el resto aparece en gris",
     "privacy": "Privacidad",
     "albumArtLookup": "Búsqueda de portadas en línea",
-    "albumArtLookupDesc": "Envía el nombre del artista/álbum a la API de búsqueda pública de Deezer cuando tu servidor Jellyfin no tiene portada. Desactívalo para que esos datos nunca salgan de tu dispositivo.",
+    "albumArtLookupDesc": "Envía el nombre del artista/álbum a la API de búsqueda pública de Deezer cuando tu servidor Jellyfin/Navidrome no tiene portada. Desactívalo para que esos datos nunca salgan de tu dispositivo.",
     "relatedArtistsLookup": "Búsqueda online de artistas similares",
     "relatedArtistsLookupDesc": "Envía los nombres de los artistas que escuchas a la API pública de Deezer para encontrar artistas similares en tu biblioteca, para el aleatorio inteligente e Inicio. Desactívalo para que esos datos nunca salgan de tu dispositivo; las recomendaciones usarán solo tu biblioteca y tus escuchas.",
     "autoUpdateCheck": "Comprobación automática de actualizaciones",
@@ -246,7 +246,7 @@
     "lyricsSearchStatus": "{done} de {total} canciones indexadas ({found} con letra)."
   },
   "privacyNotice": {
-    "text": "Triptych guarda todo en tu propio dispositivo y tu propio servidor Jellyfin. Algunas consultas en segundo plano (portadas, comprobación de actualizaciones) se comunican con servicios externos: consulta la política de privacidad para ver exactamente qué se envía, y desactívalas cuando quieras en Ajustes.",
+    "text": "Triptych guarda todo en tu propio dispositivo y tu propio servidor Jellyfin/Navidrome. Algunas consultas en segundo plano (portadas, comprobación de actualizaciones) se comunican con servicios externos: consulta la política de privacidad para ver exactamente qué se envía, y desactívalas cuando quieras en Ajustes.",
     "viewPolicy": "Política de privacidad",
     "dismiss": "Entendido"
   },

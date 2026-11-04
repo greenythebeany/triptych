@@ -220,7 +220,7 @@
     "offlineModeDesc": "Affiche et lit uniquement les chansons téléchargées — le reste est grisé",
     "privacy": "Confidentialité",
     "albumArtLookup": "Recherche de pochettes en ligne",
-    "albumArtLookupDesc": "Envoie le nom de l'artiste/album à l'API de recherche publique de Deezer quand votre serveur Jellyfin n'a pas de pochette. Désactivez pour que ces données ne quittent jamais votre appareil.",
+    "albumArtLookupDesc": "Envoie le nom de l'artiste/album à l'API de recherche publique de Deezer quand votre serveur Jellyfin/Navidrome n'a pas de pochette. Désactivez pour que ces données ne quittent jamais votre appareil.",
     "relatedArtistsLookup": "Recherche en ligne d'artistes similaires",
     "relatedArtistsLookupDesc": "Envoie le nom des artistes que vous écoutez à l'API publique de Deezer pour trouver des artistes similaires dans votre bibliothèque, pour la lecture aléatoire intelligente et l'Accueil. Désactivez pour que ces données ne quittent jamais votre appareil ; les recommandations utiliseront alors uniquement votre bibliothèque et vos écoutes.",
     "autoUpdateCheck": "Vérification automatique des mises à jour",
@@ -246,7 +246,7 @@
     "lyricsSearchStatus": "{done} titres sur {total} indexés ({found} avec paroles)."
   },
   "privacyNotice": {
-    "text": "Triptych garde tout sur votre appareil et votre propre serveur Jellyfin. Quelques requêtes en arrière-plan (pochettes, vérification des mises à jour) contactent des services externes — consultez la politique de confidentialité pour savoir exactement ce qui est envoyé, et désactivez-les à tout moment dans les Paramètres.",
+    "text": "Triptych garde tout sur votre appareil et votre propre serveur Jellyfin/Navidrome. Quelques requêtes en arrière-plan (pochettes, vérification des mises à jour) contactent des services externes — consultez la politique de confidentialité pour savoir exactement ce qui est envoyé, et désactivez-les à tout moment dans les Paramètres.",
     "viewPolicy": "Politique de confidentialité",
     "dismiss": "Compris"
   },

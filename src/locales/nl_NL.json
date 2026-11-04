@@ -220,7 +220,7 @@
     "offlineModeDesc": "Toont en speelt alleen gedownloade nummers — de rest is grijs",
     "privacy": "Privacy",
     "albumArtLookup": "Online albumhoezen zoeken",
-    "albumArtLookupDesc": "Stuurt de artiest-/albumnaam naar de openbare zoek-API van Deezer als je Jellyfin-server geen albumhoes heeft. Zet uit zodat die gegevens je apparaat nooit verlaten.",
+    "albumArtLookupDesc": "Stuurt de artiest-/albumnaam naar de openbare zoek-API van Deezer als je Jellyfin/Navidrome-server geen albumhoes heeft. Zet uit zodat die gegevens je apparaat nooit verlaten.",
     "relatedArtistsLookup": "Online vergelijkbare artiesten zoeken",
     "relatedArtistsLookupDesc": "Stuurt de namen van artiesten die je afspeelt naar de openbare API van Deezer om vergelijkbare artiesten in je bibliotheek te vinden, voor slim shuffelen en Home. Zet uit om dat nooit je apparaat te laten verlaten; aanbevelingen gebruiken dan alleen je bibliotheek en luistergedrag.",
     "autoUpdateCheck": "Automatisch controleren op updates",
@@ -246,7 +246,7 @@
     "lyricsSearchStatus": "{done} van {total} nummers verwerkt ({found} met tekst)."
   },
   "privacyNotice": {
-    "text": "Triptych bewaart alles op je eigen apparaat en je eigen Jellyfin-server. Een paar achtergrondverzoeken (albumhoezen, updatecontrole) praten met externe diensten — in het privacybeleid staat precies wat er wordt verstuurd, en je kunt ze altijd uitzetten in Instellingen.",
+    "text": "Triptych bewaart alles op je eigen apparaat en je eigen Jellyfin/Navidrome-server. Een paar achtergrondverzoeken (albumhoezen, updatecontrole) praten met externe diensten — in het privacybeleid staat precies wat er wordt verstuurd, en je kunt ze altijd uitzetten in Instellingen.",
     "viewPolicy": "Privacybeleid",
     "dismiss": "Begrepen"
   },
