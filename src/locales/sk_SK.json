@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Minimalizovať",
     "maximize": "Maximalizovať",
+    "restore": "Obnoviť nadol",
     "close": "Zavrieť"
   },
   "login": {
@@ -448,6 +449,8 @@
     "navidrome243Desc": "Prihláste sa na server Navidrome, nielen na Jellyfin: prehliadanie, prehrávanie, obľúbené aj playlisty fungujú rovnako.",
     "appIcon243Title": "Vlastná ikona aplikácie",
     "appIcon243Desc": "Počítač: vyberte ľubovoľný obrázok v Nastavenia → Vzhľad a stane sa ikonou okna a panela úloh.",
+    "windows244Title": "Okno, ktoré počúva",
+    "windows244Desc": "Okno sa dá znova vždy zväčšiť, zmenšiť aj presunúť, tlačidlo maximalizácie sa prepína na obnovenie, vlastná ikona aplikácie sa zobrazí aj na paneli úloh a aktualizácia z 2.4.2 sa už nezasekne na „nie je možné zatvoriť“.",
     "smartShuffleDesc": "Ťukni na náhodné prehrávanie dvakrát: po vybranej skladbe sa front naplní odporúčanými skladbami z tvojej knižnice, napríklad slovenský rap po slovenskom rape. Odobranú skladbu už neodporučí.",
     "animations241Title": "Statické alebo dynamické",
     "animations241Desc": "Nastavenia → Vzhľad → Animácie. Statické vypne všetky animácie a šetrič batérie naň prepne sám.",

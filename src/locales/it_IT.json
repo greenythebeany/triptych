@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Riduci a icona",
     "maximize": "Ingrandisci",
+    "restore": "Ripristina",
     "close": "Chiudi"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Accedi a un server Navidrome, non solo Jellyfin: sfoglia, riproduci, metti mi piace e usa le playlist allo stesso modo.",
     "appIcon243Title": "La tua icona dell'app",
     "appIcon243Desc": "Desktop: scegli un'immagine in Impostazioni → Aspetto e diventa l'icona della finestra e della barra delle applicazioni.",
+    "windows244Title": "Finestre che obbediscono",
+    "windows244Desc": "La finestra si può di nuovo sempre ridimensionare e trascinare, il pulsante ingrandisci diventa ripristina, la tua icona ora appare sulla barra delle applicazioni e l'aggiornamento dalla 2.4.2 non si blocca più su \"impossibile chiudere\".",
     "smartShuffleDesc": "Tocca due volte la riproduzione casuale: dopo il brano scelto, la coda si riempie di brani consigliati dalla tua libreria, come rap slovacco dopo rap slovacco. Un brano rimosso non torna.",
     "animations241Title": "Statico o dinamico",
     "animations241Desc": "Impostazioni → Aspetto → Animazioni. Statico disattiva tutte le animazioni, e il risparmio batteria passa a Statico da solo.",

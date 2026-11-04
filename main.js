@@ -106,10 +106,37 @@ function loadWindowState() {
     const visible = screen.getAllDisplays().some(({ workArea: a }) =>
       state.x < a.x + a.width - 100 && state.x + state.width > a.x + 100 &&
       state.y >= a.y - 10 && state.y < a.y + a.height - 100);
-    return visible ? state : { width: state.width, height: state.height, maximized: state.maximized };
+    return fitOnScreen(visible ? state : { width: state.width, height: state.height, maximized: state.maximized });
   } catch (err) {
     return null;
   }
+}
+
+// The un-maximized size must leave room around it: a saved size as big as
+// the screen (e.g. after a snap, or at 200% scaling) restores to a window
+// whose edges are off-screen -- it can't be resized, and dragging or the
+// maximize button seem to do nothing. Too big = 85% of the work area, centered.
+function fitOnScreen(state) {
+  const { screen } = require('electron');
+  const area = (state.x !== undefined
+    ? screen.getDisplayMatching({ x: state.x, y: state.y, width: state.width || 1, height: state.height || 1 })
+    : screen.getPrimaryDisplay()).workArea;
+  const width = state.width || 1360;
+  const height = state.height || 870;
+  if (width <= area.width - 40 && height <= area.height - 40 &&
+      (state.x === undefined || (state.x >= area.x && state.y >= area.y &&
+        state.x + width <= area.x + area.width && state.y + height <= area.y + area.height))) {
+    return { ...state, width, height };
+  }
+  const w = Math.min(width, Math.round(area.width * 0.85));
+  const h = Math.min(height, Math.round(area.height * 0.85));
+  return {
+    width: w,
+    height: h,
+    x: area.x + Math.round((area.width - w) / 2),
+    y: area.y + Math.round((area.height - h) / 2),
+    maximized: state.maximized
+  };
 }
 function trackWindowState(win) {
   let timer = null;
@@ -139,10 +166,50 @@ function currentIconPath() {
   return fs.existsSync(CUSTOM_ICON_PATH) ? CUSTOM_ICON_PATH : DEFAULT_ICON_PATH;
 }
 
+// Windows groups the taskbar button under the Start menu shortcut's app ID
+// (com.triptych.app) and draws the shortcut's icon, ignoring setIcon. A
+// window with its own app ID gets its own button that uses the window icon;
+// the relaunch details make a pin of that button start Triptych with it.
+const APP_ID = 'com.triptych.app';
+const CUSTOM_ICON_ICO_PATH = path.join(app.getPath('userData'), 'custom-icon.ico');
+
+// An .ico holding the PNG as is (supported since Vista), for appIconPath.
+function pngToIco(png) {
+  const header = Buffer.alloc(22);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(1, 4);
+  header.writeUInt16LE(1, 10);
+  header.writeUInt16LE(32, 12);
+  header.writeUInt32LE(png.length, 14);
+  header.writeUInt32LE(22, 18);
+  return Buffer.concat([header, png]);
+}
+
 function applyAppIcon() {
+  if (!mainWindow) return;
+  const custom = fs.existsSync(CUSTOM_ICON_PATH);
   const image = nativeImage.createFromPath(currentIconPath());
   if (image.isEmpty()) return;
-  mainWindow?.setIcon(image);
+  if (process.platform === 'win32') {
+    try {
+      if (custom) {
+        fs.writeFileSync(CUSTOM_ICON_ICO_PATH, pngToIco(fs.readFileSync(CUSTOM_ICON_PATH)));
+        mainWindow.setAppDetails({
+          appId: `${APP_ID}.customicon`,
+          appIconPath: CUSTOM_ICON_ICO_PATH,
+          appIconIndex: 0,
+          relaunchCommand: `"${process.execPath}"`,
+          relaunchDisplayName: 'Triptych'
+        });
+      } else {
+        fs.rmSync(CUSTOM_ICON_ICO_PATH, { force: true });
+        mainWindow.setAppDetails({ appId: APP_ID });
+      }
+    } catch (err) {
+      console.log('[app icon] taskbar:', err.message);
+    }
+  }
+  mainWindow.setIcon(image);
   if (process.platform === 'darwin') app.dock?.setIcon(image);
 }
 
@@ -153,7 +220,7 @@ function customIconDataUrl() {
 }
 
 function createWindow() {
-  const saved = loadWindowState();
+  const saved = loadWindowState() || fitOnScreen({});
   mainWindow = new BrowserWindow({
     width: saved?.width || 1360,
     height: saved?.height || 870,
@@ -190,11 +257,13 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  mainWindow.on('maximize', () => mainWindow.webContents.send('window:state', 'maximized'));
-  mainWindow.on('unmaximize', () => mainWindow.webContents.send('window:state', 'normal'));
+  const sendWindowState = () => mainWindow.webContents.send('window:state', mainWindow.isMaximized() ? 'maximized' : 'normal');
+  mainWindow.on('maximize', sendWindowState);
+  mainWindow.on('unmaximize', sendWindowState);
+  mainWindow.webContents.on('did-finish-load', sendWindowState);
 
   setupSmtc();
-  if (process.platform === 'darwin') applyAppIcon();
+  applyAppIcon();
 }
 
 ipcMain.on('smtc:setMetadata', (_event, meta) => {

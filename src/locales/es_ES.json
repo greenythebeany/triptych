@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Minimizar",
     "maximize": "Maximizar",
+    "restore": "Restaurar",
     "close": "Cerrar"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Inicia sesión en un servidor Navidrome, no solo Jellyfin: explora, reproduce, marca favoritos y usa listas igual que siempre.",
     "appIcon243Title": "Tu propio icono",
     "appIcon243Desc": "Escritorio: elige cualquier imagen en Ajustes → Apariencia y será el icono de la ventana y la barra de tareas.",
+    "windows244Title": "Ventanas que obedecen",
+    "windows244Desc": "La ventana vuelve a poder redimensionarse y moverse siempre, el botón de maximizar cambia a restaurar, tu propio icono aparece en la barra de tareas y actualizar desde la 2.4.2 ya no se queda en \"no se puede cerrar\".",
     "smartShuffleDesc": "Toca aleatorio dos veces: después de la canción que elijas, la cola se llena con canciones recomendadas de tu propia biblioteca, como rap eslovaco tras rap eslovaco. Si quitas una, no vuelve.",
     "animations241Title": "Estático o dinámico",
     "animations241Desc": "Ajustes → Apariencia → Animaciones. Estático desactiva todas las animaciones, y el ahorro de batería cambia a Estático por sí solo.",

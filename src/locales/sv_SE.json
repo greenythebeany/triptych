@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Minimera",
     "maximize": "Maximera",
+    "restore": "Återställ",
     "close": "Stäng"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Logga in på en Navidrome-server, inte bara Jellyfin: bläddra, spela, gilla och använd spellistor på samma sätt.",
     "appIcon243Title": "Din egen appikon",
     "appIcon243Desc": "Dator: välj valfri bild under Inställningar → Utseende så blir den ikon för fönstret och aktivitetsfältet.",
+    "windows244Title": "Fönster som lyder",
+    "windows244Desc": "Fönstret går alltid att ändra storlek på och dra igen, maximera-knappen växlar till återställ, din egen appikon syns nu i aktivitetsfältet och uppdatering från 2.4.2 fastnar inte längre på \"kan inte stängas\".",
     "smartShuffleDesc": "Tryck två gånger på blanda: efter låten du väljer fylls kön med rekommenderade låtar från ditt eget bibliotek, som slovakisk rap efter slovakisk rap. Tar du bort en kommer den inte tillbaka.",
     "animations241Title": "Statiskt eller dynamiskt",
     "animations241Desc": "Inställningar → Utseende → Animationer. Statiskt stänger av alla animationer, och batterisparläget byter till Statiskt av sig självt.",

@@ -101,6 +101,13 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.4
+
+- Windows: the window can always be resized and dragged again (a saved size as big as the screen left its edges off-screen), and the maximize button switches to restore
+- Desktop: your own app icon now shows on the taskbar too, not only in the window
+- Windows: updating from 2.4.2 no longer stops at "Triptych can't be closed"
+- Plus everything from 2.4.3 below: Navidrome servers and your own app icon
+
 ## What's new in 2.4.3
 
 - Navidrome: sign in to a Navidrome (OpenSubsonic) server as well as Jellyfin; browse, play, like and use playlists the same way. Settings sync, listening history sync, Connect, playlist cover upload and artist pictures stay Jellyfin-only

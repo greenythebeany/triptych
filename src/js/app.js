@@ -170,6 +170,12 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  // 2.4.4 also lists 2.4.3: coming from 2.4.2 only the newest notes show.
+  '2.4.4': [
+    { icon: 'fi-br-headphones', key: 'navidrome243' },
+    { icon: 'fi-br-palette', key: 'appIcon243' },
+    { icon: 'fi-br-check-circle', key: 'windows244' }
+  ],
   '2.4.3': [
     { icon: 'fi-br-headphones', key: 'navidrome243' },
     { icon: 'fi-br-palette', key: 'appIcon243' }
@@ -437,6 +443,15 @@ let cardRegistry = [];
 // ---------- Window controls ----------
 document.getElementById('btn-min').addEventListener('click', () => windowControls.minimize());
 document.getElementById('btn-max').addEventListener('click', () => windowControls.maximize());
+// Maximize shows a single square, restore two overlapping ones (as Windows
+// does) -- swapped by class, the SVGs ignore the hidden property.
+windowControls.onStateChange((state) => {
+  const btn = document.getElementById('btn-max');
+  const maximized = state === 'maximized';
+  btn.classList.toggle('is-maximized', maximized);
+  btn.dataset.i18nTitle = maximized ? 'titlebar.restore' : 'titlebar.maximize';
+  btn.title = t(btn.dataset.i18nTitle);
+});
 document.getElementById('btn-close').addEventListener('click', () => windowControls.close());
 if (!isDesktop) document.body.classList.add('platform-' + platform);
 // macOS draws its own window buttons in the title bar (see main.js).

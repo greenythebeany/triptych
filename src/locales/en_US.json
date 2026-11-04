@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Minimize",
     "maximize": "Maximize",
+    "restore": "Restore",
     "close": "Close"
   },
   "login": {
@@ -448,6 +449,8 @@
     "navidrome243Desc": "Sign in to a Navidrome server, not just Jellyfin: browse, play, like and use playlists the same way.",
     "appIcon243Title": "Your own app icon",
     "appIcon243Desc": "Desktop: pick any image in Settings → Appearance and it becomes the window and taskbar icon.",
+    "windows244Title": "Windows that behave",
+    "windows244Desc": "The window can always be resized and dragged again, the maximize button switches to restore, your own app icon now shows on the taskbar, and updating from 2.4.2 no longer stops at \"can't be closed\".",
     "smartShuffleDesc": "Tap shuffle twice: after the song you pick, the queue fills with recommended songs from your own library, like Slovak rap after Slovak rap. Remove one and it won't come back.",
     "animations241Title": "Static or Dynamic",
     "animations241Desc": "Settings → Appearance → Animations. Static turns every animation off, and battery saver switches to Static on its own.",

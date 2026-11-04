@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Réduire",
     "maximize": "Agrandir",
+    "restore": "Restaurer",
     "close": "Fermer"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Connectez-vous à un serveur Navidrome, pas seulement Jellyfin : parcourir, écouter, aimer et les playlists fonctionnent pareil.",
     "appIcon243Title": "Votre propre icône",
     "appIcon243Desc": "Ordinateur : choisissez une image dans Réglages → Apparence, elle devient l'icône de la fenêtre et de la barre des tâches.",
+    "windows244Title": "Des fenêtres qui obéissent",
+    "windows244Desc": "La fenêtre peut de nouveau toujours être redimensionnée et déplacée, le bouton agrandir passe à restaurer, votre icône s'affiche désormais dans la barre des tâches, et la mise à jour depuis la 2.4.2 ne bloque plus sur « impossible de fermer ».",
     "smartShuffleDesc": "Touchez deux fois aléatoire : après le titre choisi, la file se remplit de titres recommandés de votre propre bibliothèque, comme du rap slovaque après du rap slovaque. Un titre retiré ne revient pas.",
     "animations241Title": "Statique ou dynamique",
     "animations241Desc": "Réglages → Apparence → Animations. Statique coupe toutes les animations, et l'économiseur de batterie passe tout seul en Statique.",
