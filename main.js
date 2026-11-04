@@ -196,6 +196,45 @@ function pngToIco(png) {
   return Buffer.concat([header, png]);
 }
 
+// Desktop, Start menu and pinned-taskbar shortcuts that start this exe show
+// the custom icon too (and the exe's own again on Reset). Only shortcuts
+// pointing at this exact executable are touched; the installer recreating
+// them is undone on the next start. readShortcutLink can crash the whole
+// process on some shortcuts (seen with an AutoHotkey Start menu entry), so
+// only Triptych-named ones that contain this exe's name are ever parsed.
+function shortcutDirs() {
+  const roaming = app.getPath('appData');
+  return [
+    app.getPath('desktop'),
+    path.join(roaming, 'Microsoft', 'Windows', 'Start Menu', 'Programs'),
+    path.join(roaming, 'Microsoft', 'Internet Explorer', 'Quick Launch', 'User Pinned', 'TaskBar')
+  ];
+}
+
+function updateShortcutIcons(icon) {
+  const exe = process.execPath.toLowerCase();
+  const exeName = path.basename(exe);
+  for (const dir of shortcutDirs()) {
+    let names = [];
+    try { names = fs.readdirSync(dir); } catch (err) { continue; }
+    for (const name of names) {
+      const lower = name.toLowerCase();
+      if (!lower.startsWith('triptych') || !lower.endsWith('.lnk')) continue;
+      const file = path.join(dir, name);
+      try {
+        const raw = fs.readFileSync(file);
+        if (!raw.toString('utf16le').toLowerCase().includes(exeName) && !raw.toString('latin1').toLowerCase().includes(exeName)) continue;
+        const link = shell.readShortcutLink(file);
+        if ((link.target || '').toLowerCase() !== exe) continue;
+        if ((link.icon || '').toLowerCase() === icon.toLowerCase() && (link.iconIndex || 0) === 0) continue;
+        shell.writeShortcutLink(file, 'update', { icon, iconIndex: 0 });
+      } catch (err) {
+        console.log('[app icon] shortcut:', name, err.message);
+      }
+    }
+  }
+}
+
 function applyAppIcon() {
   if (!mainWindow) return;
   const custom = fs.existsSync(CUSTOM_ICON_PATH);
@@ -209,6 +248,7 @@ function applyAppIcon() {
         const icoName = `custom-icon-${hash}.ico`;
         const icoPath = path.join(USER_DATA, icoName);
         if (!fs.existsSync(icoPath)) fs.writeFileSync(icoPath, pngToIco(png));
+        updateShortcutIcons(icoPath);
         removeTaskbarIcons(icoName);
         mainWindow.setAppDetails({
           appId: `${APP_ID}.icon${hash}`,
@@ -218,6 +258,7 @@ function applyAppIcon() {
           relaunchDisplayName: 'Triptych'
         });
       } else {
+        updateShortcutIcons(process.execPath);
         removeTaskbarIcons(null);
         mainWindow.setAppDetails({ appId: APP_ID });
       }
