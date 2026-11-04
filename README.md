@@ -101,6 +101,10 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.5
+
+- Windows: choosing another app icon updates the taskbar right away (it kept showing the previously picked image)
+
 ## What's new in 2.4.4
 
 - Windows: the window can always be resized and dragged again (a saved size as big as the screen left its edges off-screen), and the maximize button switches to restore

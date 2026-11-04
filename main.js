@@ -170,8 +170,19 @@ function currentIconPath() {
 // (com.triptych.app) and draws the shortcut's icon, ignoring setIcon. A
 // window with its own app ID gets its own button that uses the window icon;
 // the relaunch details make a pin of that button start Triptych with it.
+// The shell caches that icon by file path and app ID, so each image gets
+// both its own (named after its hash) -- reusing them kept showing the
+// previously picked image after choosing a new one.
 const APP_ID = 'com.triptych.app';
-const CUSTOM_ICON_ICO_PATH = path.join(app.getPath('userData'), 'custom-icon.ico');
+const USER_DATA = app.getPath('userData');
+
+function removeTaskbarIcons(keep) {
+  for (const name of fs.readdirSync(USER_DATA)) {
+    if (/^custom-icon(-[0-9a-f]+)?\.ico$/.test(name) && name !== keep) {
+      fs.rmSync(path.join(USER_DATA, name), { force: true });
+    }
+  }
+}
 
 // An .ico holding the PNG as is (supported since Vista), for appIconPath.
 function pngToIco(png) {
@@ -193,16 +204,21 @@ function applyAppIcon() {
   if (process.platform === 'win32') {
     try {
       if (custom) {
-        fs.writeFileSync(CUSTOM_ICON_ICO_PATH, pngToIco(fs.readFileSync(CUSTOM_ICON_PATH)));
+        const png = fs.readFileSync(CUSTOM_ICON_PATH);
+        const hash = require('crypto').createHash('sha1').update(png).digest('hex').slice(0, 12);
+        const icoName = `custom-icon-${hash}.ico`;
+        const icoPath = path.join(USER_DATA, icoName);
+        if (!fs.existsSync(icoPath)) fs.writeFileSync(icoPath, pngToIco(png));
+        removeTaskbarIcons(icoName);
         mainWindow.setAppDetails({
-          appId: `${APP_ID}.customicon`,
-          appIconPath: CUSTOM_ICON_ICO_PATH,
+          appId: `${APP_ID}.icon${hash}`,
+          appIconPath: icoPath,
           appIconIndex: 0,
           relaunchCommand: `"${process.execPath}"`,
           relaunchDisplayName: 'Triptych'
         });
       } else {
-        fs.rmSync(CUSTOM_ICON_ICO_PATH, { force: true });
+        removeTaskbarIcons(null);
         mainWindow.setAppDetails({ appId: APP_ID });
       }
     } catch (err) {
