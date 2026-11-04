@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Minimer",
     "maximize": "Maksimer",
+    "restore": "Gendan",
     "close": "Luk"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Log ind på en Navidrome-server, ikke kun Jellyfin: gennemse, afspil, synes godt om og brug playlister på samme måde.",
     "appIcon243Title": "Dit eget app-ikon",
     "appIcon243Desc": "Computer: vælg et billede under Indstillinger → Udseende, så bliver det ikon for vinduet og proceslinjen.",
+    "windows244Title": "Vinduer, der opfører sig",
+    "windows244Desc": "Vinduet kan altid ændre størrelse og trækkes igen, maksimer-knappen skifter til gendan, dit eget app-ikon vises nu på proceslinjen, og opdatering fra 2.4.2 stopper ikke længere ved \"kan ikke lukkes\".",
     "smartShuffleDesc": "Tryk to gange på shuffle: efter den sang, du vælger, fyldes køen med anbefalede sange fra dit eget bibliotek, f.eks. slovakisk rap efter slovakisk rap. Fjerner du en, kommer den ikke igen.",
     "animations241Title": "Statisk eller dynamisk",
     "animations241Desc": "Indstillinger → Udseende → Animationer. Statisk slår alle animationer fra, og strømbesparelse skifter selv til Statisk.",

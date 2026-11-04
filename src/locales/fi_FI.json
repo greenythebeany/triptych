@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Pienennä",
     "maximize": "Suurenna",
+    "restore": "Palauta",
     "close": "Sulje"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Kirjaudu Navidrome-palvelimelle, ei vain Jellyfiniin: selaa, toista, tykkää ja käytä soittolistoja samalla tavalla.",
     "appIcon243Title": "Oma sovelluskuvake",
     "appIcon243Desc": "Tietokone: valitse mikä tahansa kuva kohdassa Asetukset → Ulkoasu, niin siitä tulee ikkunan ja tehtäväpalkin kuvake.",
+    "windows244Title": "Ikkunat, jotka tottelevat",
+    "windows244Desc": "Ikkunan kokoa voi taas aina muuttaa ja sitä voi siirtää, suurenna-painike vaihtuu palauta-painikkeeksi, oma sovelluskuvakkeesi näkyy nyt tehtäväpalkissa, eikä päivitys versiosta 2.4.2 enää jumitu ilmoitukseen ”ei voida sulkea”.",
     "smartShuffleDesc": "Napauta sekoitusta kahdesti: valitsemasi kappaleen jälkeen jono täyttyy suosituksilla omasta kirjastostasi, kuten slovakialaista räppiä slovakialaisen räpin perään. Poistettu kappale ei palaa.",
     "animations241Title": "Staattinen tai dynaaminen",
     "animations241Desc": "Asetukset → Ulkoasu → Animaatiot. Staattinen poistaa kaikki animaatiot, ja virransäästö vaihtaa Staattiseen itsestään.",

@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Minimieren",
     "maximize": "Maximieren",
+    "restore": "Wiederherstellen",
     "close": "Schließen"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Melde dich bei einem Navidrome-Server an, nicht nur bei Jellyfin: Durchsuchen, Abspielen, Favoriten und Playlists funktionieren genauso.",
     "appIcon243Title": "Dein eigenes App-Symbol",
     "appIcon243Desc": "Desktop: Wähle unter Einstellungen → Darstellung ein beliebiges Bild als Fenster- und Taskleistensymbol.",
+    "windows244Title": "Fenster, die mitspielen",
+    "windows244Desc": "Das Fenster lässt sich wieder immer in der Größe ändern und verschieben, die Maximieren-Taste wechselt zu Wiederherstellen, dein eigenes App-Symbol erscheint jetzt in der Taskleiste, und das Update von 2.4.2 bleibt nicht mehr bei „kann nicht geschlossen werden“ hängen.",
     "smartShuffleDesc": "Tippe zweimal auf Zufallswiedergabe: Nach dem gewählten Song füllt sich die Warteschlange mit Empfehlungen aus deiner eigenen Bibliothek, etwa slowakischer Rap nach slowakischem Rap. Entfernte Songs kommen nicht wieder.",
     "animations241Title": "Statisch oder dynamisch",
     "animations241Desc": "Einstellungen → Darstellung → Animationen. Statisch schaltet alle Animationen aus, und der Energiesparmodus wechselt von selbst zu Statisch.",

@@ -10,6 +10,7 @@
   "titlebar": {
     "minimize": "Minimaliseren",
     "maximize": "Maximaliseren",
+    "restore": "Vorig formaat",
     "close": "Sluiten"
   },
   "login": {
@@ -450,6 +451,8 @@
     "navidrome243Desc": "Log in op een Navidrome-server, niet alleen Jellyfin: bladeren, afspelen, liken en playlists werken hetzelfde.",
     "appIcon243Title": "Je eigen app-pictogram",
     "appIcon243Desc": "Desktop: kies een afbeelding in Instellingen → Weergave en die wordt het pictogram van het venster en de taakbalk.",
+    "windows244Title": "Vensters die luisteren",
+    "windows244Desc": "Het venster kan weer altijd van formaat veranderen en versleept worden, de maximaliseerknop wordt herstellen, je eigen app-pictogram staat nu op de taakbalk en bijwerken vanaf 2.4.2 blijft niet meer hangen op \"kan niet worden gesloten\".",
     "smartShuffleDesc": "Tik twee keer op shuffle: na het gekozen nummer vult de wachtrij zich met aanbevolen nummers uit je eigen bibliotheek, zoals Slowaakse rap na Slowaakse rap. Een verwijderd nummer komt niet terug.",
     "animations241Title": "Statisch of dynamisch",
     "animations241Desc": "Instellingen → Weergave → Animaties. Statisch zet alle animaties uit, en batterijbesparing schakelt vanzelf naar Statisch.",
