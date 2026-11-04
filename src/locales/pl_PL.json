@@ -13,9 +13,9 @@
     "close": "Zamknij"
   },
   "login": {
-    "subtitle": "Zaloguj się do swojego serwera Jellyfin",
+    "subtitle": "Zaloguj się do swojego serwera Jellyfin lub Navidrome",
     "serverLabel": "Adres serwera",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "Nazwa użytkownika",
     "usernamePlaceholder": "Nazwa użytkownika",
     "passwordLabel": "Hasło",
@@ -25,6 +25,7 @@
     "loggingIn": "Logowanie…",
     "errorWrongCredentials": "Nieprawidłowa nazwa użytkownika lub hasło.",
     "errorServer": "Serwer odpowiedział kodem {status}.",
+    "errorNotServer": "Pod tym adresem nie ma serwera Jellyfin ani Navidrome.",
     "errorGeneric": "Nie udało się zalogować. Sprawdź adres serwera i spróbuj ponownie.",
     "errorUnreachable": "Nie udało się połączyć z serwerem, ale nadal jesteś zalogowany — sprawdź połączenie i spróbuj ponownie.",
     "retry": "Spróbuj ponownie",
@@ -224,7 +225,7 @@
     "offlineModeDesc": "Pokazuje i odtwarza tylko pobrane utwory — reszta jest wyszarzona",
     "privacy": "Prywatność",
     "albumArtLookup": "Wyszukiwanie okładek online",
-    "albumArtLookupDesc": "Wysyła nazwę wykonawcy/albumu do publicznego API wyszukiwania Deezera, gdy Twój serwer Jellyfin nie ma okładki. Wyłącz, aby te dane nigdy nie opuszczały urządzenia.",
+    "albumArtLookupDesc": "Wysyła nazwę wykonawcy/albumu do publicznego API wyszukiwania Deezera, gdy Twój serwer Jellyfin/Navidrome nie ma okładki. Wyłącz, aby te dane nigdy nie opuszczały urządzenia.",
     "relatedArtistsLookup": "Wyszukiwanie podobnych wykonawców online",
     "relatedArtistsLookupDesc": "Wysyła nazwy słuchanych wykonawców do publicznego API Deezera, aby znaleźć podobnych wykonawców w Twojej bibliotece dla inteligentnego odtwarzania losowego i ekranu głównego. Wyłącz, aby te dane nigdy nie opuszczały urządzenia; polecenia korzystają wtedy tylko z Twojej biblioteki i historii słuchania.",
     "autoUpdateCheck": "Automatyczne sprawdzanie aktualizacji",
@@ -250,7 +251,7 @@
     "lyricsSearchStatus": "Przetworzono {done} z {total} utworów ({found} z tekstem)."
   },
   "privacyNotice": {
-    "text": "Triptych przechowuje wszystko na Twoim urządzeniu i Twoim własnym serwerze Jellyfin. Kilka zapytań w tle (okładki, sprawdzanie aktualizacji) łączy się z zewnętrznymi usługami — w polityce prywatności opisano dokładnie, co jest wysyłane, a w Ustawieniach możesz je w każdej chwili wyłączyć.",
+    "text": "Triptych przechowuje wszystko na Twoim urządzeniu i Twoim własnym serwerze Jellyfin/Navidrome. Kilka zapytań w tle (okładki, sprawdzanie aktualizacji) łączy się z zewnętrznymi usługami — w polityce prywatności opisano dokładnie, co jest wysyłane, a w Ustawieniach możesz je w każdej chwili wyłączyć.",
     "viewPolicy": "Polityka prywatności",
     "dismiss": "Rozumiem"
   },

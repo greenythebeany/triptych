@@ -13,9 +13,9 @@
     "close": "Luk"
   },
   "login": {
-    "subtitle": "Log ind på din Jellyfin-server",
+    "subtitle": "Log ind på din Jellyfin- eller Navidrome-server",
     "serverLabel": "Serveradresse",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "Brugernavn",
     "usernamePlaceholder": "Brugernavn",
     "passwordLabel": "Adgangskode",
@@ -25,6 +25,7 @@
     "loggingIn": "Logger ind…",
     "errorWrongCredentials": "Forkert brugernavn eller adgangskode.",
     "errorServer": "Serveren svarede med {status}.",
+    "errorNotServer": "Der er ingen Jellyfin- eller Navidrome-server på denne adresse.",
     "errorGeneric": "Kunne ikke logge ind. Tjek serveradressen, og prøv igen.",
     "errorUnreachable": "Kunne ikke nå din server, men du er stadig logget ind — tjek forbindelsen og prøv igen.",
     "retry": "Prøv igen",
@@ -224,7 +225,7 @@
     "offlineModeDesc": "Viser og afspiller kun downloadede sange — resten er nedtonet",
     "privacy": "Privatliv",
     "albumArtLookup": "Onlinesøgning efter cover",
-    "albumArtLookupDesc": "Sender kunstner-/albumnavnet til Deezers offentlige søge-API, når din Jellyfin-server ikke har et cover. Slå fra, så de data aldrig forlader din enhed.",
+    "albumArtLookupDesc": "Sender kunstner-/albumnavnet til Deezers offentlige søge-API, når din Jellyfin/Navidrome-server ikke har et cover. Slå fra, så de data aldrig forlader din enhed.",
     "relatedArtistsLookup": "Online-opslag af lignende kunstnere",
     "relatedArtistsLookupDesc": "Sender navnene på de kunstnere, du afspiller, til Deezers offentlige API for at finde lignende kunstnere i dit bibliotek til smart shuffle og Hjem. Slå fra for at holde det på din enhed; anbefalinger bruger så kun dit bibliotek og din lytning.",
     "autoUpdateCheck": "Automatisk søgning efter opdateringer",
@@ -250,7 +251,7 @@
     "lyricsSearchStatus": "{done} af {total} sange behandlet ({found} med tekst)."
   },
   "privacyNotice": {
-    "text": "Triptych gemmer alt på din egen enhed og din egen Jellyfin-server. Et par opslag i baggrunden (covers, opdateringstjek) taler med eksterne tjenester — se privatlivspolitikken for præcis hvad der sendes, og slå dem fra når som helst i Indstillinger.",
+    "text": "Triptych gemmer alt på din egen enhed og din egen Jellyfin/Navidrome-server. Et par opslag i baggrunden (covers, opdateringstjek) taler med eksterne tjenester — se privatlivspolitikken for præcis hvad der sendes, og slå dem fra når som helst i Indstillinger.",
     "viewPolicy": "Privatlivspolitik",
     "dismiss": "Forstået"
   },

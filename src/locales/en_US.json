@@ -13,9 +13,9 @@
     "close": "Close"
   },
   "login": {
-    "subtitle": "Sign in to your Jellyfin server",
+    "subtitle": "Sign in to your Jellyfin or Navidrome server",
     "serverLabel": "Server address",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "Username",
     "usernamePlaceholder": "Username",
     "passwordLabel": "Password",
@@ -25,6 +25,7 @@
     "loggingIn": "Logging in…",
     "errorWrongCredentials": "Wrong username or password.",
     "errorServer": "Server responded with {status}.",
+    "errorNotServer": "There's no Jellyfin or Navidrome server at this address.",
     "errorGeneric": "Could not sign in. Check your server address and try again.",
     "errorUnreachable": "Could not reach your server, but you're still signed in — check your connection and retry.",
     "retry": "Retry",
@@ -224,7 +225,7 @@
     "offlineModeDesc": "Only show and play songs you've downloaded — everything else is grayed out",
     "privacy": "Privacy",
     "albumArtLookup": "Online album art lookup",
-    "albumArtLookupDesc": "Sends the artist/album name to Deezer's public search API when your Jellyfin server doesn't have cover art. Turn off to keep that from ever leaving your device.",
+    "albumArtLookupDesc": "Sends the artist/album name to Deezer's public search API when your Jellyfin/Navidrome server doesn't have cover art. Turn off to keep that from ever leaving your device.",
     "relatedArtistsLookup": "Online related artists lookup",
     "relatedArtistsLookupDesc": "Sends the names of artists you play to Deezer's public API to find similar artists in your library, for smart shuffle and Home. Turn off to keep that from ever leaving your device; recommendations then use your library and listening only.",
     "autoUpdateCheck": "Automatic update check",
@@ -250,7 +251,7 @@
     "lyricsSearchStatus": "Indexed {done} of {total} songs ({found} with lyrics)."
   },
   "privacyNotice": {
-    "text": "Triptych keeps everything on your own device and your own Jellyfin server. A couple of background lookups (album art, update checks) talk to outside services — see the Privacy Policy for exactly what's sent, and turn them off any time in Settings.",
+    "text": "Triptych keeps everything on your own device and your own Jellyfin/Navidrome server. A couple of background lookups (album art, update checks) talk to outside services — see the Privacy Policy for exactly what's sent, and turn them off any time in Settings.",
     "viewPolicy": "Privacy Policy",
     "dismiss": "Got it"
   },

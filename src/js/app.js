@@ -1,5 +1,6 @@
 import './migrate.js'; // must stay first: renames storage keys before other modules read them
 import { JellyfinClient, initClientVersion, getClientVersion } from './jellyfin.js';
+import { SubsonicClient, isSubsonicServer } from './subsonic.js';
 import { LocalLibraryClient, CombinedClient, isLocalLibrarySupported, isLocalLibraryEnabled, localLibraryUsesFolders, isLocalItemId } from './localLibrary.js';
 import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
@@ -943,7 +944,7 @@ async function tryRestoreSession() {
     showLogin();
     return;
   }
-  jellyfin = new JellyfinClient(saved);
+  jellyfin = saved.type === 'subsonic' ? new SubsonicClient(saved) : new JellyfinClient(saved);
 
   // No network at all: don't spend seconds on retries that can't succeed --
   // go straight in with the saved session (downloads still work offline).
@@ -1006,6 +1007,7 @@ async function enterApp(username) {
   loginScreen.hidden = true;
   appRoot.hidden = false;
   document.body.classList.toggle('local-mode', !!jellyfin.isLocal);
+  document.body.classList.toggle('subsonic-mode', !!jellyfin.isSubsonic);
 
   player = new Player(jellyfin, currentBitrateKbps);
   const savedSettings = getSettings();
@@ -1091,8 +1093,13 @@ loginForm.addEventListener('submit', async (evt) => {
   const remember = document.getElementById('input-remember').checked;
 
   try {
-    const auth = await JellyfinClient.authenticate(serverUrl, username, password);
-    jellyfin = new JellyfinClient(auth);
+    // Navidrome/Subsonic answers /rest/ping; anything else is treated as
+    // Jellyfin, so a Jellyfin sign-in goes exactly as before.
+    const subsonic = await isSubsonicServer(serverUrl);
+    const auth = subsonic
+      ? await SubsonicClient.authenticate(serverUrl, username, password)
+      : await JellyfinClient.authenticate(serverUrl, username, password);
+    jellyfin = subsonic ? new SubsonicClient(auth) : new JellyfinClient(auth);
     if (remember) {
       await sessionStore.save(auth);
     }
@@ -1245,6 +1252,8 @@ btnLocalDisable.addEventListener('click', () => {
 
 function translateLoginError(err) {
   if (err?.code === 'wrong_credentials') return t('login.errorWrongCredentials');
+  // Nothing at Jellyfin's sign-in path either: not a music server URL.
+  if (err?.code === 'server_error' && err.status === 404) return t('login.errorNotServer');
   if (err?.code === 'server_error') return t('login.errorServer', { status: err.status });
   return null;
 }
@@ -3949,7 +3958,8 @@ async function renderPlaylistDetail(id, name) {
     onPlayAll: tracks.length ? () => player.setQueue(tracks, 0, id) : undefined,
     trackIds: tracks.map((t) => t.Id),
     downloadTracks: tracks,
-    onChangeArt: async (file) => {
+    // Subsonic has no API for playlist covers.
+    onChangeArt: jellyfin.canUploadPlaylistImage?.(id) === false ? undefined : async (file) => {
       try {
         await jellyfin.uploadPlaylistImage(id, file);
         await loadPlaylistSidebar();

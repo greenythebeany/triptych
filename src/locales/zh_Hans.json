@@ -13,9 +13,9 @@
     "close": "关闭"
   },
   "login": {
-    "subtitle": "登录你的 Jellyfin 服务器",
+    "subtitle": "登录你的 Jellyfin 或 Navidrome 服务器",
     "serverLabel": "服务器地址",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "用户名",
     "usernamePlaceholder": "用户名",
     "passwordLabel": "密码",
@@ -25,6 +25,7 @@
     "loggingIn": "正在登录…",
     "errorWrongCredentials": "用户名或密码错误。",
     "errorServer": "服务器返回了 {status}。",
+    "errorNotServer": "此地址没有 Jellyfin 或 Navidrome 服务器。",
     "errorGeneric": "无法登录。请检查服务器地址后重试。",
     "errorUnreachable": "无法连接到你的服务器，但你仍处于登录状态——请检查网络连接后重试。",
     "retry": "重试",
@@ -224,7 +225,7 @@
     "offlineModeDesc": "只显示和播放已下载的歌曲——其余内容会变灰",
     "privacy": "隐私",
     "albumArtLookup": "在线查找专辑封面",
-    "albumArtLookupDesc": "当你的 Jellyfin 服务器没有封面时，将艺人/专辑名称发送到 Deezer 的公开搜索 API。关闭后这些信息绝不会离开你的设备。",
+    "albumArtLookupDesc": "当你的 Jellyfin/Navidrome 服务器没有封面时，将艺人/专辑名称发送到 Deezer 的公开搜索 API。关闭后这些信息绝不会离开你的设备。",
     "relatedArtistsLookup": "在线查找相关艺人",
     "relatedArtistsLookupDesc": "将你播放的艺人名称发送到 Deezer 的公开 API，为智能随机播放和主页在你的音乐库中查找相似艺人。关闭后这些信息不会离开你的设备，推荐将仅使用你的音乐库和收听记录。",
     "autoUpdateCheck": "自动检查更新",
@@ -250,7 +251,7 @@
     "lyricsSearchStatus": "已索引 {total} 首中的 {done} 首（{found} 首有歌词）。"
   },
   "privacyNotice": {
-    "text": "Triptych 的所有内容都保存在你自己的设备和 Jellyfin 服务器上。少数后台查询（专辑封面、更新检查）会与外部服务通信——具体发送了什么请查看隐私政策，你也可以随时在设置中关闭它们。",
+    "text": "Triptych 的所有内容都保存在你自己的设备和 Jellyfin/Navidrome 服务器上。少数后台查询（专辑封面、更新检查）会与外部服务通信——具体发送了什么请查看隐私政策，你也可以随时在设置中关闭它们。",
     "viewPolicy": "隐私政策",
     "dismiss": "知道了"
   },

@@ -13,9 +13,9 @@
     "close": "닫기"
   },
   "login": {
-    "subtitle": "Jellyfin 서버에 로그인",
+    "subtitle": "Jellyfin 또는 Navidrome 서버에 로그인",
     "serverLabel": "서버 주소",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "사용자 이름",
     "usernamePlaceholder": "사용자 이름",
     "passwordLabel": "비밀번호",
@@ -25,6 +25,7 @@
     "loggingIn": "로그인 중…",
     "errorWrongCredentials": "사용자 이름 또는 비밀번호가 올바르지 않습니다.",
     "errorServer": "서버가 {status}(으)로 응답했습니다.",
+    "errorNotServer": "이 주소에 Jellyfin 또는 Navidrome 서버가 없습니다.",
     "errorGeneric": "로그인할 수 없습니다. 서버 주소를 확인하고 다시 시도하세요.",
     "errorUnreachable": "서버에 연결할 수 없지만 로그인 상태는 유지됩니다. 연결을 확인하고 다시 시도하세요.",
     "retry": "다시 시도",
@@ -224,7 +225,7 @@
     "offlineModeDesc": "다운로드한 노래만 표시하고 재생합니다. 나머지는 회색으로 표시됩니다",
     "privacy": "개인정보",
     "albumArtLookup": "온라인 앨범 아트 검색",
-    "albumArtLookupDesc": "Jellyfin 서버에 커버 아트가 없을 때 아티스트/앨범 이름을 Deezer의 공개 검색 API로 보냅니다. 끄면 이 정보가 기기 밖으로 나가지 않습니다.",
+    "albumArtLookupDesc": "Jellyfin/Navidrome 서버에 커버 아트가 없을 때 아티스트/앨범 이름을 Deezer의 공개 검색 API로 보냅니다. 끄면 이 정보가 기기 밖으로 나가지 않습니다.",
     "relatedArtistsLookup": "관련 아티스트 온라인 검색",
     "relatedArtistsLookupDesc": "재생 중인 아티스트 이름을 Deezer 공개 API로 보내 스마트 셔플과 홈에 쓸 비슷한 아티스트를 라이브러리에서 찾습니다. 끄면 이 정보가 기기 밖으로 나가지 않으며, 추천은 라이브러리와 감상 기록만 사용합니다.",
     "autoUpdateCheck": "자동 업데이트 확인",
@@ -250,7 +251,7 @@
     "lyricsSearchStatus": "{total}곡 중 {done}곡 색인 완료(가사 있음 {found}곡)."
   },
   "privacyNotice": {
-    "text": "Triptych는 모든 것을 내 기기와 내 Jellyfin 서버에 보관합니다. 몇 가지 백그라운드 조회(앨범 아트, 업데이트 확인)는 외부 서비스와 통신합니다. 정확히 무엇을 보내는지는 개인정보 처리방침에서 확인할 수 있으며, 설정에서 언제든지 끌 수 있습니다.",
+    "text": "Triptych는 모든 것을 내 기기와 내 Jellyfin/Navidrome 서버에 보관합니다. 몇 가지 백그라운드 조회(앨범 아트, 업데이트 확인)는 외부 서비스와 통신합니다. 정확히 무엇을 보내는지는 개인정보 처리방침에서 확인할 수 있으며, 설정에서 언제든지 끌 수 있습니다.",
     "viewPolicy": "개인정보 처리방침",
     "dismiss": "확인"
   },

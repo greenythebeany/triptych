@@ -13,9 +13,9 @@
     "close": "Stäng"
   },
   "login": {
-    "subtitle": "Logga in på din Jellyfin-server",
+    "subtitle": "Logga in på din Jellyfin- eller Navidrome-server",
     "serverLabel": "Serveradress",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "Användarnamn",
     "usernamePlaceholder": "Användarnamn",
     "passwordLabel": "Lösenord",
@@ -25,6 +25,7 @@
     "loggingIn": "Loggar in…",
     "errorWrongCredentials": "Fel användarnamn eller lösenord.",
     "errorServer": "Servern svarade med {status}.",
+    "errorNotServer": "Det finns ingen Jellyfin- eller Navidrome-server på den här adressen.",
     "errorGeneric": "Det gick inte att logga in. Kontrollera serveradressen och försök igen.",
     "errorUnreachable": "Kunde inte nå din server, men du är fortfarande inloggad — kontrollera anslutningen och försök igen.",
     "retry": "Försök igen",
@@ -224,7 +225,7 @@
     "offlineModeDesc": "Visar och spelar bara nedladdade låtar — resten är nedtonat",
     "privacy": "Integritet",
     "albumArtLookup": "Sök omslag online",
-    "albumArtLookupDesc": "Skickar artist-/albumnamnet till Deezers öppna sök-API när din Jellyfin-server saknar omslag. Stäng av så att de uppgifterna aldrig lämnar din enhet.",
+    "albumArtLookupDesc": "Skickar artist-/albumnamnet till Deezers öppna sök-API när din Jellyfin/Navidrome-server saknar omslag. Stäng av så att de uppgifterna aldrig lämnar din enhet.",
     "relatedArtistsLookup": "Sök liknande artister online",
     "relatedArtistsLookupDesc": "Skickar namnen på artister du spelar till Deezers öppna API för att hitta liknande artister i ditt bibliotek, för smart blandning och Hem. Stäng av för att det aldrig ska lämna din enhet; rekommendationer använder då bara ditt bibliotek och ditt lyssnande.",
     "autoUpdateCheck": "Automatisk uppdateringskontroll",
@@ -250,7 +251,7 @@
     "lyricsSearchStatus": "{done} av {total} låtar behandlade ({found} med text)."
   },
   "privacyNotice": {
-    "text": "Triptych sparar allt på din egen enhet och din egen Jellyfin-server. Några förfrågningar i bakgrunden (omslag, uppdateringskontroll) pratar med externa tjänster — i integritetspolicyn står exakt vad som skickas, och du kan stänga av dem när som helst i Inställningar.",
+    "text": "Triptych sparar allt på din egen enhet och din egen Jellyfin/Navidrome-server. Några förfrågningar i bakgrunden (omslag, uppdateringskontroll) pratar med externa tjänster — i integritetspolicyn står exakt vad som skickas, och du kan stänga av dem när som helst i Inställningar.",
     "viewPolicy": "Integritetspolicy",
     "dismiss": "Uppfattat"
   },

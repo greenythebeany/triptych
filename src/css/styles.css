@@ -283,6 +283,8 @@ body.platform-mac .titlebar-controls { display: none; }
 
 /* Music on this device without a server: server-only features hidden. */
 body.local-mode .server-only { display: none !important; }
+/* Subsonic servers have no Sessions API to hand playback to other devices. */
+body.subsonic-mode .connect-only { display: none !important; }
 /* A settings section left with no visible rows (e.g. Storage on desktop). */
 body.local-mode .settings-section:not(:has(> .settings-row:not([hidden]):not(.server-only))) { display: none; }
 .local-folder-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }

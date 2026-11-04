@@ -5,6 +5,7 @@ export const GITHUB = `https://github.com/${REPO}`;
 export const RELEASES = `${GITHUB}/releases/latest`;
 export const ISSUES = `${GITHUB}/issues`;
 export const JELLYFIN = 'https://jellyfin.org/downloads/server';
+export const NAVIDROME = 'https://www.navidrome.org/docs/installation/';
 export const SITE = 'https://triptych.greenybeany.dev/';
 export const BASE = import.meta.env.BASE_URL;
 

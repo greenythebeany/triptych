@@ -12,7 +12,7 @@ export default function Footer() {
         <a href={`${BASE}terms/`}>Terms</a>
         <a href={`${BASE}privacy/`}>Privacy</a>
       </nav>
-      <p className="foot-note">Free and open source under the MIT license. Not affiliated with Jellyfin, Spotify, Apple or Nothing; their names belong to their owners.</p>
+      <p className="foot-note">Free and open source under the MIT license. Not affiliated with Jellyfin, Navidrome, Spotify, Apple or Nothing; their names belong to their owners.</p>
     </footer>
   );
 }

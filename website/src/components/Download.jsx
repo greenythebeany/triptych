@@ -21,7 +21,7 @@ export default function Download() {
       <p className="fine">
         {r.version ? `Latest ${r.version}. ` : 'Latest release. '}
         Windows updates itself from inside the app; on iPhone, sideload with AltStore or Sideloadly.
-        After installing, open Triptych, enter your Jellyfin server address and sign in.
+        After installing, open Triptych, enter your Jellyfin or Navidrome server address and sign in.
       </p>
       <details className="mac-help" id="mac">
         <summary>Opening Triptych on a Mac</summary>
