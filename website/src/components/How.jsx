@@ -1,5 +1,5 @@
 import Shot from './Shot.jsx';
-import { JELLYFIN } from '../site.js';
+import { JELLYFIN, NAVIDROME } from '../site.js';
 
 const TREE = [
   ['d1', 'Slipknot'],
@@ -19,12 +19,15 @@ export default function How() {
         <li className="step">
           <span className="step-n" aria-hidden="true">1</span>
           <div className="step-text">
-            <h3>Put your music on Jellyfin</h3>
+            <h3>Put your music on a server</h3>
             <p>
-              Install Jellyfin on a computer that stays on (a PC, a NAS or a small server) and point it at your music folder.
-              It reads your tags and cover art and builds the library. Already running Jellyfin? Skip ahead.
+              Install Jellyfin or Navidrome on a computer that stays on (a PC, a NAS or a small server) and point it at your music folder.
+              It reads your tags and cover art and builds the library. Already running one of them? Skip ahead.
             </p>
-            <a className="link" href={JELLYFIN} target="_blank" rel="noreferrer">Get Jellyfin, free</a>
+            <a className="link" href={JELLYFIN} target="_blank" rel="noreferrer">Get Jellyfin</a>
+            {' or '}
+            <a className="link" href={NAVIDROME} target="_blank" rel="noreferrer">Navidrome</a>
+            {', both free'}
           </div>
           <div className="tree" role="img" aria-label="An example music folder: Music, then Slipknot, then the album We Are Not Your Kind with its FLAC files">
             <div className="tree-head">Music</div>
@@ -50,8 +53,8 @@ export default function How() {
           <div className="step-text">
             <h3>Sign in and press play</h3>
             <p>
-              Open Triptych, type your server's address and your Jellyfin username and password. Your whole library shows up:
-              artists, albums, playlists and liked songs. Your settings follow you to every device.
+              Open Triptych, type your server's address and your username and password. Triptych works out whether it's Jellyfin or Navidrome. Your whole library shows up:
+              artists, albums, playlists and liked songs. On Jellyfin, your settings follow you to every device too.
             </p>
           </div>
           <div className="phone">

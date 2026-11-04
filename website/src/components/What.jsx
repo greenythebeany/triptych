@@ -8,7 +8,8 @@ export default function What() {
         <h2 id="what-title">A player for your own music.</h2>
         <p className="lead">
           Streaming apps rent you music. Triptych plays the files you already have: your MP3s and FLACs, ripped CDs,
-          old downloads. Keep them on your own <a href="https://jellyfin.org" target="_blank" rel="noreferrer">Jellyfin</a> server
+          old downloads. Keep them on your own <a href="https://jellyfin.org" target="_blank" rel="noreferrer">Jellyfin</a> or{' '}
+          <a href="https://www.navidrome.org" target="_blank" rel="noreferrer">Navidrome</a> server
           and listen on your computer and phone in an app that feels like Spotify or Apple Music. No subscription, no ads.
         </p>
       </div>
@@ -20,7 +21,7 @@ export default function What() {
         </li>
         <li>
           <span className="panel-key" aria-hidden="true">B</span>
-          <h3>Jellyfin server</h3>
+          <h3>Jellyfin or Navidrome</h3>
           <p>Free software that organizes them and streams them to your devices.</p>
         </li>
         <li className="is-app">
