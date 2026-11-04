@@ -77,6 +77,13 @@ Var pid
       not_running:
     ${endIf}
   ${endIf}
+
+  ; 2.4.2 shipped the mobile-only Capacitor packages (with Android Gradle
+  ; build output) unpacked. Its uninstaller moves every file into Temp before
+  ; deleting, and some of those paths pass MAX_PATH there, so it aborts and
+  ; the update stops at "can't be closed" -- Retry never helps. This runs
+  ; right before the old uninstaller; the desktop app never loads them.
+  RMDir /r "$INSTDIR\resources\app.asar.unpacked\node_modules"
 !macroend
 
 ; Up to 2.2 the app was installed as com.jellywave.app (this GUID). 2.3
