@@ -101,6 +101,11 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.4.6
+
+- Windows: your own app icon also shows on the Desktop, Start menu and pinned-taskbar shortcuts (Reset puts the original back)
+- Smooth dropdown arrows in Settings instead of jagged ones
+
 ## What's new in 2.4.5
 
 - Windows: choosing another app icon updates the taskbar right away (it kept showing the previously picked image)
