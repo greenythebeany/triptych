@@ -13,9 +13,9 @@
     "close": "닫기"
   },
   "login": {
-    "subtitle": "Jellyfin 서버에 로그인",
+    "subtitle": "Jellyfin 또는 Navidrome 서버에 로그인",
     "serverLabel": "서버 주소",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "사용자 이름",
     "usernamePlaceholder": "사용자 이름",
     "passwordLabel": "비밀번호",
@@ -25,6 +25,7 @@
     "loggingIn": "로그인 중…",
     "errorWrongCredentials": "사용자 이름 또는 비밀번호가 올바르지 않습니다.",
     "errorServer": "서버가 {status}(으)로 응답했습니다.",
+    "errorNotServer": "이 주소에 Jellyfin 또는 Navidrome 서버가 없습니다.",
     "errorGeneric": "로그인할 수 없습니다. 서버 주소를 확인하고 다시 시도하세요.",
     "errorUnreachable": "서버에 연결할 수 없지만 로그인 상태는 유지됩니다. 연결을 확인하고 다시 시도하세요.",
     "retry": "다시 시도",

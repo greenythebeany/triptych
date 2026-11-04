@@ -13,9 +13,9 @@
     "close": "Stäng"
   },
   "login": {
-    "subtitle": "Logga in på din Jellyfin-server",
+    "subtitle": "Logga in på din Jellyfin- eller Navidrome-server",
     "serverLabel": "Serveradress",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "Användarnamn",
     "usernamePlaceholder": "Användarnamn",
     "passwordLabel": "Lösenord",
@@ -25,6 +25,7 @@
     "loggingIn": "Loggar in…",
     "errorWrongCredentials": "Fel användarnamn eller lösenord.",
     "errorServer": "Servern svarade med {status}.",
+    "errorNotServer": "Det finns ingen Jellyfin- eller Navidrome-server på den här adressen.",
     "errorGeneric": "Det gick inte att logga in. Kontrollera serveradressen och försök igen.",
     "errorUnreachable": "Kunde inte nå din server, men du är fortfarande inloggad — kontrollera anslutningen och försök igen.",
     "retry": "Försök igen",

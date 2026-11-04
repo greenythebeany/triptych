@@ -13,9 +13,9 @@
     "close": "Zavřít"
   },
   "login": {
-    "subtitle": "Přihlaste se ke svému Jellyfin serveru",
+    "subtitle": "Přihlaste se ke svému serveru Jellyfin nebo Navidrome",
     "serverLabel": "Adresa serveru",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "Uživatelské jméno",
     "usernamePlaceholder": "Uživatelské jméno",
     "passwordLabel": "Heslo",
@@ -25,6 +25,7 @@
     "loggingIn": "Přihlašování…",
     "errorWrongCredentials": "Nesprávné uživatelské jméno nebo heslo.",
     "errorServer": "Server odpověděl s kódem {status}.",
+    "errorNotServer": "Na této adrese není server Jellyfin ani Navidrome.",
     "errorGeneric": "Přihlášení se nezdařilo. Zkontrolujte adresu serveru a zkuste to znovu.",
     "errorUnreachable": "Nepodařilo se připojit k serveru, ale stále jsi přihlášen — zkontroluj připojení a zkus to znovu.",
     "retry": "Zkusit znovu",

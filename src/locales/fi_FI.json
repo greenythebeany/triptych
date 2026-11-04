@@ -13,9 +13,9 @@
     "close": "Sulje"
   },
   "login": {
-    "subtitle": "Kirjaudu Jellyfin-palvelimellesi",
+    "subtitle": "Kirjaudu Jellyfin- tai Navidrome-palvelimellesi",
     "serverLabel": "Palvelimen osoite",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "Käyttäjätunnus",
     "usernamePlaceholder": "Käyttäjätunnus",
     "passwordLabel": "Salasana",
@@ -25,6 +25,7 @@
     "loggingIn": "Kirjaudutaan…",
     "errorWrongCredentials": "Väärä käyttäjätunnus tai salasana.",
     "errorServer": "Palvelin vastasi koodilla {status}.",
+    "errorNotServer": "Tässä osoitteessa ei ole Jellyfin- tai Navidrome-palvelinta.",
     "errorGeneric": "Kirjautuminen epäonnistui. Tarkista palvelimen osoite ja yritä uudelleen.",
     "errorUnreachable": "Palvelimeen ei saatu yhteyttä, mutta olet yhä kirjautuneena — tarkista yhteys ja yritä uudelleen.",
     "retry": "Yritä uudelleen",

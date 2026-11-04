@@ -13,9 +13,9 @@
     "close": "關閉"
   },
   "login": {
-    "subtitle": "登入你的 Jellyfin 伺服器",
+    "subtitle": "登入你的 Jellyfin 或 Navidrome 伺服器",
     "serverLabel": "伺服器位址",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "使用者名稱",
     "usernamePlaceholder": "使用者名稱",
     "passwordLabel": "密碼",
@@ -25,6 +25,7 @@
     "loggingIn": "正在登入…",
     "errorWrongCredentials": "使用者名稱或密碼錯誤。",
     "errorServer": "伺服器回應了 {status}。",
+    "errorNotServer": "此位址沒有 Jellyfin 或 Navidrome 伺服器。",
     "errorGeneric": "無法登入。請檢查伺服器位址後再試一次。",
     "errorUnreachable": "無法連線到你的伺服器，但你仍保持登入——請檢查網路連線後重試。",
     "retry": "重試",

@@ -13,9 +13,9 @@
     "close": "閉じる"
   },
   "login": {
-    "subtitle": "Jellyfin サーバーにサインイン",
+    "subtitle": "Jellyfin または Navidrome サーバーにサインイン",
     "serverLabel": "サーバーアドレス",
-    "serverPlaceholder": "https://jellyfin.example.com",
+    "serverPlaceholder": "https://music.example.com",
     "usernameLabel": "ユーザー名",
     "usernamePlaceholder": "ユーザー名",
     "passwordLabel": "パスワード",
@@ -25,6 +25,7 @@
     "loggingIn": "ログイン中…",
     "errorWrongCredentials": "ユーザー名またはパスワードが違います。",
     "errorServer": "サーバーが {status} を返しました。",
+    "errorNotServer": "このアドレスには Jellyfin または Navidrome サーバーがありません。",
     "errorGeneric": "サインインできませんでした。サーバーアドレスを確認して、もう一度お試しください。",
     "errorUnreachable": "サーバーに接続できませんが、サインインは保持されています。接続を確認して再試行してください。",
     "retry": "再試行",

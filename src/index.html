@@ -76,11 +76,11 @@
         <svg id="login-icon" class="brand-mark login-icon" viewBox="0 0 411 453" aria-hidden="true"><rect y="103" width="113" height="350" rx="24"/><rect x="149" width="113" height="453" rx="24"/><rect class="brand-accent" x="298" y="103" width="113" height="350" rx="24"/></svg>
         <h1>Triptych</h1>
       </div>
-      <p class="login-sub" data-i18n="login.subtitle">Sign in to your Jellyfin server</p>
+      <p class="login-sub" data-i18n="login.subtitle">Sign in to your Jellyfin or Navidrome server</p>
       <form id="login-form" class="login-form">
         <label>
           <span data-i18n="login.serverLabel">Server address</span>
-          <input type="text" id="input-server" placeholder="https://jellyfin.example.com" required autocomplete="url" />
+          <input type="text" id="input-server" placeholder="https://music.example.com" required autocomplete="url" />
         </label>
         <label>
           <span data-i18n="login.usernameLabel">Username</span>
@@ -203,7 +203,7 @@
       <div class="lyrics-header">
         <button id="btn-close-lyrics" class="btn-icon-plain np-collapse-btn" data-i18n-title="nowPlaying.title" title="Now Playing"><i class="fi fi-br-angle-small-down"></i></button>
         <div class="lyrics-header-actions">
-          <button id="btn-connect-mobile" class="btn-icon-plain server-only" type="button" data-i18n-title="connect.title" title="Connect"><i class="fi fi-br-screencast"></i></button>
+          <button id="btn-connect-mobile" class="btn-icon-plain server-only connect-only" type="button" data-i18n-title="connect.title" title="Connect"><i class="fi fi-br-screencast"></i></button>
           <button id="btn-sleep-timer-mobile" class="btn-icon-plain" type="button" data-i18n-title="player.sleepTimer" title="Sleep timer"><i class="fi fi-br-moon"></i></button>
           <button id="btn-lyrics-mobile" class="btn-icon-plain btn-queue-mobile" type="button" data-i18n-title="nowPlaying.lyricsTab" title="Lyrics"><i class="fi fi-br-quote-right"></i></button>
           <button id="btn-queue-mobile" class="btn-icon-plain btn-queue-mobile" type="button" data-i18n-title="nowPlaying.queueTab" title="Queue"><i class="fi fi-br-list-music"></i></button>
@@ -312,7 +312,7 @@
           </button>
           <span id="sleep-timer-badge" class="sleep-timer-badge" hidden></span>
         </div>
-        <button id="btn-connect" class="ctrl-btn server-only" data-i18n-title="connect.title" title="Connect">
+        <button id="btn-connect" class="ctrl-btn server-only connect-only" data-i18n-title="connect.title" title="Connect">
           <i class="fi fi-br-screencast"></i>
         </button>
         <button id="btn-queue" class="ctrl-btn" data-i18n-title="nowPlaying.queueTab" title="Queue">
