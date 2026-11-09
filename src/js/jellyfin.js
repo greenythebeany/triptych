@@ -52,7 +52,7 @@ const LEGACY_PREFS = { listening: 'JellyWaveListening', settings: 'JellyWaveSett
 // literal below is only the fallback for the brief window before that
 // resolves (or if neither bridge is available, e.g. running in a plain
 // browser during development).
-let CLIENT_VERSION = '2.4.6';
+let CLIENT_VERSION = '2.5.0';
 
 export function getClientVersion() {
   return CLIENT_VERSION;
@@ -721,6 +721,50 @@ export class JellyfinClient {
     if (!tag) return null;
     const params = new URLSearchParams({ maxWidth, quality: 90, tag });
     return `${this.serverUrl}/Items/${item.Id}/Images/Backdrop/0?${params.toString()}`;
+  }
+
+  // A video to loop on the Now Playing art (see canvasVideo.js): the
+  // track's or its album's theme video (a backdrops/ folder next to the
+  // files), else a music video in the library with the same title and
+  // artist. null when the server has none.
+  async findCanvasVideo(track) {
+    for (const id of [track.Id, track.AlbumId]) {
+      if (!id) continue;
+      const data = await this._get(`/Items/${id}/ThemeVideos`, { userId: this.userId, inheritFromParent: true });
+      if (data?.Items?.length) return data.Items[0];
+    }
+    const norm = (s) => String(s || '').toLowerCase().replace(/\s*[([].*?[)\]]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    const title = norm(track.Name);
+    if (!title) return null;
+    const artists = [...(track.Artists || []), track.AlbumArtist].map(norm).filter(Boolean);
+    const data = await this._get(`/Users/${this.userId}/Items`, {
+      SearchTerm: track.Name.replace(/\s*[([].*?[)\]]/g, '').trim() || track.Name,
+      IncludeItemTypes: 'MusicVideo',
+      Recursive: true,
+      Limit: 20,
+      Fields: 'Artists'
+    });
+    return (data?.Items || []).find((v) => {
+      const name = norm(v.Name);
+      const byArtist = (v.Artists || []).some((a) => artists.includes(norm(a))) || artists.some((a) => name.includes(a));
+      return byArtist && (name === title || name.includes(title));
+    }) || null;
+  }
+
+  // Capped at 720p / 1.5 Mbps -- the server stream-copies a video already
+  // under that, transcodes anything bigger.
+  canvasVideoUrl(video) {
+    const params = new URLSearchParams({
+      videoCodec: 'h264',
+      audioCodec: 'aac',
+      maxWidth: '720',
+      maxHeight: '720',
+      videoBitRate: '1500000',
+      audioBitRate: '64000',
+      api_key: this.accessToken,
+      deviceId: DEVICE_ID
+    });
+    return `${this.serverUrl}/Videos/${video.Id}/stream.mp4?${params.toString()}`;
   }
 
   // bitrateKbps: omit (or 0) for direct play at source quality; otherwise the

@@ -13,6 +13,7 @@ import { createConnect } from './connect.js';
 import { createRecommender, trackArtistKeys } from './recommend.js';
 import { isSupported as downloadsSupported, isDownloaded, downloadTrack, deleteDownload, onDownloadsChange, getDownloadedTracks, getTotalDownloadedBytes, getLocalImageUri } from './downloads.js';
 import { renderGrab } from './grab.js';
+import { initCanvasVideo, setCanvasTrack, syncCanvasPlayback } from './canvasVideo.js';
 import { getPinnedAlbums, isAlbumPinned, togglePinAlbum, onPinnedAlbumsChange } from './pinnedAlbums.js';
 
 // ---------- DOM refs ----------
@@ -103,6 +104,9 @@ const paletteGrid = document.getElementById('palette-grid');
 const audioQualitySelect = document.getElementById('audio-quality-select');
 const languageSelect = document.getElementById('language-select');
 const toggleArtBackground = document.getElementById('toggle-art-background');
+const toggleCanvasVideo = document.getElementById('toggle-canvas-video');
+const giphyKeyInput = document.getElementById('giphy-key-input');
+const toggleGiphy = document.getElementById('toggle-giphy');
 const toggleDynamicAccentColor = document.getElementById('toggle-dynamic-accent-color');
 const crossfadeSlider = document.getElementById('crossfade-slider');
 const crossfadeValue = document.getElementById('crossfade-value');
@@ -170,6 +174,9 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  '2.5.0': [
+    { icon: 'fi-br-film', key: 'canvas250' }
+  ],
   // 2.4.4 also lists 2.4.3: coming from 2.4.2 only the newest notes show.
   '2.4.4': [
     { icon: 'fi-br-headphones', key: 'navidrome243' },
@@ -1029,6 +1036,7 @@ async function enterApp(username) {
   document.body.classList.toggle('subsonic-mode', !!jellyfin.isSubsonic);
 
   player = new Player(jellyfin, currentBitrateKbps);
+  initCanvasVideo({ panel: lyricsPanel, audio: () => player?.audio, client: () => jellyfin });
   const savedSettings = getSettings();
   player.setCrossfadeSeconds(savedSettings.crossfadeSeconds || 0);
   player.setReplayGainEnabled(!!savedSettings.replayGainEnabled);
@@ -1474,6 +1482,16 @@ function wireSettingsUI() {
     updateSettings({ audioQuality: audioQualitySelect.value });
   });
 
+
+  toggleCanvasVideo.addEventListener('change', () => {
+    updateSettings({ canvasVideos: toggleCanvasVideo.checked });
+  });
+  toggleGiphy.addEventListener('change', () => {
+    updateSettings({ giphyEnabled: toggleGiphy.checked });
+  });
+  giphyKeyInput.addEventListener('change', () => {
+    updateSettings({ giphyApiKey: giphyKeyInput.value.trim() });
+  });
 
   toggleArtBackground.addEventListener('change', () => {
     updateSettings({ artBackground: toggleArtBackground.checked });
@@ -2488,6 +2506,7 @@ function updateRemoteBarUI(session) {
     // (paused, since it was stopped for the handoff) instead of leaving the
     // last-seen remote track showing.
     const track = player.currentTrack;
+    setCanvasTrack(track);
     if (track) {
       playerArt.src = artUrl(track, 'album', 64);
       withOfflineArtFallback(playerArt, track);
@@ -2530,6 +2549,7 @@ function updateRemoteBarUI(session) {
 
   playerBar.hidden = false;
   appRoot.classList.add('has-track');
+  setCanvasTrack(null);
 
   const item = session.NowPlayingItem;
   const playState = session.PlayState || {};
@@ -2573,6 +2593,9 @@ function refreshSettingsUI() {
   const s = getSettings();
   languageSelect.value = s.language;
   toggleArtBackground.checked = !!s.artBackground;
+  toggleCanvasVideo.checked = s.canvasVideos !== false;
+  giphyKeyInput.value = s.giphyApiKey || '';
+  toggleGiphy.checked = s.giphyEnabled !== false;
   toggleDynamicAccentColor.checked = !!s.dynamicAccentColor;
   crossfadeSlider.value = s.crossfadeSeconds || 0;
   crossfadeValue.textContent = s.crossfadeSeconds ? `${s.crossfadeSeconds}s` : t('settings.crossfadeOff');
@@ -4984,6 +5007,7 @@ function wirePlayer() {
 
     nowPlayingArt.src = artUrl(track, 'album', 440);
     withOfflineArtFallback(nowPlayingArt, track);
+    if (!connect?.isConnected()) setCanvasTrack(track);
     setMarqueeText(nowPlayingTitle, track.Name);
     setMarqueeText(nowPlayingArtist, artistNames(track));
     setArtAlt(track.Name, artistNames(track));
@@ -5032,6 +5056,7 @@ function wirePlayer() {
     const playing = !player.audio.paused;
     lyricsPanel.classList.toggle('is-paused', !playing);
     if (playing) startWordLoop();
+    syncCanvasPlayback();
     setHidden(iconPlay, playing);
     setHidden(iconPause, !playing);
     setHidden(mobileIconPlay, playing);

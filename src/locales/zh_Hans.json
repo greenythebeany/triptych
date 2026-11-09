@@ -445,6 +445,8 @@
     "motion242Desc": "开关和菜单像水滴一样移动，页面标题会自己打出来，按钮会弹跳，手机上的标签会滑动。静态模式会全部关闭。",
     "sidebar242Title": "你的侧边栏，你的顺序",
     "sidebar242Desc": "把歌单和固定的专辑拖成任意顺序。另外播放栏新增队列按钮，点一下即可静音。",
+    "canvas250Title": "Canvas",
+    "canvas250Desc": "循环视频铺满正在播放界面：来自你的服务器，或来自 GIPHY 的歌曲 GIF（在设置中添加免费密钥）。省电模式和慢速网络下保持封面。",
     "navidrome243Title": "Navidrome 服务器",
     "navidrome243Desc": "不只是 Jellyfin，也能登录 Navidrome 服务器：浏览、播放、喜欢和播放列表用法都一样。",
     "appIcon243Title": "自定义应用图标",

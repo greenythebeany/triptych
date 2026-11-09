@@ -36,6 +36,9 @@ const DEFAULTS = {
   nothingDottedSliders: true, // Nothing style only: dot-matrix seek/volume bars, off = plain lines
   audioQuality: 'auto',
   artBackground: false,
+  giphyApiKey: '', // empty = no GIPHY lookups (Settings -> Canvas videos)
+  giphyEnabled: true, // off = no GIF backgrounds, only the server's own videos
+  canvasVideos: true, // looping video on the Now Playing art when the server has one (see canvasVideo.js)
   dynamicAccentColor: false,
   language: detectLocale(), // first run follows the system language; saved choices win
   customCss: '',

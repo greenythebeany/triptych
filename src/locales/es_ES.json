@@ -447,6 +447,8 @@
     "motion242Desc": "Los interruptores y menús se mueven como una gota, los títulos se escriben solos, los botones rebotan y las pestañas del móvil se deslizan. Estático lo desactiva todo.",
     "sidebar242Title": "Tu barra lateral, tu orden",
     "sidebar242Desc": "Arrastra listas y álbumes fijados en el orden que quieras. Además, un botón de cola y silenciar con un clic en el reproductor.",
+    "canvas250Title": "Canvas",
+    "canvas250Desc": "Un vídeo en bucle llena la pantalla de reproducción: el de tu servidor o un GIF de la canción de GIPHY (añade una clave gratuita en Ajustes). Con ahorro de batería o conexión lenta se queda la portada.",
     "navidrome243Title": "Servidores Navidrome",
     "navidrome243Desc": "Inicia sesión en un servidor Navidrome, no solo Jellyfin: explora, reproduce, marca favoritos y usa listas igual que siempre.",
     "appIcon243Title": "Tu propio icono",

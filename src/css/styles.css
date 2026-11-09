@@ -943,6 +943,57 @@ html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; f
 .now-playing-summary { padding: 22px 22px 8px; flex-shrink: 0; position: relative; z-index: 1; }
 .now-playing-art-wrap { position: relative; max-width: 220px; margin: 0 auto 16px; overflow: hidden; border-radius: var(--radius-md); }
 .now-playing-art { display: block; width: 100%; aspect-ratio: 1/1; border-radius: var(--radius-md); object-fit: cover; box-shadow: 0 16px 34px rgba(0,0,0,0.4); background: var(--bg-card); transform: scale(1.15); }
+/* Canvas (canvasVideo.js): the video fills the whole Now Playing panel,
+   Spotify-style -- the cover steps aside and a shade keeps the title,
+   controls and lyrics readable. Comes into focus as it fades in; a soft
+   resting blur hides upscaled GIFs' pixels. Blur fades an element's own
+   edges to transparent, so the scale pushes them well past the panel
+   (about 3x the blur radius on each side, even on a narrow window). */
+.lyrics-panel { isolation: isolate; }
+.now-playing-canvas, .now-playing-canvas-shade {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+}
+.now-playing-canvas {
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; filter: blur(14px); transform: scale(1.35);
+  transition: opacity 0.8s ease, filter 1.1s ease, transform 1.1s ease;
+}
+.now-playing-canvas.shown { opacity: 1; filter: blur(4px) saturate(1.1); transform: scale(1.15); }
+.now-playing-canvas-shade {
+  opacity: 0; transition: opacity 0.8s ease;
+  /* The panel's own color (dark or light theme, custom themes too): a band
+     behind the header buttons, clear middle, then a soft ramp that starts
+     just above the title and deepens under the controls. */
+  --shade: var(--bg-elevated);
+  --s-top: 78%; --s-top2: 50%; --s-top3: 18%;
+  --s-mid: 22%; --s-title: 55%; --s-ctrl: 78%; --s-end: 90%;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--shade) var(--s-top), transparent) 0%,
+    color-mix(in srgb, var(--shade) var(--s-top2), transparent) 10%,
+    color-mix(in srgb, var(--shade) var(--s-top3), transparent) 19%,
+    transparent 29%, transparent 37%,
+    color-mix(in srgb, var(--shade) var(--s-mid), transparent) 45%,
+    color-mix(in srgb, var(--shade) var(--s-title), transparent) 54%,
+    color-mix(in srgb, var(--shade) var(--s-ctrl), transparent) 64%,
+    color-mix(in srgb, var(--shade) var(--s-end), transparent) 100%);
+}
+/* Dark theme: fades to true black (not the panel's gray), and deeper --
+   dark footage under a light shade barely shows the fade. */
+:root[data-theme="dark"] .now-playing-canvas-shade {
+  --shade: #000;
+  --s-top: 96%; --s-top2: 78%; --s-top3: 42%;
+  --s-mid: 40%; --s-title: 78%; --s-ctrl: 92%; --s-end: 98%;
+}
+.lyrics-panel.has-canvas .now-playing-canvas-shade { opacity: 1; }
+.lyrics-panel.has-canvas .now-playing-bg-art { opacity: 0; }
+.now-playing-art { transition: opacity 0.6s ease; }
+.lyrics-panel.has-canvas .now-playing-art { opacity: 0; }
+.lyrics-panel.has-canvas .now-playing-art-wrap { box-shadow: none !important; border-color: transparent !important; background: none; }
+.lyrics-panel.has-canvas .now-playing-title, .lyrics-panel.has-canvas .now-playing-artist { text-shadow: 0 1px 12px color-mix(in srgb, var(--bg-elevated) 60%, transparent); }
+.giphy-key-input {
+  margin-top: 10px; width: 100%; background: var(--bg-highlight); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text-primary); font-size: 13px;
+}
 /* Mobile-only: app.js moves #cat-jam in here so it overlays the cover art
    instead of sitting fixed near the player bar (no room for that on phones,
    and beat-sync there would re-route audio through Web Audio, which is

@@ -441,6 +441,33 @@
           </div>
           <div class="settings-row">
             <div>
+              <div class="settings-row-label" data-i18n="settings.canvasVideos">Canvas videos</div>
+              <div class="settings-row-desc" data-i18n="settings.canvasVideosDesc">Loop a video over the cover art: your server's own (an album's theme video, or a music video with the same title), else a GIF of the song from GIPHY. Cover art stays on battery saver and slow connections</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-canvas-video" />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+          <div class="settings-row settings-row-stack">
+            <div>
+              <div class="settings-row-label" data-i18n="settings.giphyKey">GIPHY API key</div>
+              <div class="settings-row-desc" data-i18n="settings.giphyKeyDesc">Free from developers.giphy.com. Finds a GIF of the song when your server has no video for it -- sends the artist and song title to GIPHY</div>
+            </div>
+            <input type="text" id="giphy-key-input" class="giphy-key-input" spellcheck="false" autocomplete="off" placeholder="API key" />
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label" data-i18n="settings.giphyEnabled">GIF background</div>
+              <div class="settings-row-desc" data-i18n="settings.giphyEnabledDesc">When your server has no video for a song, play a GIF of it from GIPHY. Off = cover art</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-giphy" />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div>
               <div class="settings-row-label" data-i18n="settings.dynamicAccentColor">Dynamic accent color</div>
               <div class="settings-row-desc" data-i18n="settings.dynamicAccentColorDesc">Tint the app's accent color to match the current song's cover art</div>
             </div>
@@ -685,6 +712,10 @@
           <div class="settings-row">
             <div class="settings-row-label">Triptych</div>
             <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener noreferrer" class="attribution-link">Uicons by Flaticon</a>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label" data-i18n="settings.canvasVideos">Canvas videos</div>
+            <a href="https://giphy.com" target="_blank" rel="noopener noreferrer" class="attribution-link">Powered by GIPHY</a>
           </div>
           <div class="settings-row">
             <div class="settings-row-label" data-i18n="settings.catJam">Jam on paw level</div>

@@ -101,6 +101,12 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.5.0
+
+- Canvas: a looping video fills the Now Playing screen, Spotify-style -- your server's own (an album's theme video, or a music video with the same title), else a GIF of the song from GIPHY (add your free GIPHY key in Settings)
+- Fades in softly with a gentle blur, behind a gradient that keeps the title and controls readable (black in dark mode, light in light mode)
+- The cover art stays on battery saver, data saver and slow connections; turn GIFs or the whole canvas off in Settings
+
 ## What's new in 2.4.6
 
 - Windows: your own app icon also shows on the Desktop, Start menu and pinned-taskbar shortcuts (Reset puts the original back)

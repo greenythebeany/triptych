@@ -447,6 +447,8 @@
     "motion242Desc": "Kytkimet ja valikot liikkuvat kuin pisara, sivujen otsikot kirjoittuvat itsestään, painikkeet pomppaavat ja puhelimen välilehdet liukuvat. Staattinen poistaa kaiken.",
     "sidebar242Title": "Oma sivupalkki, oma järjestys",
     "sidebar242Desc": "Vedä soittolistat ja kiinnitetyt albumit haluamaasi järjestykseen. Lisäksi jonopainike ja mykistys klikkaamalla soittimessa.",
+    "canvas250Title": "Canvas",
+    "canvas250Desc": "Silmukkavideo täyttää Nyt soi -näkymän: palvelimesi oma tai kappaleen GIF GIPHYstä (lisää ilmainen avain asetuksissa). Virransäästössä ja hitaalla yhteydellä kansikuva pysyy.",
     "navidrome243Title": "Navidrome-palvelimet",
     "navidrome243Desc": "Kirjaudu Navidrome-palvelimelle, ei vain Jellyfiniin: selaa, toista, tykkää ja käytä soittolistoja samalla tavalla.",
     "appIcon243Title": "Oma sovelluskuvake",

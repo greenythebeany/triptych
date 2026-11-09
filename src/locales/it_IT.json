@@ -447,6 +447,8 @@
     "motion242Desc": "Interruttori e menu si muovono come una goccia, i titoli delle pagine si scrivono da soli, i pulsanti rimbalzano e le schede del telefono scorrono. Statico disattiva tutto.",
     "sidebar242Title": "La tua barra laterale, il tuo ordine",
     "sidebar242Desc": "Trascina playlist e album fissati nell'ordine che vuoi. In più un pulsante coda e il silenzioso con un clic nel lettore.",
+    "canvas250Title": "Canvas",
+    "canvas250Desc": "Un video in loop riempie In riproduzione: quello del tuo server o una GIF del brano da GIPHY (aggiungi una chiave gratuita nelle Impostazioni). Con risparmio energetico e connessione lenta resta la copertina.",
     "navidrome243Title": "Server Navidrome",
     "navidrome243Desc": "Accedi a un server Navidrome, non solo Jellyfin: sfoglia, riproduci, metti mi piace e usa le playlist allo stesso modo.",
     "appIcon243Title": "La tua icona dell'app",

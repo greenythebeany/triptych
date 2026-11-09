@@ -447,6 +447,8 @@
     "motion242Desc": "Les interrupteurs et menus bougent comme une goutte, les titres de page s'écrivent tout seuls, les boutons rebondissent et les onglets du téléphone glissent. Statique coupe tout.",
     "sidebar242Title": "Votre barre latérale, votre ordre",
     "sidebar242Desc": "Glissez playlists et albums épinglés dans l'ordre voulu. Plus un bouton de file d'attente et la coupure du son d'un clic dans le lecteur.",
+    "canvas250Title": "Canvas",
+    "canvas250Desc": "Une vidéo en boucle remplit l'écran de lecture : celle de votre serveur, ou un GIF du titre depuis GIPHY (ajoutez une clé gratuite dans les Réglages). La pochette reste en économie d'énergie et en connexion lente.",
     "navidrome243Title": "Serveurs Navidrome",
     "navidrome243Desc": "Connectez-vous à un serveur Navidrome, pas seulement Jellyfin : parcourir, écouter, aimer et les playlists fonctionnent pareil.",
     "appIcon243Title": "Votre propre icône",

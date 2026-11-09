@@ -445,6 +445,8 @@
     "motion242Desc": "開關和選單像水滴一樣移動，頁面標題會自己打出來，按鈕會彈跳，手機上的分頁會滑動。靜態模式會全部關閉。",
     "sidebar242Title": "你的側邊欄，你的順序",
     "sidebar242Desc": "把播放清單和釘選的專輯拖成任意順序。另外播放列新增待播清單按鈕，點一下即可靜音。",
+    "canvas250Title": "Canvas",
+    "canvas250Desc": "循環影片鋪滿正在播放畫面：來自你的伺服器，或來自 GIPHY 的歌曲 GIF（在設定中加入免費金鑰）。省電模式與慢速網路下保留封面。",
     "navidrome243Title": "Navidrome 伺服器",
     "navidrome243Desc": "不只是 Jellyfin，也能登入 Navidrome 伺服器：瀏覽、播放、喜歡和播放清單用法都一樣。",
     "appIcon243Title": "自訂應用程式圖示",

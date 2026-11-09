@@ -447,6 +447,8 @@
     "motion242Desc": "Kontakter og menuer bevæger sig som en dråbe, sidetitler skriver sig selv, knapper hopper, og faner på telefonen glider. Statisk slår det hele fra.",
     "sidebar242Title": "Dit sidepanel, din rækkefølge",
     "sidebar242Desc": "Træk playlister og fastgjorte album i den rækkefølge, du vil. Plus en køknap og lyd fra med et klik i afspilleren.",
+    "canvas250Title": "Canvas",
+    "canvas250Desc": "En video i loop fylder Afspiller nu: din servers egen eller en GIF af sangen fra GIPHY (tilføj en gratis nøgle i Indstillinger). Coveret bliver ved strømsparing og langsom forbindelse.",
     "navidrome243Title": "Navidrome-servere",
     "navidrome243Desc": "Log ind på en Navidrome-server, ikke kun Jellyfin: gennemse, afspil, synes godt om og brug playlister på samme måde.",
     "appIcon243Title": "Dit eget app-ikon",
