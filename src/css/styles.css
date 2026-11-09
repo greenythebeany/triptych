@@ -945,20 +945,33 @@ html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; f
 .now-playing-art { display: block; width: 100%; aspect-ratio: 1/1; border-radius: var(--radius-md); object-fit: cover; box-shadow: 0 16px 34px rgba(0,0,0,0.4); background: var(--bg-card); transform: scale(1.15); }
 /* Canvas (canvasVideo.js): the video fills the whole Now Playing panel,
    Spotify-style -- the cover steps aside and a shade keeps the title,
-   controls and lyrics readable. Comes into focus as it fades in; a soft
-   resting blur hides upscaled GIFs' pixels. Blur fades an element's own
-   edges to transparent, so the scale pushes them well past the panel
-   (about 3x the blur radius on each side, even on a narrow window). */
+   controls and lyrics readable. Comes into focus as it fades in and then
+   stays sharp. Blur fades an element's own edges to transparent, so the
+   fade-in's zoom keeps them well past the panel while it's blurred. */
 .lyrics-panel { isolation: isolate; }
-.now-playing-canvas, .now-playing-canvas-shade {
-  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+.now-playing-canvas-box {
+  position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
 }
+.now-playing-canvas, .now-playing-canvas-shade { position: absolute; inset: 0; }
 .now-playing-canvas {
   width: 100%; height: 100%; object-fit: cover;
   opacity: 0; filter: blur(14px); transform: scale(1.35);
   transition: opacity 0.8s ease, filter 1.1s ease, transform 1.1s ease;
 }
-.now-playing-canvas.shown { opacity: 1; filter: blur(4px) saturate(1.1); transform: scale(1.15); }
+.now-playing-canvas.shown { opacity: 1; filter: saturate(1.1); transform: scale(1.04); }
+/* Desktop side panel: only the top, down to just under the title
+   (--canvas-h, canvasVideo.js), fading out into the panel above the
+   lyrics. */
+.lyrics-panel.canvas-top .now-playing-canvas-box { bottom: auto; height: var(--canvas-h, 60%); }
+.lyrics-panel.canvas-top .now-playing-canvas-box .now-playing-canvas-shade {
+  --shade: var(--panel-bg, var(--bg-elevated));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--shade) var(--s-top), transparent) 0%,
+    color-mix(in srgb, var(--shade) var(--s-top3), transparent) 16%,
+    transparent 30%, transparent 55%,
+    color-mix(in srgb, var(--shade) var(--s-title), transparent) 78%,
+    var(--shade) 94%);
+}
 .now-playing-canvas-shade {
   opacity: 0; transition: opacity 0.8s ease;
   /* The panel's own color (dark or light theme, custom themes too): a band
@@ -990,6 +1003,9 @@ html:root[data-ui] .main.hero-top .header-nav-arrows .nav-arrow { color: #fff; f
 .lyrics-panel.has-canvas .now-playing-art { opacity: 0; }
 .lyrics-panel.has-canvas .now-playing-art-wrap { box-shadow: none !important; border-color: transparent !important; background: none; }
 .lyrics-panel.has-canvas .now-playing-title, .lyrics-panel.has-canvas .now-playing-artist { text-shadow: 0 1px 12px color-mix(in srgb, var(--bg-elevated) 60%, transparent); }
+.giphy-howto { margin-top: 10px; font-size: 12.5px; color: var(--text-secondary); }
+.giphy-howto summary { cursor: pointer; color: var(--text-primary); font-weight: 500; width: fit-content; }
+.giphy-howto ol { margin: 8px 0 10px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; line-height: 1.45; }
 .giphy-key-input {
   margin-top: 10px; width: 100%; background: var(--bg-highlight); border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text-primary); font-size: 13px;

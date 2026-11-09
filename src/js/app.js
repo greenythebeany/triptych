@@ -174,6 +174,11 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  // Also lists 2.5.0's canvas: coming from 2.4.x only the newest notes show.
+  '2.5.1': [
+    { icon: 'fi-br-film', key: 'canvas250' },
+    { icon: 'fi-br-search', key: 'gifs251' }
+  ],
   '2.5.0': [
     { icon: 'fi-br-film', key: 'canvas250' }
   ],

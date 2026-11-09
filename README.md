@@ -101,6 +101,22 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.5.1
+
+- Canvas GIFs: sharp HD clips (up to 1080p) from the artist's own GIPHY channel -- the song's clip when there is one, else a different one of the artist's clips per song
+- Many more songs found: long titles ("From the Motion Picture...", "feat.", "Remastered"), co-artists, names like Ke$ha; no more still title cards or other artists' GIFs
+- Every result is remembered for 30 days, so a free GIPHY key's 100 searches an hour go a long way
+- Wide windows: the canvas fills the top of Now Playing behind the title and fades out above the lyrics; phones stay full screen. No blur once it's in focus
+- Settings: step-by-step guide to getting a free GIPHY key (also below)
+
+### Getting a free GIPHY key
+
+1. Open [developers.giphy.com](https://developers.giphy.com/dashboard/) and sign up (free) or log in.
+2. Click **Create an App**, choose **API** (not SDK), then **Next Step**.
+3. Name it (for example *Triptych*), add a short description, accept the terms and click **Create App**.
+4. Copy the API key it shows and paste it in Triptych: **Settings -> GIPHY API key**.
+5. New keys allow 100 searches an hour. Triptych remembers every song for 30 days, so that's usually plenty. For no limit, click **Upgrade to Production** on your app's page (free; GIPHY reviews the request).
+
 ## What's new in 2.5.0
 
 - Canvas: a looping video fills the Now Playing screen, Spotify-style -- your server's own (an album's theme video, or a music video with the same title), else a GIF of the song from GIPHY (add your free GIPHY key in Settings)
