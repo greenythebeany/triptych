@@ -135,6 +135,20 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.6.2
+
+- Songs that have a music video get a small, subtle icon next to the title in song lists (film strip by default; pick another one or turn it off in Settings → Music video icon). It marks the songs the Triptych Music Video Data plugin found a video for
+- A heart next to the song's title and artist in the player bar, to like or unlike what's playing
+- The heart, add and download buttons in song lists are round again (they were squeezed into ovals)
+- Plus everything from 2.6.0 (details below):
+  - **Real music videos in Now Playing**: the song's official music video plays behind the player in smooth HD, from your own Jellyfin videos first, then Apple's 30-second previews. GIPHY and its API key are gone
+  - **The Triptych Music Video Data plugin** for Jellyfin finds every song's video ahead of time, so it starts instantly ([setup](#music-videos-setup))
+  - On phones, tap the video to see all of it; desktop shows it at the top of the Now Playing panel
+  - Tap an artist's name to open their page, with combined credits like "Nerieš, Separ" split per artist
+  - The seek bar lands where you let go, also at lower streaming quality
+  - Lyrics retry a busy source instead of showing "No lyrics found"; remixes fall back to the original song
+  - Ctrl+↑ / Ctrl+↓ for volume; the Android notification always shows the right cover; the player opens the way you left it
+
 ## What's new in 2.6.0
 
 - **Real music videos in Now Playing** (see [Music videos: setup](#music-videos-setup)): the song's official music video plays behind the player in smooth HD instead of a GIF, from your own Jellyfin videos first, then Apple's 30-second previews. GIPHY is gone, and so is the API key.

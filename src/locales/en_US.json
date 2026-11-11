@@ -129,7 +129,8 @@
     "like": "Like",
     "changeCoverArt": "Change cover art",
     "download": "Download",
-    "removeDownload": "Remove download"
+    "removeDownload": "Remove download",
+    "hasVideo": "Has a music video"
   },
   "createPlaylist": {
     "title": "Create Playlist",
@@ -253,7 +254,9 @@
     "qualityOriginal": "original quality",
     "lyricsSearch": "Search by lyrics",
     "lyricsSearchDesc": "Lets you find songs by a line of their lyrics. Fetches your library's lyrics in the background (song titles and artists go to lrclib.net, NetEase, Kugou and lyrics.ovh) and keeps them on this device.",
-    "lyricsSearchStatus": "Indexed {done} of {total} songs ({found} with lyrics)."
+    "lyricsSearchStatus": "Indexed {done} of {total} songs ({found} with lyrics).",
+    "videoBadge": "Music video icon",
+    "videoBadgeDesc": "Marks songs that have a music video in song lists (found by the Triptych Music Video Data plugin)"
   },
   "privacyNotice": {
     "text": "Triptych keeps everything on your own device and your own Jellyfin/Navidrome server. A couple of background lookups (album art, update checks) talk to outside services — see the Privacy Policy for exactly what's sent, and turn them off any time in Settings.",
@@ -521,5 +524,12 @@
     "turnOff": "Turn off",
     "phoneDesc": "Play the music saved on this phone, alongside your server.",
     "permissionDenied": "Triptych needs permission to read the music on this phone. You can allow it in the system settings under Apps → Triptych → Permissions."
+  },
+  "videoBadge": {
+    "film": "Film strip",
+    "clapperboard": "Clapperboard",
+    "camera": "Video camera",
+    "play": "Play button",
+    "off": "Off"
   }
 }
