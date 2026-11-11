@@ -54,7 +54,7 @@ const LEGACY_PREFS = { listening: 'JellyWaveListening', settings: 'JellyWaveSett
 // literal below is only the fallback for the brief window before that
 // resolves (or if neither bridge is available, e.g. running in a plain
 // browser during development).
-let CLIENT_VERSION = '2.6.0';
+let CLIENT_VERSION = '2.6.2';
 
 export function getClientVersion() {
   return CLIENT_VERSION;
