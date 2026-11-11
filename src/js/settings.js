@@ -36,6 +36,8 @@ const DEFAULTS = {
   nothingDottedSliders: true, // Nothing style only: dot-matrix seek/volume bars, off = plain lines
   audioQuality: 'auto',
   artBackground: false,
+  appleVideos: true, // the song's music video preview from Apple's iTunes Search API (canvasVideo.js)
+  canvasVideos: true, // looping video on the Now Playing art when the server has one (see canvasVideo.js)
   dynamicAccentColor: false,
   language: detectLocale(), // first run follows the system language; saved choices win
   customCss: '',

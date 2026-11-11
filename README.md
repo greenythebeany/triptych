@@ -22,6 +22,14 @@
 
 Triptych is a personal music client for a self-hosted Jellyfin server. It logs into your own server with your own library and gives you a modern, Spotify-like listening experience across desktop and Android, without any of the server-side bloat of a general-purpose media app.
 
+> [!IMPORTANT]
+> ## Triptych 2.6.0: real music videos in Now Playing
+> The song's **actual music video now plays behind Now Playing**, Spotify-Canvas style: smooth HD video (mostly 1080p), not a GIF. It fills the whole player on phones and the top of the side panel on desktop, with the lyrics underneath. On a phone, tap the video to see all of it, and tap again to bring the player back.
+>
+> It works out of the box, and it gets **instant** with the new **Triptych Music Video Data** plugin for your Jellyfin server, which finds every song's video ahead of time. Two minutes to set up: **[Music videos: setup](#music-videos-setup)**.
+>
+> Also new: tap an artist's name to open their page, a seek bar that lands where you let go, lyrics that no longer give up when a source is busy, Ctrl+↑/↓ for volume, and the Android notification always showing the right cover.
+
 ## Showcase
 
 https://github.com/user-attachments/assets/4d5fa0a4-d05b-4bf4-8921-1810018c48fb
@@ -32,6 +40,7 @@ https://github.com/user-attachments/assets/4d5fa0a4-d05b-4bf4-8921-1810018c48fb
 
 - Full library browsing: Home, Search, All Songs, Liked Songs, Genres, Albums, Artists, and Playlists
 - Music on this device: on desktop, pick one or more folders and Triptych plays the audio files in them (MP3, FLAC, M4A/AAC, Ogg, Opus, WAV) with their tags and cover art. Use it on its own without a Jellyfin server ("Use music on this device" on the sign-in screen), or next to your server, where the local songs show up in the same library. Likes, play counts and playlists for local songs stay on the device; `.lrc` files next to a song and lyrics embedded in its tags are used for lyrics. Folders and Rescan are in Settings → Music on this device. On Android, Triptych reads the phone's own music library (the songs other music apps see) after you allow access to music
+- Music videos in Now Playing: the song's official music video plays behind the player (from your own Jellyfin Music Videos library, or Apple's 30-second HD previews), found ahead of time by the optional [Triptych Music Video Data](#music-videos-setup) plugin. The cover stays on battery saver, data saver and slow connections
 - Gapless playback with optional crossfade (0-12 seconds) between tracks
 - ReplayGain-based volume normalization, using loudness data from your server
 - Synced lyrics for the currently playing track, with the current line easing into focus as it's sung. Your own Jellyfin server, lrclib.net, NetEase Cloud Music and Kugou are all asked at once and the best synced match is taken as soon as it arrives; plain lyrics (also from lyrics.ovh) only when nobody has synced ones. Titles are matched loosely ("feat.", "Remastered 2011", "- Live", brackets, accents and Chinese/Japanese/Korean titles) and checked against the song's length, and lyrics are cached per song and fetched ahead for the next song
@@ -55,6 +64,31 @@ Grab the latest build from the [Releases](https://github.com/greenythebeany/trip
 - **Android**: download the `.apk` and install it (you will need to allow installs from your browser or file manager the first time)
 
 On first launch, enter the address of your own Jellyfin server and sign in with your Jellyfin account.
+
+## Music videos: setup
+
+Triptych 2.6.0 plays the song's music video behind Now Playing. There are three places it can come from, tried in this order:
+
+1. **Your own videos:** a **Music Videos** library on your Jellyfin server (or an album's theme video in its `backdrops` folder). Name each video after its song, with the artist in the tags or folder. Full quality, and the only way to get videos Apple doesn't have (most Slovak rap, YouTube-only songs).
+2. **The Triptych Music Video Data plugin** (recommended): it finds every song's official music video on Apple ahead of time and keeps the match on your server, so the video starts the moment the song does, on every device.
+3. **Without the plugin**, the app searches Apple itself when a song starts. It works, but the video appears a second or two later, and each device searches on its own.
+
+Only links are kept; the videos stream from Apple and nothing is downloaded to your server. Toggle it in **Settings → Appearance → Canvas videos** and **Music videos from Apple**.
+
+### Install the plugin (Jellyfin 10.11)
+
+1. In Jellyfin, open **Dashboard → Plugins → Repositories** (**Manage repositories**) and add one:
+   - **Name:** `Triptych`
+   - **URL:** `https://github.com/greenythebeany/triptych/releases/latest/download/jellyfin-plugin-manifest.json`
+2. Go to **Catalog**, open **Triptych Music Video Data** (under Metadata) and click **Install**.
+3. Restart Jellyfin (**Dashboard → Restart**).
+4. That's it. The first scan starts by itself. Watch it under **Dashboard → Scheduled Tasks → Triptych → Find music videos** (about an hour per 1,000 songs; afterwards only new songs are looked up, at every start and daily). Songs not scanned yet are looked up the first time they play.
+
+The plugin's page (**Dashboard → Plugins → Triptych Music Video Data**) shows how many songs have a video, and has the scan pace, the App Store country and **Forget all results**.
+
+**Change or remove a song's video:** open the song's **Edit Metadata → External IDs → Apple Music Video**. Paste another video's Apple ID (the number at the end of its `music.apple.com/.../music-video/...` link), or clear it to turn the video off for that song.
+
+Manual install, building from source and more: [`jellyfin-plugin/README.md`](jellyfin-plugin/README.md).
 
 ## Themes
 
@@ -100,6 +134,36 @@ npm run dist        # build a Windows installer
 ```
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
+
+## What's new in 2.6.0
+
+- **Real music videos in Now Playing** (see [Music videos: setup](#music-videos-setup)): the song's official music video plays behind the player in smooth HD instead of a GIF, from your own Jellyfin videos first, then Apple's 30-second previews. GIPHY is gone, and so is the API key.
+- **New Jellyfin plugin, Triptych Music Video Data:** it finds every song's video ahead of time, so it starts instantly. It ignores accents ("Nerieš", "Måneskin"), matches co-artists, and shows the pick under Edit Metadata → External IDs, where it can be swapped or cleared.
+- **Phones:** tap the video to see all of it (the gradient, controls and lyrics step aside and the title slides down); tap again to bring them back. Lyrics under the video sit on solid black (white in light mode).
+- **Desktop:** the video fills the top of the Now Playing panel and fades into it above the lyrics. Your Tailscale or remote link to the server no longer switches Apple's videos off.
+- **Tap an artist's name** in a song list, the player bar or Now Playing to open their page. Combined credits like "Nerieš, Separ" become one link per artist.
+- **Seek bar:** lands where you let go, also at lower streaming quality. It used to snap back, or play from 0:00 while showing 1:30. It doesn't fight your finger while you drag.
+- **Lyrics:** a busy lyrics source is tried again by itself instead of showing "No lyrics found" (most Slovak lyrics come from that source). Remixes fall back to the original song's lyrics.
+- **Ctrl+↑ / Ctrl+↓** (Cmd on Mac) change the volume, also while held.
+- **Android:** the notification, lock screen and widgets always show the current song's cover, not the previous one's.
+- The player opens the way you left it (phone and desktop remembered separately).
+- Search and the Artists page no longer list combined credits ("A/B", "A, B") as extra artists. Album and artist pages show a normal pointer and no longer drag songs.
+
+## What's new in 2.5.1
+
+- Canvas GIFs: sharp HD clips (up to 1080p) from the artist's own GIPHY channel -- the song's clip when there is one, else a different one of the artist's clips per song
+- Many more songs found: long titles ("From the Motion Picture...", "feat.", "Remastered"), co-artists, names like Ke$ha; no more still title cards or other artists' GIFs
+- Every result is remembered for 30 days, so a free GIPHY key's 100 searches an hour go a long way
+- Wide windows: the canvas fills the top of Now Playing behind the title and fades out above the lyrics; phones stay full screen. No blur once it's in focus
+- Settings: step-by-step guide to getting a free GIPHY key (also below)
+
+GIPHY was replaced by real music videos in 2.6.0, so there's no key to set up anymore.
+
+## What's new in 2.5.0
+
+- Canvas: a looping video fills the Now Playing screen, Spotify-style -- your server's own (an album's theme video, or a music video with the same title), else a GIF of the song from GIPHY (add your free GIPHY key in Settings)
+- Fades in softly with a gentle blur, behind a gradient that keeps the title and controls readable (black in dark mode, light in light mode)
+- The cover art stays on battery saver, data saver and slow connections; turn GIFs or the whole canvas off in Settings
 
 ## What's new in 2.4.6
 

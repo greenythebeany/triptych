@@ -42,6 +42,8 @@ const WORD_GRACE_MS = 1500;
 // (a later synced result still replaces them, see onLyricsUpgraded).
 const PLAIN_DEADLINE_MS = 3500;
 const MIN_SCORE = 0.6;
+// " - Prelud Remix", "(Club Mix)", "[Remix]" ...
+const REMIX = /\s*(?:-\s+[^-]*\b(?:remix|mix|edit|rework|bootleg|version)\b.*|[([][^)\]]*\b(?:remix|mix|edit|rework|bootleg)\b[^)\]]*[)\]])\s*$/i;
 
 // Thrown when nothing was found and at least one source couldn't be
 // reached -- distinct from a genuine "no lyrics" (null), so the UI can
@@ -738,9 +740,22 @@ export async function fetchLyrics(query) {
     if (lookup.complete) writeStored(key, lookup.result);
     return lookup;
   })()
-    .then(({ result, complete }) => {
+    .then(async ({ result, complete }) => {
       if (cache.get(key)?.synced) return cache.get(key); // upgraded meanwhile
+      // "Song - X Remix" / "(Remix)" with nothing found: the original song's
+      // lyrics (lyric sites rarely list remixes separately).
+      if (!result && REMIX.test(query.title || '')) {
+        const original = (query.title || '').replace(REMIX, '').trim();
+        if (original) {
+          const again = await lookupLyrics({ ...query, title: original }).catch(() => null);
+          if (again?.result) { result = again.result; complete = true; }
+        }
+      }
       if (complete) cache.set(key, result);
+      // Nothing found, but a source (usually lrclib, which has most of the
+      // non-English lyrics) couldn't be asked: that's "try again", not "no
+      // lyrics" -- it used to show "No lyrics found" for those.
+      if (!result && !complete) throw new LyricsUnavailableError('A lyrics source could not be reached');
       return result;
     })
     .finally(() => inFlight.delete(key));

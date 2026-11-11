@@ -13,6 +13,7 @@ import { createConnect } from './connect.js';
 import { createRecommender, trackArtistKeys } from './recommend.js';
 import { isSupported as downloadsSupported, isDownloaded, downloadTrack, deleteDownload, onDownloadsChange, getDownloadedTracks, getTotalDownloadedBytes, getLocalImageUri } from './downloads.js';
 import { renderGrab } from './grab.js';
+import { initCanvasVideo, setCanvasTrack, syncCanvasPlayback, prefetchCanvas, toggleCanvasFocus } from './canvasVideo.js';
 import { getPinnedAlbums, isAlbumPinned, togglePinAlbum, onPinnedAlbumsChange } from './pinnedAlbums.js';
 
 // ---------- DOM refs ----------
@@ -53,6 +54,28 @@ const nowPlayingArtist = document.getElementById('now-playing-artist');
 // slides across to show the end, pauses, and slides back, instead of being
 // cut off with an ellipsis. Measured after layout, and again whenever the
 // player opens (it has no width while hidden) or the window resizes.
+// Artist names as links to their pages (one per artist in a "feat." list);
+// plain text when the song has no artist ids (e.g. some local files).
+function artistLinksHtml(item, fallback) {
+  // A combined credit ("Nerieš, Separ") becomes one link per artist that
+  // has a page of its own.
+  const artists = item?.ArtistItems?.filter((a) => a?.Id && a.Name)
+    .flatMap((a) => jellyfin?.artistsInCredit?.(a.Name) || [a])
+    .filter((a, i, all) => all.findIndex((b) => (b.Id || b.Name) === (a.Id || a.Name)) === i);
+  if (!artists?.length) return escapeHtml(artistNames(item || {}, fallback));
+  return artists.map((a) => {
+    const name = escapeHtml(formatDisplayName(a.Name));
+    if (!a.Id) return name;
+    return `<span class="artist-link" data-artist-id="${escapeHtml(a.Id)}" data-artist-name="${name}">${name}</span>`;
+  }).join(', ');
+}
+
+function setMarqueeHtml(el, html, text) {
+  el.innerHTML = `<span class="marquee-inner">${html}</span>`;
+  el.title = text || '';
+  updateMarquee(el);
+}
+
 function setMarqueeText(el, text) {
   el.innerHTML = `<span class="marquee-inner">${escapeHtml(text || '')}</span>`;
   el.title = text || '';
@@ -103,6 +126,8 @@ const paletteGrid = document.getElementById('palette-grid');
 const audioQualitySelect = document.getElementById('audio-quality-select');
 const languageSelect = document.getElementById('language-select');
 const toggleArtBackground = document.getElementById('toggle-art-background');
+const toggleCanvasVideo = document.getElementById('toggle-canvas-video');
+const toggleAppleVideos = document.getElementById('toggle-apple-videos');
 const toggleDynamicAccentColor = document.getElementById('toggle-dynamic-accent-color');
 const crossfadeSlider = document.getElementById('crossfade-slider');
 const crossfadeValue = document.getElementById('crossfade-value');
@@ -170,6 +195,18 @@ const whatsNewClose = document.getElementById('whats-new-close');
 // Highlights per release, as icon + i18n key pairs (whatsNew.<key>Title /
 // whatsNew.<key>Desc). Only versions listed here get a popup.
 const WHATS_NEW = {
+  '2.6.0': [
+    { icon: 'fi-br-film', key: 'videos260' },
+    { icon: 'fi-br-database', key: 'plugin260' }
+  ],
+  // Also lists 2.5.0's canvas: coming from 2.4.x only the newest notes show.
+  '2.5.1': [
+    { icon: 'fi-br-film', key: 'canvas250' },
+    { icon: 'fi-br-search', key: 'gifs251' }
+  ],
+  '2.5.0': [
+    { icon: 'fi-br-film', key: 'canvas250' }
+  ],
   // 2.4.4 also lists 2.4.3: coming from 2.4.2 only the newest notes show.
   '2.4.4': [
     { icon: 'fi-br-headphones', key: 'navidrome243' },
@@ -1022,6 +1059,13 @@ async function enterApp(username) {
   const libsPromise = jellyfin.getMusicLibraries();
   libsPromise.catch(() => {});
   await initRemoteSync(jellyfin);
+  // Artist list for splitting combined credits into links (artistLinksHtml).
+  jellyfin._artistIndex?.().then(() => {
+    const track = player?.currentTrack;
+    if (!track) return;
+    playerArtist.innerHTML = artistLinksHtml(track);
+    setMarqueeHtml(nowPlayingArtist, artistLinksHtml(track), artistNames(track));
+  }).catch(() => {});
 
   loginScreen.hidden = true;
   appRoot.hidden = false;
@@ -1029,6 +1073,7 @@ async function enterApp(username) {
   document.body.classList.toggle('subsonic-mode', !!jellyfin.isSubsonic);
 
   player = new Player(jellyfin, currentBitrateKbps);
+  initCanvasVideo({ panel: lyricsPanel, audio: () => player?.audio, client: () => jellyfin });
   const savedSettings = getSettings();
   player.setCrossfadeSeconds(savedSettings.crossfadeSeconds || 0);
   player.setReplayGainEnabled(!!savedSettings.replayGainEnabled);
@@ -1079,7 +1124,9 @@ async function enterApp(username) {
   loadPlaylistSidebar().catch(() => {});
   loadPinnedAlbumsSidebar();
   navigateTo({ view: libs ? 'home' : 'downloads' });
+  const playerWasOpen = loadPlayerOpen()[isPhoneLayout() ? 'phone' : 'desktop'];
   restoreResumeState();
+  if (playerWasOpen && player.currentTrack) openNowPlaying({ instant: true });
   if (libs) listeningLoad = loadListeningFromServer().catch(() => {}).finally(maybeAutoOpenWrapped);
   if (libs && !jellyfin.isLocal) startConnectionProbing();
   if (libs && getSettings().lyricsSearchEnabled) setTimeout(startLyricsIndexing, 15000);
@@ -1384,7 +1431,7 @@ document.addEventListener('keydown', (evt) => {
 });
 
 // Player shortcuts: Space = play/pause, Ctrl+Left / Ctrl+Right = previous /
-// next (Cmd on a Mac keyboard). Go through the same ui* helpers as the
+// next, Ctrl+Up / Ctrl+Down = volume, also while held (Cmd on a Mac keyboard). Go through the same ui* helpers as the
 // buttons, so they also drive a connected Connect device. Skipped while
 // typing in a text field or with a popup open, so Space still types a space
 // in search, Custom CSS, etc.
@@ -1404,6 +1451,16 @@ document.addEventListener('keydown', (evt) => {
   } else if (mod && evt.key === 'ArrowRight') {
     evt.preventDefault();
     uiNext();
+  } else if (mod && (evt.key === 'ArrowUp' || evt.key === 'ArrowDown')) {
+    evt.preventDefault();
+    // Through the slider's own input handler, so the bar, the icon, the
+    // full-screen player's slider (and on phones the system volume) follow.
+    // Held down, the key repeats in smaller steps for a smooth glide.
+    const step = (evt.repeat ? 2 : 5) * (evt.key === 'ArrowUp' ? 1 : -1);
+    const value = Math.min(100, Math.max(0, Number(volumeBar.value) + step));
+    if (value === Number(volumeBar.value)) return;
+    volumeBar.value = value;
+    volumeBar.dispatchEvent(new Event('input', { bubbles: true }));
   }
 });
 menuLogout.addEventListener('click', async () => {
@@ -1474,6 +1531,13 @@ function wireSettingsUI() {
     updateSettings({ audioQuality: audioQualitySelect.value });
   });
 
+
+  toggleCanvasVideo.addEventListener('change', () => {
+    updateSettings({ canvasVideos: toggleCanvasVideo.checked });
+  });
+  toggleAppleVideos.addEventListener('change', () => {
+    updateSettings({ appleVideos: toggleAppleVideos.checked });
+  });
 
   toggleArtBackground.addEventListener('change', () => {
     updateSettings({ artBackground: toggleArtBackground.checked });
@@ -1855,7 +1919,7 @@ async function sendDiscordPresence(seq) {
   // A newer update was requested while the cover was being looked up.
   if (seq !== discordSeq) return;
   const durationSeconds = ticksToSeconds(track.RunTimeTicks) || player.audio.duration || 0;
-  const startTimestamp = Date.now() - player.audio.currentTime * 1000;
+  const startTimestamp = Date.now() - player.position * 1000;
   discordLastSent = Date.now();
   setDiscordActivity({
     type: 2, // Listening
@@ -2371,7 +2435,7 @@ function saveResumeState() {
     localStorage.setItem(RESUME_KEY, JSON.stringify({
       tracks,
       index: player.currentIndex - from,
-      position: Math.floor(player.audio.currentTime || 0),
+      position: Math.floor(player.position || 0),
       shuffle: player.shuffle,
       smartShuffle: player.smartShuffle,
       repeat: player.repeat,
@@ -2416,9 +2480,25 @@ function uiPrevious(skipRestart = false) {
   player.previous(skipRestart);
 }
 
+let seekBarHeld = false;
+
+// The time under the thumb while dragging the seek bar.
+function showSeekPreview(pct) {
+  const duration = ticksToSeconds(player?.currentTrack?.RunTimeTicks) || player?.audio.duration || 0;
+  if (!duration) return;
+  const t = formatTime((pct / 100) * duration);
+  timeCurrent.textContent = t;
+  mobileTimeCurrent.textContent = t;
+}
+
 function uiSeekPercent(pct) {
   if (connect?.isConnected()) { connect.remoteSeekPercent(pct); return; }
-  const duration = player.audio.duration || 0;
+  // The song's real length (Jellyfin's RunTimeTicks), like the seek bar
+  // itself: audio.duration is only a growing estimate while a lower-quality
+  // (transcoded) stream downloads, so 1:00 on the bar landed seconds in and
+  // looked like it snapped back. Lyrics seek to absolute times, so they
+  // never had this.
+  const duration = ticksToSeconds(player.currentTrack?.RunTimeTicks) || player.audio.duration || 0;
   player.seekTo((pct / 100) * duration);
 }
 
@@ -2488,15 +2568,16 @@ function updateRemoteBarUI(session) {
     // (paused, since it was stopped for the handoff) instead of leaving the
     // last-seen remote track showing.
     const track = player.currentTrack;
+    setCanvasTrack(track);
     if (track) {
       playerArt.src = artUrl(track, 'album', 64);
       withOfflineArtFallback(playerArt, track);
       playerTitle.textContent = track.Name;
-      playerArtist.textContent = artistNames(track);
+      playerArtist.innerHTML = artistLinksHtml(track);
       nowPlayingArt.src = artUrl(track, 'album', 440);
       withOfflineArtFallback(nowPlayingArt, track);
       setMarqueeText(nowPlayingTitle, track.Name);
-      setMarqueeText(nowPlayingArtist, artistNames(track));
+      setMarqueeHtml(nowPlayingArtist, artistLinksHtml(track), artistNames(track));
       setArtAlt(track.Name, artistNames(track));
       nowPlayingLikeBtn.classList.toggle('liked', !!track.UserData?.IsFavorite);
       setDownloadButtonState(nowPlayingDownloadBtn, isDownloaded(track.Id) ? 'downloaded' : 'idle');
@@ -2506,7 +2587,7 @@ function updateRemoteBarUI(session) {
       setHidden(mobileIconPlay, playing);
       setHidden(mobileIconPause, !playing);
       const duration = ticksToSeconds(track.RunTimeTicks) || player.audio.duration || 0;
-      const current = player.audio.currentTime || 0;
+      const current = player.position || 0;
       const pct = duration ? (current / duration) * 100 : 0;
       seekBar.value = pct;
       seekBar.style.setProperty('--pct', rangeFillPercent(pct, seekBar, 14));
@@ -2530,6 +2611,7 @@ function updateRemoteBarUI(session) {
 
   playerBar.hidden = false;
   appRoot.classList.add('has-track');
+  setCanvasTrack(null);
 
   const item = session.NowPlayingItem;
   const playState = session.PlayState || {};
@@ -2537,10 +2619,10 @@ function updateRemoteBarUI(session) {
     const art = jellyfin.imageUrl(item) || placeholderArt('album');
     playerArt.src = art;
     playerTitle.textContent = item.Name || '';
-    playerArtist.textContent = artistNames(item);
+    playerArtist.innerHTML = artistLinksHtml(item);
     nowPlayingArt.src = jellyfin.imageUrl(item, 'Primary', 800) || art;
     setMarqueeText(nowPlayingTitle, item.Name || '');
-    setMarqueeText(nowPlayingArtist, artistNames(item));
+    setMarqueeHtml(nowPlayingArtist, artistLinksHtml(item), artistNames(item));
     setArtAlt(item.Name, artistNames(item));
     nowPlayingLikeBtn.classList.toggle('liked', !!item.UserData?.IsFavorite);
     const posSeconds = (playState.PositionTicks || 0) / 10000000;
@@ -2573,6 +2655,8 @@ function refreshSettingsUI() {
   const s = getSettings();
   languageSelect.value = s.language;
   toggleArtBackground.checked = !!s.artBackground;
+  toggleCanvasVideo.checked = s.canvasVideos !== false;
+  toggleAppleVideos.checked = s.appleVideos !== false;
   toggleDynamicAccentColor.checked = !!s.dynamicAccentColor;
   crossfadeSlider.value = s.crossfadeSeconds || 0;
   crossfadeValue.textContent = s.crossfadeSeconds ? `${s.crossfadeSeconds}s` : t('settings.crossfadeOff');
@@ -4014,7 +4098,7 @@ async function renderAlbumDetail(id) {
     viewRoot.appendChild(el('div', 'empty-state', t('album.empty')));
     return;
   }
-  viewRoot.appendChild(buildTrackTable(tracks, tracks, { hideArt: true, sourceId: id, fallbackArtist: artistNames(first || {}) }));
+  viewRoot.appendChild(buildTrackTable(tracks, tracks, { hideArt: true, sourceId: id, fallbackArtist: artistNames(first || {}), noDrag: true }));
 }
 
 async function renderArtistDetail(id, name) {
@@ -4138,7 +4222,7 @@ async function renderArtistDetail(id, name) {
 
   if (songs.length) {
     viewRoot.appendChild(el('div', 'section-title', t('artists.songsSection')));
-    viewRoot.appendChild(buildTrackTable(songs, songs, { sourceId: id, fallbackArtist: targetName }));
+    viewRoot.appendChild(buildTrackTable(songs, songs, { sourceId: id, fallbackArtist: targetName, noDrag: true }));
   }
 
   if (albums.length) {
@@ -4487,7 +4571,7 @@ function buildTrackTable(tracks, queueRef, opts = {}) {
       titleWrap.appendChild(img);
     }
     const textWrap = el('div', 'track-title-text');
-    textWrap.innerHTML = `<span class="t-name">${escapeHtml(track.Name)}</span><span class="t-artist">${escapeHtml(artistNames(track, opts.fallbackArtist))}</span>`;
+    textWrap.innerHTML = `<span class="t-name">${escapeHtml(track.Name)}</span><span class="t-artist">${artistLinksHtml(track, opts.fallbackArtist)}</span>`;
     titleWrap.appendChild(textWrap);
     titleCell.appendChild(titleWrap);
     row.appendChild(titleCell);
@@ -4582,7 +4666,9 @@ function buildTrackTable(tracks, queueRef, opts = {}) {
       // menu) was completely unreachable there.
       onLongPress: isMobile ? (x, y) => openTrackMenu(x, y) : undefined
     });
-    wireTrackDragSource(row, track);
+    // Album and artist pages are showcases: no dragging rows from them
+    // ("Add to playlist" is in the right-click menu).
+    if (!opts.noDrag) wireTrackDragSource(row, track);
 
     if (isDesktop) {
       row.addEventListener('contextmenu', (evt) => {
@@ -4766,7 +4852,17 @@ function wirePlayer() {
   mobileSeekBar.addEventListener('input', () => {
     const pct = Number(mobileSeekBar.value);
     mobileSeekBar.style.setProperty('--pct', rangeFillPercent(pct, mobileSeekBar, 12));
+    showSeekPreview(pct);
   });
+  // While held, playback stops moving the bars (see the timeupdate
+  // handler); let go = the change event seeks, then it follows again.
+  for (const bar of [seekBar, mobileSeekBar]) {
+    bar.addEventListener('pointerdown', () => { seekBarHeld = true; });
+    bar.addEventListener('change', () => { seekBarHeld = false; });
+  }
+  const releaseSeekBar = () => setTimeout(() => { seekBarHeld = false; }, 0);
+  window.addEventListener('pointerup', releaseSeekBar);
+  window.addEventListener('pointercancel', releaseSeekBar);
   mobileSeekBar.addEventListener('change', () => {
     uiSeekPercent(Number(mobileSeekBar.value));
     mobileSeekBar.style.setProperty('--pct', rangeFillPercent(Number(mobileSeekBar.value), mobileSeekBar, 12));
@@ -4784,6 +4880,7 @@ function wirePlayer() {
   seekBar.addEventListener('input', () => {
     const pct = Number(seekBar.value);
     seekBar.style.setProperty('--pct', rangeFillPercent(pct, seekBar, 14));
+    showSeekPreview(pct);
   });
   seekBar.addEventListener('change', () => {
     uiSeekPercent(Number(seekBar.value));
@@ -4842,6 +4939,17 @@ function wirePlayer() {
     openNowPlaying();
   });
   btnCloseLyrics.addEventListener('click', () => closeNowPlaying());
+  // An artist's name anywhere (song lists, player bar, Now Playing) opens
+  // their page -- before the row's own click (play) or the mini player's
+  // (open the full-screen player) gets it.
+  document.addEventListener('click', (evt) => {
+    const link = evt.target.closest?.('.artist-link[data-artist-id]');
+    if (!link) return;
+    evt.stopPropagation();
+    evt.preventDefault();
+    if (isPhoneLayout() && !lyricsPanel.hidden) closeNowPlaying();
+    navigateTo({ view: 'artist', id: link.dataset.artistId, name: link.dataset.artistName });
+  }, true);
   // Phones: tapping anywhere on the empty top strip closes the full-screen
   // player too, not just the small arrow/grabber (its own buttons -- cast,
   // sleep, lyrics, queue -- still do their own thing).
@@ -4931,6 +5039,7 @@ function wirePlayer() {
   btnOpenPanel.addEventListener('click', () => { bounceButtons(btnOpenPanel); openNowPlaying(); });
   btnOpenPanel.addEventListener('animationend', () => btnOpenPanel.classList.remove('bounce'));
   new MutationObserver(syncPanelOpenButton).observe(lyricsPanel, { attributes: true, attributeFilter: ['hidden', 'data-closing'] });
+  new MutationObserver(rememberPlayerOpen).observe(lyricsPanel, { attributes: true, attributeFilter: ['hidden', 'data-closing'] });
   window.matchMedia('(max-width: 820px)').addEventListener('change', syncPanelOpenButton);
   player.on('trackchange', syncPanelOpenButton);
   syncPanelOpenButton();
@@ -4974,7 +5083,7 @@ function wirePlayer() {
     playerArt.src = art;
     withOfflineArtFallback(playerArt, track);
     playerTitle.textContent = track.Name;
-    playerArtist.textContent = artistNames(track);
+    playerArtist.innerHTML = artistLinksHtml(track);
     timeTotal.textContent = formatTime(ticksToSeconds(track.RunTimeTicks));
     seekBar.value = 0;
     seekBar.style.setProperty('--pct', rangeFillPercent(0, seekBar, 14));
@@ -4984,8 +5093,12 @@ function wirePlayer() {
 
     nowPlayingArt.src = artUrl(track, 'album', 440);
     withOfflineArtFallback(nowPlayingArt, track);
+    if (!connect?.isConnected()) {
+      setCanvasTrack(track);
+      prefetchCanvas(player.queue[player.currentIndex + 1]);
+    }
     setMarqueeText(nowPlayingTitle, track.Name);
-    setMarqueeText(nowPlayingArtist, artistNames(track));
+    setMarqueeHtml(nowPlayingArtist, artistLinksHtml(track), artistNames(track));
     setArtAlt(track.Name, artistNames(track));
     nowPlayingLikeBtn.classList.toggle('liked', !!track.UserData?.IsFavorite);
     setDownloadButtonState(nowPlayingDownloadBtn, isDownloaded(track.Id) ? 'downloaded' : 'idle');
@@ -5032,6 +5145,7 @@ function wirePlayer() {
     const playing = !player.audio.paused;
     lyricsPanel.classList.toggle('is-paused', !playing);
     if (playing) startWordLoop();
+    syncCanvasPlayback();
     setHidden(iconPlay, playing);
     setHidden(iconPause, !playing);
     setHidden(mobileIconPlay, playing);
@@ -5049,14 +5163,19 @@ function wirePlayer() {
     const ticksSeconds = ticksToSeconds(player.currentTrack?.RunTimeTicks);
     const audioDuration = player.audio.duration;
     const duration = ticksSeconds || (isFinite(audioDuration) ? audioDuration : 0);
-    const current = player.audio.currentTime || 0;
+    const current = player.position || 0;
     const pct = duration ? (current / duration) * 100 : 0;
-    seekBar.value = pct;
-    seekBar.style.setProperty('--pct', rangeFillPercent(pct, seekBar, 14));
-    mobileSeekBar.value = pct;
-    mobileSeekBar.style.setProperty('--pct', rangeFillPercent(pct, mobileSeekBar, 12));
-    timeCurrent.textContent = formatTime(current);
-    mobileTimeCurrent.textContent = formatTime(current);
+    // Not while a finger or the mouse is on the bar: playback pulled the
+    // thumb back under it (4 times a second), and letting go then reported
+    // that old spot -- the seek "snapped back" and needed a second try.
+    if (!seekBarHeld) {
+      seekBar.value = pct;
+      seekBar.style.setProperty('--pct', rangeFillPercent(pct, seekBar, 14));
+      mobileSeekBar.value = pct;
+      mobileSeekBar.style.setProperty('--pct', rangeFillPercent(pct, mobileSeekBar, 12));
+      timeCurrent.textContent = formatTime(current);
+      mobileTimeCurrent.textContent = formatTime(current);
+    }
     if (duration) { timeTotal.textContent = formatTime(duration); mobileTimeTotal.textContent = formatTime(duration); }
     updateActiveLyricLine(current);
     fillLyricWords(current);
@@ -5446,10 +5565,27 @@ function slideSidePanel(opening) {
   anim.finished.then(done, () => {});
 }
 
-function openNowPlaying() {
+// Open or closed is remembered per layout (the phone's full-screen player,
+// the desktop side panel), so the app starts the way it was left.
+const PLAYER_OPEN_KEY = 'triptych:playerOpen';
+function loadPlayerOpen() {
+  try { return JSON.parse(localStorage.getItem(PLAYER_OPEN_KEY)) || {}; } catch (err) { return {}; }
+}
+function rememberPlayerOpen() {
+  // Only with a song loaded: before the queue is restored at startup the
+  // panel is closed anyway and would overwrite what was saved.
+  if (!player?.currentTrack) return;
+  const open = !lyricsPanel.hidden && !lyricsPanel.dataset.closing;
+  const saved = loadPlayerOpen();
+  const layout = isPhoneLayout() ? 'phone' : 'desktop';
+  if (saved[layout] === open) return;
+  try { localStorage.setItem(PLAYER_OPEN_KEY, JSON.stringify({ ...saved, [layout]: open })); } catch (err) {}
+}
+
+function openNowPlaying({ instant = false } = {}) {
   // Reopened mid-close: drop the slide-out so it doesn't hide afterwards.
   clearTimeout(nowPlayingCloseTimer);
-  const desktopSlide = !isPhoneLayout() && !isStaticMotion() && (lyricsPanel.hidden || panelSlideToken);
+  const desktopSlide = !instant && !isPhoneLayout() && !isStaticMotion() && (lyricsPanel.hidden || panelSlideToken);
   lyricsPanel.style.transition = '';
   lyricsPanel.style.transform = '';
   lyricsPanel.hidden = false;
@@ -5471,7 +5607,7 @@ function openNowPlaying() {
 // Without it they lagged until the next line, or until play/pause.
 function syncLyricsToPlayback() {
   if (lyricsPanel.hidden || !currentLyrics?.synced) return;
-  const now = player.audio.currentTime || 0;
+  const now = player.position || 0;
   lyricLineEls[activeLyricIdx]?.classList.remove('active');
   activeLyricIdx = -1;
   updateActiveLyricLine(now);
@@ -5485,6 +5621,7 @@ function syncLyricsToPlayback() {
 // side panel just hides). Also used to finish a swipe-down from wherever
 // the finger left it, since the transition starts from the current transform.
 function closeNowPlaying() {
+  toggleCanvasFocus(false);
   closeQueueSheet();
   if (lyricsPanel.hidden) return;
   if (!isPhoneLayout()) {
@@ -5554,6 +5691,12 @@ function wireNowPlayingGestures() {
     const dx = evt.clientX - startX;
     const dy = evt.clientY - startY;
     const fast = performance.now() - startT < 250;
+
+    // A tap (no swipe) on a playing video: see it whole / bring the player back.
+    if (!axis && performance.now() - startT < 350) {
+      toggleCanvasFocus();
+      return;
+    }
 
     if (axis === 'x') {
       const width = target.offsetWidth || 300;
@@ -5911,6 +6054,7 @@ function prefetchNextLyrics() {
   if (next) fetchLyrics(lyricsQueryFor(next)).catch(() => {});
 }
 
+let lyricsRetries = 0;
 async function loadLyricsForCurrentTrack() {
   const track = player.currentTrack;
   if (!track) return;
@@ -5925,12 +6069,21 @@ async function loadLyricsForCurrentTrack() {
   let result;
   try {
     result = await fetchLyrics(query);
+    lyricsRetries = 0;
   } catch (err) {
     if (lyricsTrackId !== track.Id) return;
     // A source couldn't be reached and none had lyrics -- not the same as
-    // "no lyrics".
+    // "no lyrics". lrclib, which has most non-English lyrics, is often busy
+    // for a few seconds: try again by itself (3 times), then offer Retry.
     currentLyrics = null;
     lyricsTrackId = null; // so reopening the panel tries again
+    if (lyricsRetries < 3) {
+      lyricsRetries++;
+      lyricsBody.innerHTML = `<div class="lyrics-empty">${escapeHtml(t('nowPlaying.lookingUpLyrics'))}</div>`;
+      setTimeout(() => { if (player.currentTrack?.Id === track.Id) loadLyricsForCurrentTrack(); }, 4000 * lyricsRetries);
+      return;
+    }
+    lyricsRetries = 0;
     lyricsBody.innerHTML = '';
     const box = el('div', 'lyrics-empty', escapeHtml(t('nowPlaying.lyricsFailed')));
     const retry = el('button', 'lyrics-retry-btn', escapeHtml(t('nowPlaying.retry')));
@@ -6085,7 +6238,7 @@ let wordFrame = 0;
 function wordLoop() {
   wordFrame = 0;
   if (!lyricsBody.classList.contains('word-mode') || lyricsPanel.hidden || player.audio.paused) return;
-  const now = player.audio.currentTime || 0;
+  const now = player.position || 0;
   updateActiveLyricLine(now);
   fillLyricWords(now);
   wordFrame = requestAnimationFrame(wordLoop);

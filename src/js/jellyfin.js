@@ -22,13 +22,15 @@ function loadOrCreateDeviceId() {
 const DEVICE_ID = loadOrCreateDeviceId();
 
 // Jellyfin makes a separate artist for every collaboration credit it finds
-// in tags ("Pitbull feat. Ne-Yo", "Pitbull & Ke$ha"), so searching one artist
-// listed several. A credit like that is dropped when one of its names is
+// in tags ("Pitbull feat. Ne-Yo", "Pitbull & Ke$ha", "Palaye Royale/LP"), so
+// searching one artist -- or the Artists page -- listed several. A credit like that is dropped when one of its names is
 // also in the results on its own; real duo names ("Simon & Garfunkel") stay,
-// since neither half exists by itself.
-const COLLAB_SPLIT = /\s*(?:,|;|&|\+|\bfeat\.?|\bft\.?|\bfeaturing\b|\bwith\b|\bx\b|\bvs\.?)\s*/i;
-function dedupeCollabArtists(artists) {
-  const single = new Set(artists.map((a) => (a.Name || '').trim().toLowerCase()));
+// since neither half exists by itself -- same for "AC/DC". `known`: every
+// artist name in the library, so a credit is dropped even when the plain
+// artist isn't among this search's (fuzzy) results.
+const COLLAB_SPLIT = /\s*(?:,|;|\/|&|\+|\bfeat\.?|\bft\.?|\bfeaturing\b|\bwith\b|\bx\b|\bvs\.?)\s*/i;
+function dedupeCollabArtists(artists, known = []) {
+  const single = new Set([...known, ...artists.map((a) => (a.Name || '').trim().toLowerCase())]);
   return artists.filter((a) => {
     const parts = (a.Name || '').split(COLLAB_SPLIT).map((x) => x.trim().toLowerCase()).filter(Boolean);
     if (parts.length < 2) return true;
@@ -52,7 +54,7 @@ const LEGACY_PREFS = { listening: 'JellyWaveListening', settings: 'JellyWaveSett
 // literal below is only the fallback for the brief window before that
 // resolves (or if neither bridge is available, e.g. running in a plain
 // browser during development).
-let CLIENT_VERSION = '2.4.6';
+let CLIENT_VERSION = '2.6.0';
 
 export function getClientVersion() {
   return CLIENT_VERSION;
@@ -324,7 +326,7 @@ export class JellyfinClient {
       const key = (item.Name || '').trim().toLowerCase();
       if (!seen.has(key)) seen.set(key, item);
     }
-    return [...seen.values()];
+    return dedupeCollabArtists([...seen.values()]);
   }
 
   async getPlaylists() {
@@ -474,6 +476,38 @@ export class JellyfinClient {
     return data.Items || [];
   }
 
+  // Every artist in the library, by lower-case name: for
+  // dedupeCollabArtists, and for splitting a combined credit into links
+  // (artistsInCredit). Fetched once, then reused for 10 minutes.
+  async _artistIndex() {
+    if (this._artistIndexCache && Date.now() - this._artistIndexCache.at < 10 * 60 * 1000) return this._artistIndexCache.byName;
+    const data = await this._get('/Artists', { Recursive: true, EnableImages: false, EnableUserData: false });
+    const byName = new Map();
+    for (const a of data.Items || []) {
+      const key = (a.Name || '').trim().toLowerCase();
+      if (key && !byName.has(key)) byName.set(key, { Id: a.Id, Name: a.Name });
+    }
+    this._artistIndexCache = { at: Date.now(), byName };
+    return byName;
+  }
+
+  async _artistNames() {
+    return [...(await this._artistIndex()).keys()];
+  }
+
+  // Jellyfin keeps "Nerieš, Separ" (a comma-separated tag) as one artist.
+  // Its parts as [{ Id, Name }] (no Id for a name that isn't an artist of
+  // its own) -- or null when it isn't such a credit, none of its parts has
+  // a page, or the artist list hasn't loaded yet (_artistIndex() at login).
+  artistsInCredit(name) {
+    const byName = this._artistIndexCache?.byName;
+    if (!byName || !name) return null;
+    const parts = name.split(COLLAB_SPLIT).map((p) => p.trim()).filter(Boolean);
+    if (parts.length < 2) return null;
+    const found = parts.map((p) => byName.get(p.toLowerCase()) || { Name: p });
+    return found.some((a) => a.Id) ? found : null;
+  }
+
   async search(term) {
     // MusicArtist entities aren't reachable through the generic recursive
     // Items search the way songs/albums/playlists are — they need /Artists.
@@ -492,7 +526,8 @@ export class JellyfinClient {
         Fields: 'PrimaryImageAspectRatio'
       })
     ]);
-    return [...dedupeCollabArtists(artistsData.Items || []), ...(itemsData.Items || [])];
+    const known = await this._artistNames().catch(() => []);
+    return [...dedupeCollabArtists(artistsData.Items || [], known), ...(itemsData.Items || [])];
   }
 
   // ---------- Connect (Sessions API remote control) ----------
@@ -723,9 +758,68 @@ export class JellyfinClient {
     return `${this.serverUrl}/Items/${item.Id}/Images/Backdrop/0?${params.toString()}`;
   }
 
+  // A video to loop on the Now Playing art (see canvasVideo.js): the
+  // track's or its album's theme video (a backdrops/ folder next to the
+  // files), else a music video in the library with the same title and
+  // artist. null when the server has none.
+  async findCanvasVideo(track) {
+    for (const id of [track.Id, track.AlbumId]) {
+      if (!id) continue;
+      const data = await this._get(`/Items/${id}/ThemeVideos`, { userId: this.userId, inheritFromParent: true });
+      if (data?.Items?.length) return data.Items[0];
+    }
+    const norm = (s) => String(s || '').toLowerCase().replace(/\s*[([].*?[)\]]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    const title = norm(track.Name);
+    if (!title) return null;
+    const artists = [...(track.Artists || []), track.AlbumArtist].map(norm).filter(Boolean);
+    const data = await this._get(`/Users/${this.userId}/Items`, {
+      SearchTerm: track.Name.replace(/\s*[([].*?[)\]]/g, '').trim() || track.Name,
+      IncludeItemTypes: 'MusicVideo',
+      Recursive: true,
+      Limit: 20,
+      Fields: 'Artists'
+    });
+    return (data?.Items || []).find((v) => {
+      const name = norm(v.Name);
+      const byArtist = (v.Artists || []).some((a) => artists.includes(norm(a))) || artists.some((a) => name.includes(a));
+      return byArtist && (name === title || name.includes(title));
+    }) || null;
+  }
+
+  // The music video the Triptych Music Video Data plugin assigned to the
+  // song (it looks up the whole library ahead of time): its link, null when
+  // the plugin found none, undefined when the plugin isn't installed.
+  async getAssignedMusicVideo(itemId) {
+    try {
+      const data = await this._get(`/TriptychMusicVideo/Items/${itemId}`);
+      return data ? (data.Url || null) : undefined;
+    } catch (err) {
+      if (err.status === 404) return undefined;
+      throw err;
+    }
+  }
+
+  // Capped at 720p / 1.5 Mbps -- the server stream-copies a video already
+  // under that, transcodes anything bigger.
+  canvasVideoUrl(video) {
+    const params = new URLSearchParams({
+      videoCodec: 'h264',
+      audioCodec: 'aac',
+      maxWidth: '720',
+      maxHeight: '720',
+      videoBitRate: '1500000',
+      audioBitRate: '64000',
+      api_key: this.accessToken,
+      deviceId: DEVICE_ID
+    });
+    return `${this.serverUrl}/Videos/${video.Id}/stream.mp4?${params.toString()}`;
+  }
+
   // bitrateKbps: omit (or 0) for direct play at source quality; otherwise the
   // server transcodes down to that ceiling — useful on slow/metered connections.
-  streamUrl(item, bitrateKbps = 0) {
+  // startSeconds / restart (converted streams only): the server starts
+  // converting there, for seeking (see Player.seekTo).
+  streamUrl(item, bitrateKbps = 0, startSeconds = 0, restart = false) {
     if (!bitrateKbps) {
       const params = new URLSearchParams({
         static: 'true',
@@ -740,6 +834,11 @@ export class JellyfinClient {
       api_key: this.accessToken,
       deviceId: DEVICE_ID
     });
+    if (startSeconds > 0) params.set('startTimeTicks', String(Math.round(startSeconds * 1e7)));
+    // Its own session: Jellyfin otherwise reuses the conversion already
+    // running for this device and song, wherever that one started, and
+    // ignores the new start time.
+    if (restart) params.set('playSessionId', `seek-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
     return `${this.serverUrl}/Audio/${item.Id}/stream.mp3?${params.toString()}`;
   }
 }

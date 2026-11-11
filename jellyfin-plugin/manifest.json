@@ -1,0 +1,21 @@
+[
+  {
+    "guid": "6c1f3f2e-5b7a-4c1e-9a8d-2f4b7e3a9c10",
+    "name": "Triptych Music Video Data",
+    "description": "Finds every song's official music video ahead of time (a 30-second HD preview from Apple Music) for Triptych's Now Playing. Adds an Apple Music Video ID to songs, editable in Edit Metadata. Only links are stored; videos stream from Apple.",
+    "overview": "Music videos for Triptych's Now Playing",
+    "owner": "greenythebeany",
+    "category": "Metadata",
+    "imageUrl": "https://raw.githubusercontent.com/greenythebeany/triptych/main/logo.png",
+    "versions": [
+      {
+        "version": "1.0.0.0",
+        "changelog": "First version: finds each song's music video (Apple Music preview) for Triptych 2.6.0.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/greenythebeany/triptych/releases/download/v2.6.0/triptych-music-video-data_1.0.0.0.zip",
+        "checksum": "ed24aed5d2007c05aff8a3b5e207a5b8",
+        "timestamp": "2026-11-11T00:00:00Z"
+      }
+    ]
+  }
+]
