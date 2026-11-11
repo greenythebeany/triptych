@@ -278,6 +278,7 @@
           <div id="player-title" class="player-title">—</div>
           <div id="player-artist" class="player-artist">—</div>
         </div>
+        <button id="player-like-btn" class="player-like-btn" type="button" data-i18n-title="track.like" title="Like"><i class="fi fi-br-heart"></i></button>
       </div>
 
       <div class="player-center">
@@ -458,6 +459,13 @@
               <input type="checkbox" id="toggle-apple-videos" />
               <span class="switch-track"></span>
             </label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label" data-i18n="settings.videoBadge">Music video icon</div>
+              <div class="settings-row-desc" data-i18n="settings.videoBadgeDesc">Marks songs that have a music video in song lists (found by the Triptych Music Video Data plugin)</div>
+            </div>
+            <select id="video-badge-select" class="settings-select"></select>
           </div>
           <div class="settings-row">
             <div>

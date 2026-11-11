@@ -129,7 +129,8 @@
     "like": "Páči sa mi",
     "changeCoverArt": "Zmeniť obal",
     "download": "Stiahnuť",
-    "removeDownload": "Odstrániť stiahnuté"
+    "removeDownload": "Odstrániť stiahnuté",
+    "hasVideo": "Má videoklip"
   },
   "createPlaylist": {
     "title": "Vytvoriť playlist",
@@ -253,7 +254,9 @@
     "qualityOriginal": "pôvodná kvalita",
     "lyricsSearch": "Hľadanie podľa textu",
     "lyricsSearchDesc": "Nájdeš skladby podľa riadku z ich textu. Texty tvojej knižnice sa sťahujú na pozadí (názvy skladieb a interpreti idú na lrclib.net, NetEase, Kugou a lyrics.ovh) a ostávajú v tomto zariadení.",
-    "lyricsSearchStatus": "Spracované {done} z {total} skladieb ({found} s textom)."
+    "lyricsSearchStatus": "Spracované {done} z {total} skladieb ({found} s textom).",
+    "videoBadge": "Ikona videoklipu",
+    "videoBadgeDesc": "Označí v zoznamoch skladby, ktoré majú videoklip (nájde ho plugin Triptych Music Video Data)"
   },
   "privacyNotice": {
     "text": "Triptych uchováva všetko v tvojom zariadení a na tvojom vlastnom serveri Jellyfin/Navidrome. Niekoľko dopytov na pozadí (obaly, kontrola aktualizácií) komunikuje s externými službami — čo presne sa posiela, nájdeš v zásadách ochrany súkromia, a v Nastaveniach ich môžeš kedykoľvek vypnúť.",
@@ -521,5 +524,12 @@
     "turnOff": "Vypnúť",
     "phoneDesc": "Prehrávajte hudbu uloženú v tomto telefóne spolu so svojím serverom.",
     "permissionDenied": "Triptych potrebuje povolenie na čítanie hudby v tomto telefóne. Povoliť ho môžete v nastaveniach systému v časti Aplikácie → Triptych → Povolenia."
+  },
+  "videoBadge": {
+    "film": "Filmový pás",
+    "clapperboard": "Klapka",
+    "camera": "Kamera",
+    "play": "Tlačidlo prehrať",
+    "off": "Vypnuté"
   }
 }

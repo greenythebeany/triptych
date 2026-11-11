@@ -21,6 +21,14 @@ export const PALETTES = {
 
 export const UI_STYLES = ['spotify', 'apple', 'nothing'];
 
+// Settings -> Music video icon: the mark on songs that have a music video.
+export const VIDEO_BADGES = {
+  film: 'fi-br-film',
+  clapperboard: 'fi-br-clapperboard-play',
+  camera: 'fi-br-video-camera',
+  play: 'fi-br-play-alt'
+};
+
 export const AUDIO_QUALITIES = {
   auto: { label: 'Automatic (best available)', bitrateKbps: 0 },
   high: { label: 'High — 320 kbps', bitrateKbps: 320 },
@@ -36,6 +44,7 @@ const DEFAULTS = {
   nothingDottedSliders: true, // Nothing style only: dot-matrix seek/volume bars, off = plain lines
   audioQuality: 'auto',
   artBackground: false,
+  videoBadge: 'film', // icon on songs that have a music video (plugin found one): a VIDEO_BADGES key, or 'off'
   appleVideos: true, // the song's music video preview from Apple's iTunes Search API (canvasVideo.js)
   canvasVideos: true, // looping video on the Now Playing art when the server has one (see canvasVideo.js)
   dynamicAccentColor: false,

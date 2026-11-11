@@ -6,7 +6,7 @@ import { Player, RepeatMode, EQ_PRESETS } from './player.js';
 import { fetchLyrics, getCachedLyrics, onLyricsUpgraded } from './lyrics.js';
 import { rememberLyrics, startIndexing, stopIndexing, searchByLyrics, indexStatus, onIndexProgress } from './lyricsIndex.js';
 import { addListening, persistLocal as persistListening, getOwnLog, isDirty as listeningDirty, markSynced as listeningSynced, adoptIfLarger, combineLogs, dayKey } from './listening.js';
-import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, isPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES } from './settings.js';
+import { getSettings, updateSettings, applySettings, isStaticMotion, setPowerSaver, isPowerSaver, currentBitrateKbps, setAutoBitrate, getAutoBitrate, initRemoteSync, PALETTES, AUDIO_QUALITIES, VIDEO_BADGES } from './settings.js';
 import { LOCALES, loadLocale, applyTranslations, t } from './i18n.js';
 import { setHapticsEnabled, platform, isDesktop, isMobile, isAndroid, sessionStore, windowControls, wireHardwareBackButton, exitApp, requestNotificationPermission, setDiscordActivity, clearDiscordActivity, searchDeezerAlbumArt, hapticImpact, watchPowerSaver } from './platform.js';
 import { createConnect } from './connect.js';
@@ -70,6 +70,32 @@ function artistLinksHtml(item, fallback) {
   }).join(', ');
 }
 
+// The mark on songs that have a music video: the Triptych Music Video Data
+// plugin saves the video's id on the song (ProviderIds), so song lists know
+// without asking. Videos from the server's own Music Videos library only
+// show up when the song plays, so they aren't marked.
+function videoBadgeHtml(track) {
+  if (!track?.ProviderIds?.TriptychMusicVideo) return '';
+  const icon = VIDEO_BADGES[getSettings().videoBadge];
+  if (!icon) return '';
+  return ` <i class="fi ${icon} t-video-badge" title="${escapeHtml(t('track.hasVideo'))}" aria-label="${escapeHtml(t('track.hasVideo'))}"></i>`;
+}
+
+// Picked another icon (or off): swap the marks already on screen.
+function refreshVideoBadges() {
+  const icon = VIDEO_BADGES[getSettings().videoBadge];
+  document.querySelectorAll('.t-video-badge').forEach((b) => {
+    b.hidden = !icon;
+    if (icon) b.className = `fi ${icon} t-video-badge`;
+  });
+}
+
+// Both hearts for the current song: Now Playing's and the player bar's.
+function setLikeButtons(liked) {
+  nowPlayingLikeBtn.classList.toggle('liked', !!liked);
+  playerLikeBtn.classList.toggle('liked', !!liked);
+}
+
 function setMarqueeHtml(el, html, text) {
   el.innerHTML = `<span class="marquee-inner">${html}</span>`;
   el.title = text || '';
@@ -104,6 +130,7 @@ function refreshNowPlayingMarquees() {
 window.addEventListener('resize', refreshNowPlayingMarquees);
 const nowPlayingBgArt = document.getElementById('now-playing-bg-art');
 const nowPlayingLikeBtn = document.getElementById('now-playing-like-btn');
+const playerLikeBtn = document.getElementById('player-like-btn');
 const nowPlayingDownloadBtn = document.getElementById('now-playing-download-btn');
 
 // Account menu
@@ -128,6 +155,7 @@ const languageSelect = document.getElementById('language-select');
 const toggleArtBackground = document.getElementById('toggle-art-background');
 const toggleCanvasVideo = document.getElementById('toggle-canvas-video');
 const toggleAppleVideos = document.getElementById('toggle-apple-videos');
+const videoBadgeSelect = document.getElementById('video-badge-select');
 const toggleDynamicAccentColor = document.getElementById('toggle-dynamic-accent-color');
 const crossfadeSlider = document.getElementById('crossfade-slider');
 const crossfadeValue = document.getElementById('crossfade-value');
@@ -1535,6 +1563,10 @@ function wireSettingsUI() {
   toggleCanvasVideo.addEventListener('change', () => {
     updateSettings({ canvasVideos: toggleCanvasVideo.checked });
   });
+  videoBadgeSelect.addEventListener('change', () => {
+    updateSettings({ videoBadge: videoBadgeSelect.value });
+    refreshVideoBadges();
+  });
   toggleAppleVideos.addEventListener('change', () => {
     updateSettings({ appleVideos: toggleAppleVideos.checked });
   });
@@ -1747,6 +1779,13 @@ function populateLocalizedSettingsOptions() {
     paletteGrid.appendChild(swatch);
   });
 
+  videoBadgeSelect.innerHTML = '';
+  [...Object.keys(VIDEO_BADGES), 'off'].forEach((key) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = t(`videoBadge.${key}`);
+    videoBadgeSelect.appendChild(opt);
+  });
   audioQualitySelect.innerHTML = '';
   Object.entries(AUDIO_QUALITIES).forEach(([key]) => {
     const opt = document.createElement('option');
@@ -2420,7 +2459,7 @@ function listeningTotals() {
 // localStorage, and only the fields the player and UI actually use.
 const RESUME_KEY = 'triptych:resume';
 const RESUME_TRACK_FIELDS = ['Id', 'Name', 'Album', 'AlbumId', 'AlbumArtist', 'Artists', 'ArtistItems', 'ImageTags',
-  'AlbumPrimaryImageTag', 'RunTimeTicks', 'NormalizationGain', 'UserData', 'Genres', 'Type', '__queued', '__rec'];
+  'AlbumPrimaryImageTag', 'RunTimeTicks', 'NormalizationGain', 'UserData', 'Genres', 'Type', 'ProviderIds', '__queued', '__rec'];
 let resumeSaveTimer = null;
 
 function saveResumeState() {
@@ -2579,7 +2618,7 @@ function updateRemoteBarUI(session) {
       setMarqueeText(nowPlayingTitle, track.Name);
       setMarqueeHtml(nowPlayingArtist, artistLinksHtml(track), artistNames(track));
       setArtAlt(track.Name, artistNames(track));
-      nowPlayingLikeBtn.classList.toggle('liked', !!track.UserData?.IsFavorite);
+      setLikeButtons(!!track.UserData?.IsFavorite);
       setDownloadButtonState(nowPlayingDownloadBtn, isDownloaded(track.Id) ? 'downloaded' : 'idle');
       const playing = !player.audio.paused;
       setHidden(iconPlay, playing);
@@ -2624,7 +2663,7 @@ function updateRemoteBarUI(session) {
     setMarqueeText(nowPlayingTitle, item.Name || '');
     setMarqueeHtml(nowPlayingArtist, artistLinksHtml(item), artistNames(item));
     setArtAlt(item.Name, artistNames(item));
-    nowPlayingLikeBtn.classList.toggle('liked', !!item.UserData?.IsFavorite);
+    setLikeButtons(!!item.UserData?.IsFavorite);
     const posSeconds = (playState.PositionTicks || 0) / 10000000;
     const durSeconds = (item.RunTimeTicks || 0) / 10000000;
     const pct = durSeconds ? (posSeconds / durSeconds) * 100 : 0;
@@ -2657,6 +2696,7 @@ function refreshSettingsUI() {
   toggleArtBackground.checked = !!s.artBackground;
   toggleCanvasVideo.checked = s.canvasVideos !== false;
   toggleAppleVideos.checked = s.appleVideos !== false;
+  videoBadgeSelect.value = VIDEO_BADGES[s.videoBadge] ? s.videoBadge : 'off';
   toggleDynamicAccentColor.checked = !!s.dynamicAccentColor;
   crossfadeSlider.value = s.crossfadeSeconds || 0;
   crossfadeValue.textContent = s.crossfadeSeconds ? `${s.crossfadeSeconds}s` : t('settings.crossfadeOff');
@@ -4571,7 +4611,7 @@ function buildTrackTable(tracks, queueRef, opts = {}) {
       titleWrap.appendChild(img);
     }
     const textWrap = el('div', 'track-title-text');
-    textWrap.innerHTML = `<span class="t-name">${escapeHtml(track.Name)}</span><span class="t-artist">${artistLinksHtml(track, opts.fallbackArtist)}</span>`;
+    textWrap.innerHTML = `<span class="t-name">${escapeHtml(track.Name)}${videoBadgeHtml(track)}</span><span class="t-artist">${artistLinksHtml(track, opts.fallbackArtist)}</span>`;
     titleWrap.appendChild(textWrap);
     titleCell.appendChild(titleWrap);
     row.appendChild(titleCell);
@@ -4959,20 +4999,27 @@ function wirePlayer() {
   });
   wireNowPlayingGestures();
 
-  nowPlayingLikeBtn.addEventListener('click', async () => {
+  // The player bar's heart (beside the title) and Now Playing's do the same.
+  const toggleCurrentLike = async () => {
     const track = player.currentTrack;
     if (!track) return;
     const liked = !track.UserData?.IsFavorite;
-    nowPlayingLikeBtn.classList.toggle('liked', liked);
+    setLikeButtons(liked);
     track.UserData = { ...(track.UserData || {}), IsFavorite: liked };
     try {
       if (liked) await jellyfin.likeItem(track.Id);
       else await jellyfin.unlikeItem(track.Id);
     } catch (err) {
-      nowPlayingLikeBtn.classList.toggle('liked', !liked);
+      setLikeButtons(!liked);
       track.UserData.IsFavorite = !liked;
       alert(err.message || t('errors.couldNotUpdateLike'));
     }
+  };
+  nowPlayingLikeBtn.addEventListener('click', toggleCurrentLike);
+  playerLikeBtn.addEventListener('click', (evt) => {
+    evt.stopPropagation(); // on phones the mini player would also open Now Playing
+    bounceButtons(playerLikeBtn);
+    toggleCurrentLike();
   });
 
   nowPlayingDownloadBtn.addEventListener('click', async () => {
@@ -5100,7 +5147,7 @@ function wirePlayer() {
     setMarqueeText(nowPlayingTitle, track.Name);
     setMarqueeHtml(nowPlayingArtist, artistLinksHtml(track), artistNames(track));
     setArtAlt(track.Name, artistNames(track));
-    nowPlayingLikeBtn.classList.toggle('liked', !!track.UserData?.IsFavorite);
+    setLikeButtons(!!track.UserData?.IsFavorite);
     setDownloadButtonState(nowPlayingDownloadBtn, isDownloaded(track.Id) ? 'downloaded' : 'idle');
     syncPlayAllButton();
     syncCardStates();

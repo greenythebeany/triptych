@@ -230,7 +230,7 @@ export class JellyfinClient {
       Recursive: true,
       SortBy: 'Album,SortName',
       SortOrder: 'Ascending',
-      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain'
+      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain,ProviderIds'
     });
     return data.Items || [];
   }
@@ -246,7 +246,7 @@ export class JellyfinClient {
       SortBy: sortBy,
       SortOrder: 'Descending',
       Limit: limit,
-      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain'
+      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain,ProviderIds'
     });
     return data.Items || [];
   }
@@ -295,7 +295,7 @@ export class JellyfinClient {
       Recursive: true,
       SortBy: 'Album,SortName',
       SortOrder: 'Ascending',
-      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain'
+      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain,ProviderIds'
     });
     return data.Items || [];
   }
@@ -306,7 +306,7 @@ export class JellyfinClient {
       IncludeItemTypes: 'Audio',
       SortBy: 'ParentIndexNumber,IndexNumber',
       SortOrder: 'Ascending',
-      Fields: 'ArtistItems,UserData,Genres,NormalizationGain'
+      Fields: 'ArtistItems,UserData,Genres,NormalizationGain,ProviderIds'
     });
     return data.Items || [];
   }
@@ -357,7 +357,7 @@ export class JellyfinClient {
   async getPlaylistItems(playlistId) {
     const data = await this._get(`/Playlists/${playlistId}/Items`, {
       UserId: this.userId,
-      Fields: 'ArtistItems,UserData,Genres,NormalizationGain'
+      Fields: 'ArtistItems,UserData,Genres,NormalizationGain,ProviderIds'
     });
     return data.Items || [];
   }
@@ -421,7 +421,7 @@ export class JellyfinClient {
       IncludeItemTypes: 'Audio',
       Recursive: true,
       SortBy: 'SortName',
-      Fields: 'PrimaryImageAspectRatio,ArtistItems,UserData,Genres,NormalizationGain'
+      Fields: 'PrimaryImageAspectRatio,ArtistItems,UserData,Genres,NormalizationGain,ProviderIds'
     });
     return data.Items || [];
   }
@@ -471,7 +471,7 @@ export class JellyfinClient {
       IncludeItemTypes: 'Audio',
       Recursive: true,
       SortBy: 'Album,SortName',
-      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain'
+      Fields: 'PrimaryImageAspectRatio,AlbumArtist,ArtistItems,UserData,Genres,NormalizationGain,ProviderIds'
     });
     return data.Items || [];
   }
@@ -517,7 +517,7 @@ export class JellyfinClient {
         IncludeItemTypes: 'Audio,MusicAlbum,Playlist',
         Recursive: true,
         Limit: 30,
-        Fields: 'PrimaryImageAspectRatio,UserData'
+        Fields: 'PrimaryImageAspectRatio,UserData,ProviderIds'
       }),
       this._get(`/Artists`, {
         SearchTerm: term,
