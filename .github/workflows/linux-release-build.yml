@@ -3,7 +3,11 @@ name: Linux Release Build
 # Builds the Linux AppImage and snap with electron-builder (targets are set
 # under "linux" in package.json). Runs on pushes to release/** branches, or
 # manually from the Actions tab. If a draft/published GitHub release for
-# this version exists, both files are attached to it too.
+# this version exists, the files are attached to it too.
+#
+# The snap needs snapcraft from the Snap Store. When the store is down
+# (it was for hours during 2.6.2), only the snap is skipped: the AppImage
+# still builds and ships, and re-running later adds the snap.
 
 on:
   workflow_dispatch:
@@ -24,13 +28,23 @@ jobs:
           node-version: 22
 
       - name: Install snapcraft
+        id: snapcraft
+        continue-on-error: true
+        timeout-minutes: 8
         run: sudo snap install snapcraft --classic
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build AppImage and snap
+        if: steps.snapcraft.outcome == 'success'
         run: npx electron-builder --linux --publish never
+
+      - name: Build AppImage only (Snap Store unreachable)
+        if: steps.snapcraft.outcome != 'success'
+        run: |
+          echo "::warning::snapcraft couldn't be installed (Snap Store unreachable?) -- building the AppImage only. Re-run this workflow later to add the snap."
+          npx electron-builder --linux AppImage --publish never
 
       - name: Collect version
         id: ver
@@ -50,8 +64,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v${{ steps.ver.outputs.version }}"
+          shopt -s nullglob
+          files=(dist/*.AppImage dist/*.snap)
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/*.AppImage dist/*.snap --clobber
+            gh release upload "$TAG" "${files[@]}" --clobber
           else
             echo "No release $TAG yet -- files are only in the run's artifacts."
           fi
