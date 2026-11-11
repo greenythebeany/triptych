@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Triptych Music Video Data</title>
+</head>
+<body>
+    <div id="TriptychMusicVideoPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button">
+        <div data-role="content">
+            <div class="content-primary">
+                <h2 class="sectionTitle">Triptych Music Video Data</h2>
+                <p>Finds each song's official music video (a 30-second HD preview from Apple Music) ahead of time, so Triptych shows it in Now Playing instantly. Only the link is kept on the server; the video streams from Apple.</p>
+                <p id="tmvStats" class="fieldDescription">Loading…</p>
+                <p class="fieldDescription">Run it now: Dashboard → Scheduled Tasks → Triptych → <b>Find music videos</b> (it also runs daily). To change a song's video, open the song's <b>Edit Metadata</b> and set its <b>Apple Music Video</b> ID; clear the ID to turn the video off for that song.</p>
+                <form id="TriptychMusicVideoForm">
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="tmvRate">Searches per minute</label>
+                        <input id="tmvRate" type="number" is="emby-input" min="1" max="20" />
+                        <div class="fieldDescription">Apple allows about 20 a minute. 18 takes about an hour per 1,000 songs on the first scan.</div>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="tmvRecheck">Look again at songs without a video after (days)</label>
+                        <input id="tmvRecheck" type="number" is="emby-input" min="1" max="365" />
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="tmvCountry">App Store country</label>
+                        <input id="tmvCountry" type="text" is="emby-input" maxlength="2" />
+                        <div class="fieldDescription">Two letters, e.g. US, GB, DE. Some videos exist only in some countries.</div>
+                    </div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button"><span>Save</span></button>
+                    <button is="emby-button" type="button" id="tmvReset" class="raised button-cancel block emby-button"><span>Forget all results (search again)</span></button>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            (function () {
+                var pluginId = '6c1f3f2e-5b7a-4c1e-9a8d-2f4b7e3a9c10';
+                var page = document.querySelector('#TriptychMusicVideoPage');
+
+                function loadStats() {
+                    ApiClient.getJSON(ApiClient.getUrl('TriptychMusicVideo/Stats')).then(function (s) {
+                        page.querySelector('#tmvStats').textContent = s.Found + ' songs have a music video, ' + s.Missing + ' have none (yet).';
+                    }, function () {
+                        page.querySelector('#tmvStats').textContent = '';
+                    });
+                }
+
+                page.addEventListener('pageshow', function () {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        page.querySelector('#tmvRate').value = config.SearchesPerMinute;
+                        page.querySelector('#tmvRecheck').value = config.RecheckMissesAfterDays;
+                        page.querySelector('#tmvCountry').value = config.Country;
+                        Dashboard.hideLoadingMsg();
+                    });
+                    loadStats();
+                });
+
+                page.querySelector('#TriptychMusicVideoForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        config.SearchesPerMinute = parseInt(page.querySelector('#tmvRate').value, 10) || 18;
+                        config.RecheckMissesAfterDays = parseInt(page.querySelector('#tmvRecheck').value, 10) || 14;
+                        config.Country = (page.querySelector('#tmvCountry').value || 'US').toUpperCase();
+                        ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
+                    });
+                    return false;
+                });
+
+                page.querySelector('#tmvReset').addEventListener('click', function () {
+                    ApiClient.ajax({ type: 'POST', url: ApiClient.getUrl('TriptychMusicVideo/Reset') }).then(loadStats);
+                });
+            })();
+        </script>
+    </div>
+</body>
+</html>

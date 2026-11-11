@@ -442,38 +442,20 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-label" data-i18n="settings.canvasVideos">Canvas videos</div>
-              <div class="settings-row-desc" data-i18n="settings.canvasVideosDesc">Loop a video over the cover art: your server's own (an album's theme video, or a music video with the same title), else a GIF of the song from GIPHY. Cover art stays on battery saver and slow connections</div>
+              <div class="settings-row-desc" data-i18n="settings.canvasVideosDesc">Play the song's music video behind Now Playing: from your server (the Triptych Music Video Data plugin, or a music video with the same title), else Apple's preview. Cover art stays on battery saver and slow connections</div>
             </div>
             <label class="switch">
               <input type="checkbox" id="toggle-canvas-video" />
               <span class="switch-track"></span>
             </label>
           </div>
-          <div class="settings-row settings-row-stack">
-            <div>
-              <div class="settings-row-label" data-i18n="settings.giphyKey">GIPHY API key</div>
-              <div class="settings-row-desc" data-i18n="settings.giphyKeyDesc">Free from developers.giphy.com. Finds a GIF of the song when your server has no video for it -- sends the artist and song title to GIPHY</div>
-            </div>
-            <input type="text" id="giphy-key-input" class="giphy-key-input" spellcheck="false" autocomplete="off" placeholder="API key" />
-            <details class="giphy-howto">
-              <summary data-i18n="settings.giphyHowTo">How to get a free key</summary>
-              <ol>
-                <li data-i18n="settings.giphyStep1">Open developers.giphy.com and sign up (free) or log in.</li>
-                <li data-i18n="settings.giphyStep2">Click Create an App, choose API (not SDK), then Next Step.</li>
-                <li data-i18n="settings.giphyStep3">Name it (for example Triptych), add a short description, accept the terms and click Create App.</li>
-                <li data-i18n="settings.giphyStep4">Copy the API key it shows and paste it in the box above.</li>
-                <li data-i18n="settings.giphyStep5">New keys allow 100 searches an hour. Triptych remembers every song for 30 days, so that's usually plenty. For no limit, click Upgrade to Production on your app's page (free, GIPHY reviews it).</li>
-              </ol>
-              <a href="https://developers.giphy.com/dashboard/" target="_blank" rel="noopener noreferrer" class="attribution-link" data-i18n="settings.giphyOpen">Open developers.giphy.com</a>
-            </details>
-          </div>
           <div class="settings-row">
             <div>
-              <div class="settings-row-label" data-i18n="settings.giphyEnabled">GIF background</div>
-              <div class="settings-row-desc" data-i18n="settings.giphyEnabledDesc">When your server has no video for a song, play a GIF of it from GIPHY. Off = cover art</div>
+              <div class="settings-row-label" data-i18n="settings.appleVideos">Music videos from Apple</div>
+              <div class="settings-row-desc" data-i18n="settings.appleVideosDesc">Play a 30-second HD clip of the song's real music video when your server has none -- sends the artist and song title to Apple. No account or key needed</div>
             </div>
             <label class="switch">
-              <input type="checkbox" id="toggle-giphy" />
+              <input type="checkbox" id="toggle-apple-videos" />
               <span class="switch-track"></span>
             </label>
           </div>
@@ -726,7 +708,7 @@
           </div>
           <div class="settings-row">
             <div class="settings-row-label" data-i18n="settings.canvasVideos">Canvas videos</div>
-            <a href="https://giphy.com" target="_blank" rel="noopener noreferrer" class="attribution-link">Powered by GIPHY</a>
+            <a href="https://music.apple.com" target="_blank" rel="noopener noreferrer" class="attribution-link">Music video previews by Apple Music</a>
           </div>
           <div class="settings-row">
             <div class="settings-row-label" data-i18n="settings.catJam">Jam on paw level</div>

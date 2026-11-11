@@ -28,7 +28,7 @@ export function createConnect(jellyfin, player) {
   const remoteStateListeners = [];
 
   function currentPositionTicks() {
-    return Math.floor((player.audio.currentTime || 0) * 10000000);
+    return Math.floor((player.position || 0) * 10000000);
   }
 
   function buildReportPayload(extra = {}) {

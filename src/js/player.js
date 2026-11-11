@@ -2,6 +2,9 @@ import { isDesktop, isAndroid } from './platform.js';
 import { isDownloaded, getLocalUri, getLocalArtwork } from './downloads.js';
 import { isLocalMediaUrl } from './localLibrary.js';
 
+// 1x1 transparent PNG: clears the native media session's cover.
+const BLANK_ARTWORK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 export const RepeatMode = {
   OFF: 'off',
   ALL: 'all',
@@ -107,6 +110,7 @@ export class Player {
     }
 
     this.queue = [];
+    this._squareCache = new Map();
     this.originalQueue = [];
     this.currentIndex = -1;
     this.shuffle = false;
@@ -352,9 +356,9 @@ export class Player {
         case 'previous': this.previous(); break;
         case 'stop': if (!this.audio.paused) this.togglePlay(); break;
         case 'setposition': if (event.positionMs != null) this.seekTo(event.positionMs / 1000); break;
-        case 'seekforward': this.seekTo(Math.min(this.audio.duration || Infinity, this.audio.currentTime + 10)); break;
-        case 'seekbackward': this.seekTo(Math.max(0, this.audio.currentTime - 10)); break;
-        case 'seekby': if (event.positionMs != null) this.seekTo(Math.max(0, this.audio.currentTime + event.positionMs / 1000)); break;
+        case 'seekforward': this.seekTo(Math.min(this._mediaDuration() || Infinity, this.position + 10)); break;
+        case 'seekbackward': this.seekTo(Math.max(0, this.position - 10)); break;
+        case 'seekby': if (event.positionMs != null) this.seekTo(Math.max(0, this.position + event.positionMs / 1000)); break;
       }
     });
 
@@ -368,10 +372,10 @@ export class Player {
         if (details?.seekTime != null) this.seekTo(details.seekTime);
       });
       native.setActionHandler({ action: 'seekbackward' }, () => {
-        this.seekTo(Math.max(0, this.audio.currentTime - 10));
+        this.seekTo(Math.max(0, this.position - 10));
       });
       native.setActionHandler({ action: 'seekforward' }, () => {
-        this.seekTo(Math.min(this.audio.duration || Infinity, this.audio.currentTime + 10));
+        this.seekTo(Math.min(this._mediaDuration() || Infinity, this.position + 10));
       });
       return;
     }
@@ -384,10 +388,10 @@ export class Player {
       if (details.seekTime != null) this.seekTo(details.seekTime);
     });
     navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-      this.seekTo(Math.max(0, this.audio.currentTime - (details.seekOffset || 10)));
+      this.seekTo(Math.max(0, this.position - (details.seekOffset || 10)));
     });
     navigator.mediaSession.setActionHandler('seekforward', (details) => {
-      this.seekTo(Math.min(this.audio.duration || Infinity, this.audio.currentTime + (details.seekOffset || 10)));
+      this.seekTo(Math.min(this._mediaDuration() || Infinity, this.position + (details.seekOffset || 10)));
     });
   }
 
@@ -443,6 +447,29 @@ export class Player {
     return canvas.toDataURL('image/jpeg', 0.9);
   }
 
+  // Cropped covers by track Id (a few: this song, the next, a skip back).
+  _cropSquareArtwork(track, source) {
+    if (!this._squareCache) this._squareCache = new Map();
+    if (this._squareCache.has(track.Id)) return Promise.resolve(this._squareCache.get(track.Id));
+    return this._squareArtwork(source).catch(() => null).then((square) => {
+      if (square) {
+        this._squareCache.set(track.Id, square);
+        while (this._squareCache.size > 6) this._squareCache.delete(this._squareCache.keys().next().value);
+      }
+      return square;
+    });
+  }
+
+  // The next song's cover, cropped while this one plays, so a skip shows
+  // the right cover at once. Downloaded songs' covers are looked up when
+  // they start (getLocalArtwork), so only server and on-device covers here.
+  _prefetchSquareArtwork() {
+    const next = this.queue[this.currentIndex + 1];
+    if (!next || this._squareCache?.has(next.Id) || isDownloaded(next.Id)) return;
+    const src = this.jellyfin.imageUrl(next, 'Primary', 512);
+    if (src) this._cropSquareArtwork(next, src);
+  }
+
   _applyMediaSessionMetadata(track, localArtwork) {
     const artist = track ? ((track.Artists && track.Artists.length ? track.Artists.join(', ') : track.AlbumArtist) || '') : '';
     // Each declared size needs to actually BE that size — every entry
@@ -487,19 +514,31 @@ export class Player {
     const native = this._nativeMediaSession();
     if (native) {
       const meta = { title: track?.Name || '', artist, album: track?.Album || '' };
-      // Text and length right away (new song = position 0), then the
-      // square cover once it's cropped; the uncropped one if cropping fails.
-      native.setMetadata({ ...meta, artwork: [] }).catch(() => {});
-      this._updateMediaSessionPosition(true);
       const source = (local || artwork[0])?.src;
+      const ready = track && this._squareCache.get(track.Id);
+      // Usually the cover was cropped ahead (see _prefetchSquareArtwork):
+      // text and cover go out together.
+      if (ready) {
+        native.setMetadata({ ...meta, artwork: [{ src: ready, sizes: '512x512', type: 'image/jpeg' }] }).catch(() => {});
+        this._updateMediaSessionPosition(true);
+        this._prefetchSquareArtwork();
+        return;
+      }
+      // Otherwise text and length right away (new song = position 0) with
+      // the cover cleared: the plugin keeps the last bitmap when it gets an
+      // empty artwork list, so the notification, lock screen and widgets
+      // showed the previous song's cover until (or instead of) this one's.
+      native.setMetadata({ ...meta, artwork: [{ src: BLANK_ARTWORK, sizes: '1x1', type: 'image/png' }] }).catch(() => {});
+      this._updateMediaSessionPosition(true);
       if (!source) return;
-      this._squareArtwork(source).catch(() => null).then((square) => {
+      this._cropSquareArtwork(track, source).then((square) => {
         if (this.currentTrack !== track) return;
         if (square) {
           native.setMetadata({ ...meta, artwork: [{ src: square, sizes: '512x512', type: 'image/jpeg' }] }).catch(() => {});
         } else if (!local) {
           native.setMetadata({ ...meta, artwork }).catch(() => {});
         }
+        this._prefetchSquareArtwork();
       });
       return;
     }
@@ -526,7 +565,7 @@ export class Player {
 
   _setMediaSessionPlaybackState() {
     const state = this.audio.paused ? 'paused' : 'playing';
-    window.api?.smtc?.setPlayback(state, this.audio.currentTime * 1000);
+    window.api?.smtc?.setPlayback(state, this.position * 1000);
 
     const native = this._nativeMediaSession();
     if (native) {
@@ -558,7 +597,7 @@ export class Player {
     const duration = this._mediaDuration();
     if (!duration) return;
     this._lastPositionPush = now;
-    const position = Math.max(0, Math.min(this.audio.currentTime || 0, duration));
+    const position = Math.max(0, Math.min(this.position, duration));
     const playbackRate = this.audio.playbackRate || 1;
 
     const native = this._nativeMediaSession();
@@ -650,7 +689,7 @@ export class Player {
     this._emit('queuechange');
     const el = this.audio;
     if (positionSeconds > 1) {
-      const seek = () => { try { el.currentTime = positionSeconds; } catch (err) { /* not seekable yet */ } };
+      const seek = () => { try { if (el === this.audio) this.seekTo(positionSeconds); } catch (err) { /* not seekable yet */ } };
       el.addEventListener('loadedmetadata', seek, { once: true });
     }
     this._loadCurrent(false);
@@ -880,8 +919,8 @@ export class Player {
   previous(skipRestart = false) {
     this._cancelTransition();
     if (this.queue.length === 0) return;
-    if (!skipRestart && this.audio.currentTime > 3) {
-      this.audio.currentTime = 0;
+    if (!skipRestart && this.position > 3) {
+      this.seekTo(0);
       return;
     }
     let prevIndex = this.currentIndex - 1;
@@ -919,12 +958,46 @@ export class Player {
 
   _stopAtEnd() {
     this.audio.pause();
-    this.audio.currentTime = 0;
+    this.seekTo(0);
     this._emit('playstate');
   }
 
+  // Where the song really is, in seconds. A converted stream restarted
+  // mid-song (seekTo) plays from 0 again, so its start is added back; the
+  // offset belongs to that one stream URL, so any other stream loaded into
+  // the element counts from 0 by itself.
+  get position() {
+    const el = this.audio;
+    const offset = el._startOffsetSrc && el._startOffsetSrc === el.src ? el._startOffset : 0;
+    return offset + (el.currentTime || 0);
+  }
+
   seekTo(seconds) {
-    this.audio.currentTime = seconds;
+    const el = this.audio;
+    const track = this.currentTrack;
+    seconds = Math.max(0, seconds || 0);
+    const offset = el._startOffsetSrc && el._startOffsetSrc === el.src ? el._startOffset : 0;
+    // Original quality and downloads take byte ranges: jump anywhere.
+    if (!track || !/\/stream\.mp3\?/.test(el.src)) {
+      el.currentTime = Math.max(0, seconds - offset);
+      return;
+    }
+    // A converted (lower-quality) stream can't jump, not even within what
+    // has downloaded: the server ignores byte ranges, so the browser fetched
+    // it again from the top and played 0:00 while showing the new time. The
+    // server starts converting right there instead.
+    const wasPlaying = !el.paused;
+    const kbps = this.getBitrateKbps();
+    el.src = this.jellyfin.streamUrl(track, kbps, seconds, true);
+    if (kbps) {
+      el._startOffset = seconds;
+      el._startOffsetSrc = el.src;
+    } else {
+      // Connection got better meanwhile: original quality, which seeks.
+      el.addEventListener('loadedmetadata', () => { el.currentTime = seconds; }, { once: true });
+    }
+    if (wasPlaying) el.play().catch((err) => this._logPlayError('seekTo', err));
+    this._updateMediaSessionPosition(true);
   }
 
   // ---------- Gapless preloading / crossfade ----------
