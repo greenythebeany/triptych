@@ -4985,6 +4985,8 @@ function wirePlayer() {
   document.addEventListener('click', (evt) => {
     const link = evt.target.closest?.('.artist-link[data-artist-id]');
     if (!link) return;
+    // Phones: the mini player's artist opens the player, not the artist.
+    if (isPhoneLayout() && link.closest('#player-bar')) return;
     evt.stopPropagation();
     evt.preventDefault();
     if (isPhoneLayout() && !lyricsPanel.hidden) closeNowPlaying();

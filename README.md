@@ -135,6 +135,12 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.6.3
+
+- Phones: tapping the mini player's artist opens the player again (it opened the artist's page by accident), and the mini player has no heart; the full-screen player keeps both
+- Linux releases ship the AppImage even when the Snap Store is down (2.6.2's AppImage came late because of that)
+- Plus everything from 2.6.2 and 2.6.0 below: the music video icon, the player bar heart on desktop, real music videos in Now Playing and the Triptych Music Video Data plugin
+
 ## What's new in 2.6.2
 
 - Songs that have a music video get a small, subtle icon next to the title in song lists (film strip by default; pick another one or turn it off in Settings → Music video icon). It marks the songs the Triptych Music Video Data plugin found a video for
