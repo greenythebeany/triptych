@@ -135,6 +135,13 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.6.4
+
+- **Triptych in your browser:** the app now also runs at [triptych.greenybeany.dev/app](https://triptych.greenybeany.dev/app), nothing to install. It runs entirely in your browser and talks straight to your own server; the website doesn't take any data from your server or your account. Your server needs to allow the site (see "Use it in a browser")
+- **Lyrics for "feat." songs:** a song like "Take Me to the Beach (feat. Ado)" gets the version with Ado's parts, not the solo version's lyrics. Lyrics saved before are looked up again once
+- **Privacy Policy and Terms of Use** updated for the browser version and for music videos from Apple (and the Music Video Data plugin)
+- Plus everything from 2.6.3, 2.6.2 and 2.6.0 below: real music videos in Now Playing, the Triptych Music Video Data plugin, the music video icon, the player bar heart and the phone mini player fix
+
 ## What's new in 2.6.3
 
 - Phones: tapping the mini player's artist opens the player again (it opened the artist's page by accident), and the mini player has no heart; the full-screen player keeps both
