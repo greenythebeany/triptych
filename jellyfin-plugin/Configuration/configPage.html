@@ -25,7 +25,7 @@
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="tmvCountry">App Store country</label>
                         <input id="tmvCountry" type="text" is="emby-input" maxlength="2" />
-                        <div class="fieldDescription">Two letters, e.g. US, GB, DE. Some videos exist only in some countries.</div>
+                        <div class="fieldDescription">Two letters, e.g. SK, CZ, DE, GB. Searched first, then the US store (and Japan's for Japanese titles). Some videos exist only in some countries: Slovak artists have more in SK/CZ. Empty = your server's metadata country.</div>
                     </div>
                     <button is="emby-button" type="submit" class="raised button-submit block emby-button"><span>Save</span></button>
                     <button is="emby-button" type="button" id="tmvReset" class="raised button-cancel block emby-button"><span>Forget all results (search again)</span></button>
@@ -62,7 +62,7 @@
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
                         config.SearchesPerMinute = parseInt(page.querySelector('#tmvRate').value, 10) || 18;
                         config.RecheckMissesAfterDays = parseInt(page.querySelector('#tmvRecheck').value, 10) || 14;
-                        config.Country = (page.querySelector('#tmvCountry').value || 'US').toUpperCase();
+                        config.Country = (page.querySelector('#tmvCountry').value || '').trim().toUpperCase();
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
                     });
                     return false;

@@ -148,6 +148,7 @@ The Android project lives in `android/` and is a standard Capacitor project — 
 
 - **Triptych in your browser:** the app now also runs at [triptych.greenybeany.dev/app](https://triptych.greenybeany.dev/app), nothing to install. It runs entirely in your browser and talks straight to your own server; the website doesn't take any data from your server or your account. Your server needs to allow the site (see "Use it in a browser")
 - **Lyrics for "feat." songs:** a song like "Take Me to the Beach (feat. Ado)" gets the version with Ado's parts, not the solo version's lyrics. Lyrics saved before are looked up again once
+- **Music videos for Japanese, K-pop and Slovak songs:** Apple's Japanese store is searched for Japanese titles and J-pop/anime artists, your own country's store comes first (Slovak artists have more videos in the SK/CZ stores), and every part of a title counts ("うっせぇわ - Usseewa", "강남스타일 (Gangnam Style)"). In the Triptych Music Video Data plugin (1.0.1, update it from Jellyfin's catalog) and in the app
 - **Privacy Policy and Terms of Use** updated for the browser version and for music videos from Apple (and the Music Video Data plugin)
 - Plus everything from 2.6.3, 2.6.2 and 2.6.0 below: real music videos in Now Playing, the Triptych Music Video Data plugin, the music video icon, the player bar heart and the phone mini player fix
 

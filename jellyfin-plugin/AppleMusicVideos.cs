@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MediaBrowser.Controller.Configuration;
 using System.Globalization;
 using System.Net;
 using System.Text;
@@ -16,15 +17,17 @@ namespace Triptych.MusicVideoData;
 public sealed partial class AppleMusicVideos
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IServerConfigurationManager _serverConfig;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private double _tokens = Burst;
     private DateTime _refilled = DateTime.UtcNow;
     private const double Burst = 4;
     private DateTime _blockedUntil = DateTime.MinValue;
 
-    public AppleMusicVideos(IHttpClientFactory httpClientFactory)
+    public AppleMusicVideos(IHttpClientFactory httpClientFactory, IServerConfigurationManager serverConfig)
     {
         _httpClientFactory = httpClientFactory;
+        _serverConfig = serverConfig;
     }
 
     public sealed record Match(string Url, string AppleId);
@@ -36,20 +39,20 @@ public sealed partial class AppleMusicVideos
     }
 
     /// <summary>Bumped when matching gets better: songs missed by an older version are looked at again.</summary>
-    public const int MatcherVersion = 3;
+    public const int MatcherVersion = 4;
 
     private sealed record Video(string Artist, string Title, string Url, string Id);
 
-    // An artist's whole video list, fetched once and matched against every
-    // song by them (a scan goes artist by artist, so this saves most requests).
+    // An artist's whole video list per App Store country, fetched once and
+    // matched against every song by them (a scan goes artist by artist, so
+    // this saves most requests).
     private readonly ConcurrentDictionary<string, (DateTime At, List<Video> Videos)> _artistVideos = new();
 
     public async Task<Match?> SearchAsync(IReadOnlyList<string> artists, string trackName, CancellationToken ct)
     {
         var names = artists.Select(Words).Where(n => n.Length > 0).Distinct().ToList();
-        var song = CleanTitle(trackName);
-        var title = Words(song);
-        if (names.Count == 0 || title.Length == 0)
+        var titles = TitleVariants(trackName);
+        if (names.Count == 0 || titles.Count == 0)
         {
             return null;
         }
@@ -57,23 +60,56 @@ public sealed partial class AppleMusicVideos
         bool ByArtist(Video v) =>
             names.Any(n => v.Artist == n || v.Artist.Contains(n, StringComparison.Ordinal) || n.Contains(v.Artist, StringComparison.Ordinal));
 
+        // Any reading of the title counts: "うっせぇわ - Usseewa" is
+        // うっせぇわ in Apple's Japanese store and could be "Usseewa"
+        // elsewhere; "강남스타일 (Gangnam Style)" is "Gangnam Style".
         bool Fits(Video v) =>
             ByArtist(v)
             && v.Title.Length > 0
-            && (v.Title == title || v.Title.StartsWith(title + " ", StringComparison.Ordinal) || title.StartsWith(v.Title + " ", StringComparison.Ordinal));
+            && titles.Any(title => v.Title == title
+                || v.Title.StartsWith(title + " ", StringComparison.Ordinal)
+                || title.StartsWith(v.Title + " ", StringComparison.Ordinal));
 
-        // 1. The artist's (and co-artists') video lists.
-        var artistKnown = false;
-        foreach (var n in names.Take(3))
+        // Your country's store first (Slovak artists have more videos in the
+        // SK/CZ stores than in the US one), then the US store, and Apple's
+        // Japanese store for Japanese titles or artists, or for artists none
+        // of those has anything by (J-pop, anime songs). Korea's store has no
+        // music videos; K-pop is in the US/international one.
+        var country = Country;
+        var japanese = HasJapanese(trackName) || artists.Any(HasJapanese);
+        var stores = new List<string> { country };
+        if (country != "US")
         {
-            var list = await ArtistVideosAsync(n, ct).ConfigureAwait(false);
-            // Only the artist's own videos count: for a name Apple doesn't
-            // know it returns other artists (Hard Rico -> Doja Cat ...).
-            artistKnown |= list.Any(ByArtist);
-            var hit = list.FirstOrDefault(Fits);
-            if (hit is not null)
+            stores.Add("US");
+        }
+
+        if (country != "JP" && japanese)
+        {
+            stores.Add("JP");
+        }
+
+        var artistKnown = false;
+        for (var i = 0; i < stores.Count; i++)
+        {
+            // 1. The artist's (and co-artists') video lists in this store.
+            var knownHere = false;
+            foreach (var n in names.Take(3))
             {
-                return new Match(hit.Url, hit.Id);
+                var list = await ArtistVideosAsync(stores[i], n, ct).ConfigureAwait(false);
+                // Only the artist's own videos count: for a name Apple doesn't
+                // know it returns other artists (Hard Rico -> Doja Cat ...).
+                knownHere |= list.Any(ByArtist);
+                var hit = list.FirstOrDefault(Fits);
+                if (hit is not null)
+                {
+                    return new Match(hit.Url, hit.Id);
+                }
+            }
+
+            artistKnown |= knownHere;
+            if (!artistKnown && i == stores.Count - 1 && !stores.Contains("JP"))
+            {
+                stores.Add("JP");
             }
         }
 
@@ -83,32 +119,58 @@ public sealed partial class AppleMusicVideos
             return null;
         }
 
-        // 2. Apple knows the artist by another name ("mgk"): by title.
-        foreach (var term in new[] { Query(names[0], Words(song)), Query(Words(song)) }.Distinct())
+        // 2. Apple knows the artist by another name ("mgk"): by title, in the
+        //    first store (and the Japanese one for Japanese titles).
+        foreach (var store in japanese ? new[] { country, "JP" }.Distinct() : new[] { country })
         {
-            var hit = (await SearchVideosAsync(term, null, 25, ct).ConfigureAwait(false)).FirstOrDefault(Fits);
-            if (hit is not null)
+            foreach (var term in new[] { Query(names[0], titles[0]), Query(titles[0]) }.Distinct())
             {
-                return new Match(hit.Url, hit.Id);
+                var hit = (await SearchVideosAsync(store, term, null, 25, ct).ConfigureAwait(false)).FirstOrDefault(Fits);
+                if (hit is not null)
+                {
+                    return new Match(hit.Url, hit.Id);
+                }
             }
         }
 
         return null;
     }
 
-    private async Task<List<Video>> ArtistVideosAsync(string artist, CancellationToken ct)
+    // The title as a whole, each side of " - " and any bracketed name that
+    // isn't a version note -- all cleaned and compared without accents.
+    private static List<string> TitleVariants(string trackName)
     {
-        if (_artistVideos.TryGetValue(artist, out var cached) && DateTime.UtcNow - cached.At < TimeSpan.FromHours(12))
+        var raw = (trackName ?? string.Empty).Normalize(NormalizationForm.FormKC);
+        var list = new List<string> { CleanTitle(raw) };
+        list.AddRange(DashSplit().Split(CleanTitle(raw)).Select(p => p.Trim()));
+        foreach (System.Text.RegularExpressions.Match m in BracketInner().Matches(raw))
+        {
+            var inner = m.Groups[1].Value;
+            if (!VersionNote().IsMatch(inner))
+            {
+                list.Add(inner);
+            }
+        }
+
+        return list.Select(Words).Where(t => t.Length > 0).Distinct().ToList();
+    }
+
+    private static bool HasJapanese(string? s) => !string.IsNullOrEmpty(s) && JapaneseChars().IsMatch(s);
+
+    private async Task<List<Video>> ArtistVideosAsync(string store, string artist, CancellationToken ct)
+    {
+        var key = store + "\u0001" + artist;
+        if (_artistVideos.TryGetValue(key, out var cached) && DateTime.UtcNow - cached.At < TimeSpan.FromHours(12))
         {
             return cached.Videos;
         }
 
-        var videos = await SearchVideosAsync(Query(artist), "artistTerm", 200, ct).ConfigureAwait(false);
-        _artistVideos[artist] = (DateTime.UtcNow, videos);
+        var videos = await SearchVideosAsync(store, Query(artist), "artistTerm", 200, ct).ConfigureAwait(false);
+        _artistVideos[key] = (DateTime.UtcNow, videos);
         return videos;
     }
 
-    private async Task<List<Video>> SearchVideosAsync(string term, string? attribute, int limit, CancellationToken ct)
+    private async Task<List<Video>> SearchVideosAsync(string store, string term, string? attribute, int limit, CancellationToken ct)
     {
         var query = new Dictionary<string, string>
         {
@@ -116,7 +178,7 @@ public sealed partial class AppleMusicVideos
             ["media"] = "musicVideo",
             ["entity"] = "musicVideo",
             ["limit"] = limit.ToString(CultureInfo.InvariantCulture),
-            ["country"] = Country
+            ["country"] = store
         };
         if (attribute is not null)
         {
@@ -151,29 +213,45 @@ public sealed partial class AppleMusicVideos
     /// <summary>A video picked by hand (its Apple ID typed into the song's metadata).</summary>
     public async Task<Match?> LookupAsync(string appleId, CancellationToken ct)
     {
-        using var doc = await GetAsync("lookup", new Dictionary<string, string>
+        foreach (var store in new[] { Country, "US", "JP" }.Distinct())
         {
-            ["id"] = appleId,
-            ["entity"] = "musicVideo",
-            ["country"] = Country
-        }, ct).ConfigureAwait(false);
-        if (doc is null)
-        {
-            return null;
-        }
-
-        foreach (var r in doc.RootElement.GetProperty("results").EnumerateArray())
-        {
-            if (r.TryGetProperty("previewUrl", out var p) && !string.IsNullOrEmpty(p.GetString()))
+            using var doc = await GetAsync("lookup", new Dictionary<string, string>
             {
-                return new Match(p.GetString()!, IdOf(r));
+                ["id"] = appleId,
+                ["entity"] = "musicVideo",
+                ["country"] = store
+            }, ct).ConfigureAwait(false);
+            if (doc is null)
+            {
+                continue;
+            }
+
+            foreach (var r in doc.RootElement.GetProperty("results").EnumerateArray())
+            {
+                if (r.TryGetProperty("previewUrl", out var p) && !string.IsNullOrEmpty(p.GetString()))
+                {
+                    return new Match(p.GetString()!, IdOf(r));
+                }
             }
         }
 
         return null;
     }
 
-    private static string Country => Plugin.Instance?.Configuration.Country is { Length: 2 } c ? c : "US";
+    // The configured store, else the server's metadata country, else US.
+    private string Country
+    {
+        get
+        {
+            if (Plugin.Instance?.Configuration.Country is { Length: 2 } c)
+            {
+                return c.ToUpperInvariant();
+            }
+
+            var server = _serverConfig.Configuration.MetadataCountryCode;
+            return server is { Length: 2 } ? server.ToUpperInvariant() : "US";
+        }
+    }
 
     private static string IdOf(JsonElement r) =>
         r.TryGetProperty("trackId", out var id) ? id.GetInt64().ToString(CultureInfo.InvariantCulture) : string.Empty;
@@ -289,4 +367,16 @@ public sealed partial class AppleMusicVideos
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex Spaces();
+
+    [GeneratedRegex(@"\s+[-–—]\s+")]
+    private static partial Regex DashSplit();
+
+    [GeneratedRegex(@"[(\[（【「『]([^)\]）】」』]{2,})[)\]）】」』]")]
+    private static partial Regex BracketInner();
+
+    [GeneratedRegex(@"\b(feat|ft|featuring|with|remaster|remastered|live|version|ver|edit|mix|remix|acoustic|demo|radio|explicit|clean|lyric|lyrics|video|audio|official|prod|from|ost|soundtrack|instrumental|\d{4})\b", RegexOptions.IgnoreCase)]
+    private static partial Regex VersionNote();
+
+    [GeneratedRegex(@"[\u3040-\u30ff\u31f0-\u31ff\u4e00-\u9fff]")]
+    private static partial Regex JapaneseChars();
 }
