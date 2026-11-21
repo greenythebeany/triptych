@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: 2026-11-04_
+_Last updated: 2026-11-21_
 
 Triptych is a client app for a Jellyfin or Navidrome media server **you host yourself**. The developer does not run any backend for Triptych, does not receive analytics or telemetry from your copy of the app, and cannot see your library, your account, or what you play.
 
@@ -24,8 +24,20 @@ This document is also available inside the app itself, under **Settings → Abou
 - **Deezer (api.deezer.com)** — when your server (or a song file on this device) has no cover art for a track, the current artist/album/track name is sent to Deezer's public search to find one. No account or personal identifier is sent. While Discord Rich Presence is connected, the playing song's artist/album is also looked up this way so your Discord status can show a cover anyone can see. Can be turned off in Settings → Privacy.
 - **Deezer related artists (api.deezer.com)** — in smart shuffle, and for Home's "Because you listened to…" row, the names of the artists you're playing are sent to Deezer's public artist API to find similar artists, along with requests for those artists' album and top-track lists (compared on your device with your own song and album titles, so a same-named artist isn't mistaken for yours). The answers are cached on your device for up to 30 days, so each artist is only looked up now and then. No account or personal identifier is sent. Can be turned off in Settings → Privacy ("Online related artists lookup"); smart shuffle then works from your library and listening history only.
 - **Lyrics: lrclib.net, NetEase Cloud Music, Kugou and lyrics.ovh** — when you view lyrics, the current track's title, artist, album and length are sent to lrclib.net's public lyrics API, and its title, artist and length to NetEase Cloud Music's and Kugou's public lyrics search, at the same time as your own server is asked; the title and first artist also go to lyrics.ovh. No account or personal identifier is sent. Lyrics found (or the fact that a song has none) are cached on your device, per track, so each song is only looked up once; the next song in your queue is looked up ahead of time while lyrics are open. If you turn on **Search by lyrics** (Settings → Privacy, off by default), the same lookups also run in the background for the songs in your library, one every few seconds, and the lyrics found are stored on your device so you can search them; turning it off stops this.
+- **Music videos: Apple (itunes.apple.com)** — when a song plays and neither your server nor the Triptych Music Video Data plugin has a video for it, the song's title and artist are sent to Apple's public iTunes Search API to find its official music video. No account or personal identifier is sent; the result is cached on your device for 30 days. The video itself (a 30-second preview) then streams from Apple's servers, which see your IP address like any video host. Can be turned off in Settings → Appearance ("Music videos from Apple"); "Canvas videos" turns all videos off.
+- **Triptych Music Video Data (optional plugin on your Jellyfin server)** — if you install it, your server sends each song's title and artist to the same Apple API, ahead of time, and keeps only the links it finds (a small `videos.json` in the plugin's folder, plus an "Apple Music Video" ID on each song). That happens between your server and Apple; nothing goes to the developer.
 - **Discord** — only if you explicitly connect it in Settings → Audio → Discord Rich Presence. While connected, the currently playing track/artist and its cover art URL are sent to your local Discord client so it can show on your Discord profile. Off by default; disconnect any time.
 - **YouTube / YouTube Music / SoundCloud** — only if you use the "Import" feature to paste a link, which fetches that specific media directly to your device. See the [Terms of Service](TERMS.md) for the responsibility that comes with this feature.
+
+## Triptych in your browser (triptych.greenybeany.dev/app)
+
+The browser version is the same app, loaded as plain files from the Triptych website (GitHub Pages). **It runs entirely in your browser, and your browser talks straight to your own server.** There is no Triptych backend in between:
+
+- **The website doesn't take any data from your server or your account.** Your server address, username, access token, library, playlists, likes and what you play are never sent to, seen by or stored on the website or the developer. They only travel between your browser and your server.
+- **What the browser keeps** (your server session, preferences, listening stats, cached lyrics and music-video links) is saved in that browser's own storage on your device (local storage and IndexedDB for the site), like the desktop app keeps it on your computer. Signing out, or clearing the site's data in your browser, removes all of it.
+- **Your server has to allow the site** to talk to it (its CORS / reverse-proxy settings). That's a setting on your server about which pages may connect to it; nothing is shared with the developer by it.
+- **GitHub, as the host,** only serves the app's files and sees the usual request data any web server sees (your IP address and browser), under [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). It never sees your server, your login or your music.
+- The optional lookups below (lyrics, cover art, music videos, related artists) work the same way in the browser, straight from your browser to those services. NetEase and Kugou aren't used in the browser.
 
 ## This website
 

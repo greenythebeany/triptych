@@ -1,15 +1,17 @@
 {
   "category": "Metadata",
-  "changelog": "First version: finds each song's music video (Apple Music preview) for Triptych.",
+  "changelog": "1.0.1: Apple's Japanese store for Japanese titles and J-pop/anime artists, your own country's store first (Slovak artists have more videos in SK/CZ) then US, and every part of a title counts (\"うっせぇわ - Usseewa\", \"강남스타일 (Gangnam Style)\"). Songs without a video are looked at again.",
   "description": "Finds every song's official music video ahead of time (a 30-second HD preview from Apple Music) for Triptych's Now Playing canvas. Adds an Apple Music Video ID to songs, editable in Edit Metadata.",
   "guid": "6c1f3f2e-5b7a-4c1e-9a8d-2f4b7e3a9c10",
   "name": "Triptych Music Video Data",
   "overview": "Music videos for Triptych's Now Playing",
   "owner": "greenythebeany",
   "targetAbi": "10.11.0.0",
-  "timestamp": "2026-11-11T00:00:00.0000000Z",
-  "version": "1.0.0.0",
+  "timestamp": "2026-11-21T00:00:00.0000000Z",
+  "version": "1.0.1.0",
   "status": "Active",
   "autoUpdate": false,
-  "assemblies": [ "Triptych.MusicVideoData.dll" ]
+  "assemblies": [
+    "Triptych.MusicVideoData.dll"
+  ]
 }

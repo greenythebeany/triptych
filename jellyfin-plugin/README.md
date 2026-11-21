@@ -2,7 +2,7 @@
 
 A small Jellyfin plugin that finds every song's **official music video** ahead of time, so Triptych can play it behind Now Playing the moment the song starts.
 
-- It looks each song up in Apple's free iTunes Search API, which has 30-second HD previews (mostly 1080p) of official music videos. It matches the artist's whole video list first, ignores accents ("Nerieš", "Måneskin") and treats "feat." credits as co-artists. Only an exact artist + title match counts: a different song's video is worse than none.
+- It looks each song up in Apple's free iTunes Search API, which has 30-second HD previews (mostly 1080p) of official music videos: your server's country store first (or the one set on the plugin's page), then the US store, and Japan's store for Japanese titles and J-pop/anime artists (Korea's store has no music videos; K-pop is in the US one). Every part of a title counts: "うっせぇわ - Usseewa", "강남스타일 (Gangnam Style)". It matches the artist's whole video list first, ignores accents ("Nerieš", "Måneskin") and treats "feat." credits as co-artists. Only an exact artist + title match counts: a different song's video is worse than none.
 - It keeps **only the link** on your server (`videos.json` in the plugin's data folder, well under 1 MB for thousands of songs). The video itself streams from Apple when it plays; nothing is downloaded or stored.
 - It adds an **Apple Music Video** ID to every song (Edit Metadata → External IDs), so you can see what was picked, swap it, or clear it to turn the video off for that song.
 - It runs by itself: at every server start, only for songs not looked up yet, and once a day for new music. Its pace is about 18 searches a minute, under Apple's limit; the first pass takes roughly an hour per 1,000 songs.

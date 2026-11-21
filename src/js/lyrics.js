@@ -203,6 +203,25 @@ function makePair(title, artist) {
 // dash is also read as "Artist - Title" and "Title - Artist/Show", most
 // likely reading first. Searches walk these in order; matching takes the
 // best of them.
+// "Take Me to the Beach (feat. Ado)" and "Take Me to the Beach" are
+// different recordings with different lyrics, same title and length once
+// the feat. part is set aside. The featured artists (from the title, and any
+// artist after the first in the tags) are kept to tell them apart.
+const FEAT_IN_TITLE = /(?:\b(?:feat\.?|ft\.?|featuring)\s+|[(\[]\s*with\s+)([^)\]\-–—]+)/i;
+function featuredArtists(query) {
+  const names = [];
+  const m = (query.title || '').normalize('NFKC').match(FEAT_IN_TITLE);
+  if (m) names.push(...splitArtists(m[1]));
+  names.push(...splitArtists(query.artist).slice(1));
+  const seen = new Set();
+  return names.filter((n) => {
+    const key = matchKey(n);
+    if (key.length < 2 || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function prepareQuery(query) {
   const asTagged = makePair(query.title, query.artist);
   const pairs = [asTagged];
@@ -223,7 +242,8 @@ function prepareQuery(query) {
   for (const [, inner] of asTagged.title.matchAll(/[([（【「『]([^)\]）】」』]{3,})[)\]）】」』]/g)) {
     if (inner.trim().includes(' ') || /[぀-ヿ一-鿿가-힯]/.test(inner)) pairs.push(makePair(inner, query.artist));
   }
-  return { ...query, asTagged, pairs, duration: query.durationSeconds || 0 };
+  const featured = featuredArtists(query);
+  return { ...query, asTagged, pairs, featured, featuredKeys: featured.map(matchKey), duration: query.durationSeconds || 0 };
 }
 
 function scorePair(pair, cand, dd) {
@@ -245,7 +265,11 @@ function scorePair(pair, cand, dd) {
 function scoreCandidate(q, cand) {
   const dd = q.duration && cand.duration ? Math.abs(q.duration - cand.duration) : null;
   if (dd != null && dd > 15) return 0;
-  return Math.max(...q.pairs.map((pair) => scorePair(pair, cand, dd)));
+  const score = Math.max(...q.pairs.map((pair) => scorePair(pair, cand, dd)));
+  if (!score || !q.featuredKeys?.length) return score;
+  const hay = ` ${matchKey([cand.title, cand.artist, cand.album, cand.albumName].filter(Boolean).join(' '))} `;
+  const named = q.featuredKeys.some((k) => hay.includes(` ${k} `));
+  return Math.min(1, Math.max(0, score + (named ? 0.1 : -0.15)));
 }
 
 // Best-scoring candidate, preferring one with synced lyrics when it's
@@ -367,9 +391,11 @@ async function lookupLrclib(q) {
   // One search per song: the tags as they are, or for uploads with
   // "Artist - Title" in the title, free text from the likeliest reading.
   const first = q.pairs[0];
-  const search = q.pairs.length > 1
-    ? { q: `${first.bare} ${first.firstArtist}`.trim() }
-    : { track_name: first.title, artist_name: first.firstArtist };
+  const search = q.featured?.length
+    ? { q: `${first.bare} ${first.firstArtist} ${q.featured.join(' ')}`.trim() }
+    : q.pairs.length > 1
+      ? { q: `${first.bare} ${first.firstArtist}`.trim() }
+      : { track_name: first.title, artist_name: first.firstArtist };
   const results = await lrclibGet(`/search?${new URLSearchParams(search)}`);
   const best = pickBest(q, (results || []).map(toCand), synced);
   return best ? fromLrclib(best, best.score) : null;
@@ -651,7 +677,7 @@ function lookupLyrics(query, onLate) {
 
 const DB_NAME = 'triptych-lyrics-cache';
 const STORE = 'tracks';
-const CACHE_VERSION = 3; // 3: text fixes in strip() (entities, lookalikes) -- refetch older entries
+const CACHE_VERSION = 4; // 4: feat. versions told apart from solo ones; 3: text fixes in strip() -- refetch older entries
 const FOUND_TTL_MS = 90 * 24 * 3600 * 1000;
 const NONE_TTL_MS = 3 * 24 * 3600 * 1000;
 

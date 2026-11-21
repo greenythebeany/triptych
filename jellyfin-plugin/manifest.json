@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/greenythebeany/triptych/main/logo.png",
     "versions": [
       {
+        "version": "1.0.1.0",
+        "changelog": "Apple's Japanese store for Japanese titles and J-pop/anime artists; your own country's store first (Slovak artists have more videos in SK/CZ), then US; every part of a title counts (\"うっせぇわ - Usseewa\", \"강남스타일 (Gangnam Style)\"). Songs without a video are looked at again.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/greenythebeany/triptych/releases/download/v2.6.4/triptych-music-video-data_1.0.1.0.zip",
+        "checksum": "a0d2befdb2e6671a4ab8e0923d30b67b",
+        "timestamp": "2026-11-21T00:00:00Z"
+      },
+      {
         "version": "1.0.0.0",
         "changelog": "First version: finds each song's music video (Apple Music preview) for Triptych 2.6.0.",
         "targetAbi": "10.11.0.0",

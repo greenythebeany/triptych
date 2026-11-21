@@ -257,9 +257,9 @@ async function findCanvas(track) {
 // then the title alone (Apple's search sometimes misses the pair). Apple
 // allows ~20 searches a minute; a refusal pauses lookups for 5 minutes.
 let appleBlockedUntil = 0;
-async function appleSearch(term) {
+async function appleSearch(term, country) {
   if (Date.now() < appleBlockedUntil) throw new Error('Apple rate limited');
-  const params = new URLSearchParams({ term, media: 'musicVideo', entity: 'musicVideo', limit: '25' });
+  const params = new URLSearchParams({ term, media: 'musicVideo', entity: 'musicVideo', limit: '25', country });
   const res = await fetch(`https://itunes.apple.com/search?${params}`);
   if (res.status === 403 || res.status === 429) {
     appleBlockedUntil = Date.now() + 5 * 60 * 1000;
@@ -270,21 +270,56 @@ async function appleSearch(term) {
   return (await res.json()).results || [];
 }
 
+const JAPANESE = /[\u3040-\u30ff\u31f0-\u31ff\u4e00-\u9fff]/;
+const VERSION_NOTE = /\b(?:feat|ft|featuring|with|remaster(?:ed)?|live|version|ver|edit|mix|remix|acoustic|demo|radio|explicit|clean|lyrics?|video|audio|official|prod|from|ost|soundtrack|instrumental|\d{4})\b/i;
+
+// Every reading of a title: the whole, each side of " - ", and a bracketed
+// name that isn't a version note -- "うっせぇわ - Usseewa" is うっせぇわ in
+// Apple's Japanese store, "강남스타일 (Gangnam Style)" is "Gangnam Style".
+function titleVariants(name) {
+  const raw = String(name || '').normalize('NFKC');
+  const out = [cleanTitle(raw), ...cleanTitle(raw).split(/\s+[-–—]\s+/)];
+  for (const [, inner] of raw.matchAll(/[([（【「『]([^)\]）】」』]{2,})[)\]）】」』]/g)) {
+    if (!VERSION_NOTE.test(inner)) out.push(inner);
+  }
+  return [...new Set(out.map(words).filter(Boolean))];
+}
+
+// This device's country store first (Slovak artists have more videos in
+// the SK/CZ stores), then the US one, and Japan's for Japanese titles.
+// Korea's store has no music videos; K-pop is in the US one.
+// A language without a region ("sk") stands for its main country.
+const LANGUAGE_STORE = { sk: 'SK', cs: 'CZ', pl: 'PL', hu: 'HU', de: 'DE', fr: 'FR', it: 'IT', es: 'ES', nl: 'NL', sv: 'SE', da: 'DK', nb: 'NO', fi: 'FI', uk: 'UA', ja: 'JP', en: 'US' };
+function appleStores(japanese) {
+  const tags = navigator.languages?.length ? navigator.languages : [navigator.language || ''];
+  let home = null;
+  for (const tag of tags) {
+    const [lang, region] = String(tag).split('-');
+    home = (region && /^[A-Za-z]{2}$/.test(region) ? region.toUpperCase() : null) || LANGUAGE_STORE[lang?.toLowerCase()] || null;
+    if (home) break;
+  }
+  return [...new Set([home || 'US', 'US', ...(japanese ? ['JP'] : [])])];
+}
+
 async function searchAppleVideo(track) {
   const names = [...new Set([...(track.Artists || []), track.AlbumArtist].map((n) => words(n)).filter(Boolean))];
-  const song = cleanTitle(track.Name);
-  const title = words(song);
-  if (!names.length || !title) return null;
+  const titles = titleVariants(track.Name);
+  if (!names.length || !titles.length) return null;
   const match = (r) => {
     if (!r.previewUrl) return false;
     const artist = words(r.artistName);
     const byArtist = names.some((n) => artist === n || artist.includes(n) || n.includes(artist));
     const name = words(cleanTitle(r.trackName));
-    return byArtist && (name === title || name.startsWith(`${title} `) || title.startsWith(`${name} `));
+    return byArtist && titles.some((title) => name === title || name.startsWith(`${title} `) || title.startsWith(`${name} `));
   };
-  for (const term of [query(names[0], song), query(song)]) {
-    const hit = (await appleSearch(term)).find(match);
-    if (hit) return hit.previewUrl;
+  const japanese = JAPANESE.test(track.Name || '') || names.some((n) => JAPANESE.test(n));
+  // Artist + each reading of the title (at most two), then the title alone.
+  const terms = [...new Set([...titles.slice(0, 2).map((t) => query(names[0], t)), query(titles[0])])];
+  for (const store of appleStores(japanese)) {
+    for (const term of terms) {
+      const hit = (await appleSearch(term, store)).find(match);
+      if (hit) return hit.previewUrl;
+    }
   }
   return null;
 }
@@ -303,6 +338,13 @@ function cache() {
     try { disk = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (err) { disk = {}; }
     // Results from 2.5.x's GIF source: dropped.
     for (const id of Object.keys(disk)) if (!id.startsWith('a:')) delete disk[id];
+    // v2 (country stores, Japanese store, title readings): look again at misses.
+    try {
+      if (localStorage.getItem(`${CACHE_KEY}:v`) !== '2') {
+        for (const id of Object.keys(disk)) if (!disk[id]?.v) delete disk[id];
+        localStorage.setItem(`${CACHE_KEY}:v`, '2');
+      }
+    } catch (err) {}
   }
   return disk;
 }
