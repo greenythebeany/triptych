@@ -1,6 +1,6 @@
 // Minimal Jellyfin REST API client — just what a music client needs.
 
-import { isMobile } from './platform.js';
+import { isMobile, platform } from './platform.js';
 
 // Must be unique per install, not per app — the Connect feature (Sessions
 // API) tells devices apart by DeviceId, and a shared constant here would
@@ -75,7 +75,7 @@ export async function initClientVersion() {
 }
 
 function authHeader(token) {
-  const device = isMobile ? 'Android' : 'Desktop';
+  const device = isMobile ? 'Android' : platform === 'web' ? 'Web' : 'Desktop';
   let header = `MediaBrowser Client="${CLIENT_NAME}", Device="${device}", DeviceId="${DEVICE_ID}", Version="${CLIENT_VERSION}"`;
   if (token) header += `, Token="${token}"`;
   return header;

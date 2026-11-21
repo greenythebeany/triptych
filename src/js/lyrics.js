@@ -513,13 +513,14 @@ async function lookupLyricsOvh(q) {
 }
 
 // In priority order -- used to break ties between plain-text answers.
+// NetEase and Kugou send no CORS headers, so a plain browser can't reach them.
 const SOURCES = [
   { name: 'jellyfin', run: lookupJellyfin },
   { name: 'lrclib', run: lookupLrclib },
-  { name: 'netease', run: lookupNetease },
-  { name: 'kugou', run: lookupKugou },
+  { name: 'netease', run: lookupNetease, native: true },
+  { name: 'kugou', run: lookupKugou, native: true },
   { name: 'lyricsovh', run: lookupLyricsOvh }
-];
+].filter((src) => !src.native || isDesktop || isMobile);
 
 function withTimeout(promise, ms) {
   return Promise.race([promise, sleep(ms).then(() => { throw new SourceError('timeout'); })]);

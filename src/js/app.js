@@ -1199,7 +1199,7 @@ loginForm.addEventListener('submit', async (evt) => {
     }
     await enterApp(auth.username);
   } catch (err) {
-    loginError.textContent = translateLoginError(err) || t('login.errorGeneric');
+    loginError.textContent = translateLoginError(err, serverUrl) || t('login.errorGeneric');
     loginError.hidden = false;
   } finally {
     btnLogin.disabled = false;
@@ -1344,8 +1344,15 @@ btnLocalDisable.addEventListener('click', () => {
   rescanLocalLibrary();
 });
 
-function translateLoginError(err) {
+function translateLoginError(err, serverUrl = '') {
   if (err?.code === 'wrong_credentials') return t('login.errorWrongCredentials');
+  // In a plain browser a fetch() that never got an answer is usually the
+  // browser itself refusing: an http:// server from an https:// page (mixed
+  // content), or a server that doesn't allow this site's origin (CORS).
+  if (platform === 'web' && err instanceof TypeError) {
+    if (location.protocol === 'https:' && /^http:/i.test(serverUrl)) return t('login.errorMixedContent');
+    return t('login.errorBrowserBlocked', { origin: location.origin });
+  }
   // Nothing at Jellyfin's sign-in path either: not a music server URL.
   if (err?.code === 'server_error' && err.status === 404) return t('login.errorNotServer');
   if (err?.code === 'server_error') return t('login.errorServer', { status: err.status });
@@ -1610,6 +1617,7 @@ function wireSettingsUI() {
   if (!isDesktop || !window.api.appIcon) setHidden(appIconRow, true);
   else wireAppIconRow();
   if (!isDesktop && !isMobile) setHidden(autoUpdateCheckRow, true);
+  setHidden(document.getElementById('discord-row'), !isDesktop);
   // No empty section headings: hide a section whose rows are all hidden.
   document.querySelectorAll('#settings-overlay .settings-section').forEach((section) => {
     const rows = [...section.querySelectorAll(':scope > .settings-row')];

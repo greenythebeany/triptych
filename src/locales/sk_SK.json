@@ -28,6 +28,8 @@
     "errorServer": "Server odpovedal s kódom {status}.",
     "errorNotServer": "Na tejto adrese nie je server Jellyfin ani Navidrome.",
     "errorGeneric": "Prihlásenie zlyhalo. Skontrolujte adresu servera a skúste to znova.",
+    "errorMixedContent": "Táto stránka beží cez HTTPS, takže prehliadač blokuje servery na http://. Použite https:// adresu servera, alebo aplikáciu pre počítač či telefón.",
+    "errorBrowserBlocked": "Server sa nepodarilo zastihnúť. Skontrolujte adresu a či váš server (aj reverzná proxy pred ním) povoľuje požiadavky z {origin}.",
     "errorUnreachable": "Nepodarilo sa pripojiť k serveru, no stále si prihlásený — skontroluj pripojenie a skús znova.",
     "retry": "Skúsiť znova",
     "offlineToast": "Nepodarilo sa spojiť so serverom — zobrazuje sa iba stiahnutý obsah."

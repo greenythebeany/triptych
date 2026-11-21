@@ -1699,6 +1699,9 @@ html:root[data-ui] select.settings-select { padding-right: 38px; }
    *desktop* window still keeps its titlebar. */
 body.platform-mobile { --titlebar-h: 0px; }
 body.platform-mobile .titlebar { display: none; }
+/* In a browser tab the window controls do nothing, and the tab has a title. */
+body.platform-web { --titlebar-h: 0px; }
+body.platform-web .titlebar { display: none; }
 
 /* Width-based: applies to phone builds AND a narrow desktop window alike,
    so shrinking the Electron window gets you the same adaptive layout. */
