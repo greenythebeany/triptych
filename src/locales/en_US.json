@@ -28,6 +28,8 @@
     "errorServer": "Server responded with {status}.",
     "errorNotServer": "There's no Jellyfin or Navidrome server at this address.",
     "errorGeneric": "Could not sign in. Check your server address and try again.",
+    "errorMixedContent": "This page is served over HTTPS, so the browser blocks http:// servers. Use your server's https:// address, or the desktop or phone app.",
+    "errorBrowserBlocked": "Could not reach the server. Check the address, and that your server (and any reverse proxy in front of it) allows requests from {origin}.",
     "errorUnreachable": "Could not reach your server, but you're still signed in — check your connection and retry.",
     "retry": "Retry",
     "offlineToast": "Couldn't reach your server — showing downloaded content only."

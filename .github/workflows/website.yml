@@ -1,12 +1,13 @@
 name: Website
 
 # Builds the React site in website/ and publishes it to GitHub Pages
-# (Settings > Pages > Source: GitHub Actions).
+# (Settings > Pages > Source: GitHub Actions). build.js also copies the web
+# app (src/) to /app/, so app changes redeploy too.
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['website/**', '.github/workflows/website.yml']
+    paths: ['website/**', 'src/**', '.github/workflows/website.yml']
 
 permissions:
   contents: read

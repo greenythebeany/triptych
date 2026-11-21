@@ -1,7 +1,7 @@
 // Production build: the client bundle, then a server render of the same App
 // written into dist/index.html (so the page is complete before any script
-// runs), then the sitemap.
-import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+// runs), then the sitemap, then the web app (src/, no build step) at /app/.
+import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { build } from 'vite';
@@ -25,3 +25,6 @@ const today = new Date().toISOString().slice(0, 10);
 const urls = ['', 'watch/', 'terms/', 'privacy/'].map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`);
 writeFileSync(resolve(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`);
 console.log('prerendered index.html, wrote sitemap.xml');
+
+cpSync(resolve(import.meta.dirname, '../src'), resolve(dist, 'app'), { recursive: true });
+console.log('copied the web app to dist/app/');

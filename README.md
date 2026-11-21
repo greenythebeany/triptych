@@ -65,6 +65,15 @@ Grab the latest build from the [Releases](https://github.com/greenythebeany/trip
 
 On first launch, enter the address of your own Jellyfin server and sign in with your Jellyfin account.
 
+## Use it in a browser
+
+No install needed: open **[triptych.greenybeany.dev/app](https://triptych.greenybeany.dev/app/)** in Chrome, Firefox, Edge or Safari. The browser talks to your server directly, so two things have to be true:
+
+- **Your server is reachable over HTTPS.** The page is served over HTTPS, and browsers block requests from it to plain `http://` addresses (mixed content). Put Jellyfin/Navidrome behind a reverse proxy with a certificate (Caddy, nginx, Traefik, a Cloudflare or Tailscale tunnel) and sign in with the `https://` address.
+- **Your server allows the site's origin (CORS).** Jellyfin and Navidrome answer cross-origin requests out of the box. If you run a reverse proxy that adds or strips CORS headers, let it allow `https://triptych.greenybeany.dev` (methods `GET, POST, DELETE, OPTIONS`; headers `Authorization, X-Emby-Authorization, Content-Type`). For example, in nginx: `add_header Access-Control-Allow-Origin https://triptych.greenybeany.dev always;` plus a `204` answer to `OPTIONS` with the same methods and headers.
+
+If either is wrong, the login screen says so. Desktop-only and phone-only features (music folders on this device, downloads, Discord Rich Presence, system media controls, the NetEase/Kugou lyrics sources, system volume) are hidden in the browser.
+
 ## Music videos: setup
 
 Triptych 2.6.0 plays the song's music video behind Now Playing. There are three places it can come from, tried in this order:

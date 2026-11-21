@@ -17,11 +17,13 @@ export default function Download() {
         <li><a href={r.appimage}>Linux, AppImage</a></li>
         <li><a href={r.snap}>Linux, snap</a></li>
         <li><a href={r.ipa}>iPhone, unsigned .ipa</a></li>
+        <li><a href="/app/">Open in browser</a></li>
       </ul>
       <p className="fine">
         {r.version ? `Latest ${r.version}. ` : 'Latest release. '}
         Windows updates itself from inside the app; on iPhone, sideload with AltStore or Sideloadly.
         After installing, open Triptych, enter your Jellyfin or Navidrome server address and sign in.
+        The browser version needs no install, but your server has to be reachable over https://.
       </p>
       <details className="mac-help" id="mac">
         <summary>Opening Triptych on a Mac</summary>
