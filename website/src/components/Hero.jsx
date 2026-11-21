@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Shot from './Shot.jsx';
 import { LOOKS } from '../content.js';
-import { motionOff } from '../site.js';
+import { motionOff, BASE } from '../site.js';
 
 const BOOT_KEY = 'triptych-booted';
 const BOOT_MS = 2700; // ~1.2 s of level meter, then the settled logo holds for ~1.5 s
@@ -183,7 +183,10 @@ export default function Hero() {
         <h1 className="title">Triptych<span className="stop" aria-hidden="true" /></h1>
         <div className="intro">
           <p className="lede">A music player for your own Jellyfin or Navidrome server. One library, three looks. Free on Windows, macOS, Linux, Android and iPhone.</p>
-          <a className="btn" href="#download">Download Triptych</a>
+          <div className="btn-row">
+            <a className="btn" href="#download">Download Triptych</a>
+            <a className="btn btn-outline" href={`${BASE}app/`}>Open in browser</a>
+          </div>
         </div>
         <p className="caption"><strong>{LOOKS[index].label}.</strong> {LOOKS[index].caption}</p>
         <div className="controls">

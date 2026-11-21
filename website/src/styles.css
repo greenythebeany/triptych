@@ -42,6 +42,15 @@ p { margin: 0; }
 .btn:hover { transform: translateY(-3px); }
 .btn:active { transform: translateY(1px); }
 .btn-ink { background: var(--ink); color: var(--ground); }
+/* Side by side (wrapping on narrow screens): Download, then the browser version. */
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; width: max-content; max-width: calc(100vw - 2 * var(--margin)); }
+.btn-row .btn { margin-top: 0; }
+.btn-outline { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85); }
+.btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
+/* Mid widths: the centred look switcher would sit under the second button. */
+@media (min-width: 821px) and (max-width: 1200px) {
+  .btn-row { flex-direction: column; align-items: flex-start; }
+}
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--margin); align-items: end; }
 
 /* ---------- Visualizer: the logo in the middle of the first screen ----------
