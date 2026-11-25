@@ -48,6 +48,7 @@ const DEFAULTS = {
   appleVideos: true, // the song's music video preview from Apple's iTunes Search API (canvasVideo.js)
   canvasVideos: true, // looping video on the Now Playing art when the server has one (see canvasVideo.js)
   dynamicAccentColor: false,
+  oledCare: false, // pixel shift + dim the fixed UI when idle, against OLED burn-in (oledCare.js)
   language: detectLocale(), // first run follows the system language; saved choices win
   customCss: '',
   crossfadeSeconds: 0, // 0-12, 0 = off (gapless preloading is always on regardless)
@@ -191,6 +192,7 @@ export function applySettings() {
   root.setAttribute('data-ui', ui);
   root.toggleAttribute('data-nd-line-sliders', current.nothingDottedSliders === false);
   root.setAttribute('data-motion', isStaticMotion() ? 'static' : 'dynamic');
+  root.toggleAttribute('data-oled-care', current.oledCare === true);
   // Custom CSS that sets the app's colors (e.g. a theme from the README's
   // list, @import-ed from src/themes) -- lets apple.css hand colors over.
   const css = current.customCss || '';

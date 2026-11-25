@@ -1910,3 +1910,11 @@ body.platform-mobile :focus-visible { outline: none; }
 }
 body.platform-mobile .lyrics-panel:not([hidden]) { animation: jw-sheet-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
+/* ---------- OLED care (oledCare.js) ---------- */
+/* Pixel shift: the whole window walks around a 5x5px square every few minutes. */
+:root[data-oled-care] body { translate: var(--oled-x, 0px) var(--oled-y, 0px); transition: translate 2s ease; }
+:root[data-oled-care] :is(.titlebar, .sidebar, .player-bar, .bottom-nav, .mobile-now-playing-controls) { transition: opacity 1.2s ease; }
+/* Idle dim: the UI that never moves fades down until the next mouse, touch or key. */
+:root[data-oled-idle] :is(.titlebar, .sidebar, .player-bar, .bottom-nav, .mobile-now-playing-controls) { opacity: 0.3; }
+:root[data-oled-care][data-motion="static"] body,
+:root[data-oled-care][data-motion="static"] :is(.titlebar, .sidebar, .player-bar, .bottom-nav, .mobile-now-playing-controls) { transition: none; }

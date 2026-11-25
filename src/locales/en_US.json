@@ -199,6 +199,8 @@
     "appleVideosDesc": "Play a 30-second HD clip of the song's real music video when your server has none -- sends the artist and song title to Apple. No account or key needed",
     "dynamicAccentColor": "Dynamic accent color",
     "dynamicAccentColorDesc": "Tint the app's accent color to match the current song's cover art",
+    "oledCare": "OLED care",
+    "oledCareDesc": "Against burn-in on OLED screens: the app moves by a pixel or two every few minutes, and the menus and player bar dim after a minute without touching anything",
     "language": "Language",
     "languageDesc": "Choose the app's display language",
     "audio": "Audio",
