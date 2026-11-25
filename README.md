@@ -144,6 +144,11 @@ npm run dist        # build a Windows installer
 
 The Android project lives in `android/` and is a standard Capacitor project — open it in Android Studio, or build from the command line with `./gradlew assembleRelease` after setting up your own signing keystore in `android/keystore/keystore.properties`.
 
+## What's new in 2.6.5
+
+- **OLED care** (Settings → Appearance): against burn-in on OLED laptops, monitors and phones. The app moves by a pixel or two every few minutes, and the title bar, sidebar, player bar and phone controls dim after a minute without touching anything; any mouse move, tap or key brings them back
+- Plus everything from 2.6.4 below: Triptych in your browser, lyrics for "feat." songs and music videos for Japanese, K-pop and Slovak songs
+
 ## What's new in 2.6.4
 
 - **Triptych in your browser:** the app now also runs at [triptych.greenybeany.dev/app](https://triptych.greenybeany.dev/app), nothing to install. It runs entirely in your browser and talks straight to your own server; the website doesn't take any data from your server or your account. Your server needs to allow the site (see "Use it in a browser")
