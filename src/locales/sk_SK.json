@@ -199,6 +199,8 @@
     "appleVideosDesc": "Prehrá 30-sekundový HD úryvok skutočného videoklipu skladby, ak ho server nemá -- posiela interpreta a názov skladby do Apple. Bez účtu a kľúča",
     "dynamicAccentColor": "Dynamická farba zvýraznenia",
     "dynamicAccentColorDesc": "Sfarbí farbu zvýraznenia aplikácie podľa obalu aktuálnej skladby",
+    "oledCare": "Ochrana OLED",
+    "oledCareDesc": "Proti vypáleniu OLED obrazovky: aplikácia sa každých pár minút posunie o pixel či dva a menu aj prehrávač stmavnú po minúte bez dotyku",
     "language": "Jazyk",
     "languageDesc": "Vyberte zobrazovací jazyk aplikácie",
     "audio": "Zvuk",

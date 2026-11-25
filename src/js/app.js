@@ -13,6 +13,7 @@ import { createConnect } from './connect.js';
 import { createRecommender, trackArtistKeys } from './recommend.js';
 import { isSupported as downloadsSupported, isDownloaded, downloadTrack, deleteDownload, onDownloadsChange, getDownloadedTracks, getTotalDownloadedBytes, getLocalImageUri } from './downloads.js';
 import { renderGrab } from './grab.js';
+import { initOledCare } from './oledCare.js';
 import { initCanvasVideo, setCanvasTrack, syncCanvasPlayback, prefetchCanvas, toggleCanvasFocus } from './canvasVideo.js';
 import { getPinnedAlbums, isAlbumPinned, togglePinAlbum, onPinnedAlbumsChange } from './pinnedAlbums.js';
 
@@ -157,6 +158,7 @@ const toggleCanvasVideo = document.getElementById('toggle-canvas-video');
 const toggleAppleVideos = document.getElementById('toggle-apple-videos');
 const videoBadgeSelect = document.getElementById('video-badge-select');
 const toggleDynamicAccentColor = document.getElementById('toggle-dynamic-accent-color');
+const toggleOledCare = document.getElementById('toggle-oled-care');
 const crossfadeSlider = document.getElementById('crossfade-slider');
 const crossfadeValue = document.getElementById('crossfade-value');
 const toggleReplayGain = document.getElementById('toggle-replaygain');
@@ -1102,6 +1104,7 @@ async function enterApp(username) {
 
   player = new Player(jellyfin, currentBitrateKbps);
   initCanvasVideo({ panel: lyricsPanel, audio: () => player?.audio, client: () => jellyfin });
+  initOledCare();
   const savedSettings = getSettings();
   player.setCrossfadeSeconds(savedSettings.crossfadeSeconds || 0);
   player.setReplayGainEnabled(!!savedSettings.replayGainEnabled);
@@ -1586,6 +1589,10 @@ function wireSettingsUI() {
   toggleDynamicAccentColor.addEventListener('change', () => {
     updateSettings({ dynamicAccentColor: toggleDynamicAccentColor.checked });
     updateDynamicAccentColor();
+  });
+
+  toggleOledCare.addEventListener('change', () => {
+    updateSettings({ oledCare: toggleOledCare.checked });
   });
 
   crossfadeSlider.addEventListener('input', () => {
@@ -2706,6 +2713,7 @@ function refreshSettingsUI() {
   toggleAppleVideos.checked = s.appleVideos !== false;
   videoBadgeSelect.value = VIDEO_BADGES[s.videoBadge] ? s.videoBadge : 'off';
   toggleDynamicAccentColor.checked = !!s.dynamicAccentColor;
+  toggleOledCare.checked = s.oledCare === true;
   crossfadeSlider.value = s.crossfadeSeconds || 0;
   crossfadeValue.textContent = s.crossfadeSeconds ? `${s.crossfadeSeconds}s` : t('settings.crossfadeOff');
   crossfadeSlider.style.setProperty('--pct', rangeFillPercent(((s.crossfadeSeconds || 0) / 12) * 100, crossfadeSlider, 13));

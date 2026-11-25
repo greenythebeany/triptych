@@ -192,6 +192,8 @@
     "blurBgDesc": "Vyplní pozadí rozmazanou verzí obalu aktuální skladby",
     "dynamicAccentColor": "Dynamická barva zvýraznění",
     "dynamicAccentColorDesc": "Obarví barvu zvýraznění aplikace podle obalu aktuální skladby",
+    "oledCare": "Ochrana OLED",
+    "oledCareDesc": "Proti vypálení OLED displeje: aplikace se každých pár minut posune o pixel či dva a nabídky i přehrávač ztmavnou po minutě bez dotyku",
     "language": "Jazyk",
     "languageDesc": "Vyberte zobrazovací jazyk aplikace",
     "audio": "Zvuk",
